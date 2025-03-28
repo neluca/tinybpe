@@ -1,3 +1,3 @@
-# microbpe
+# tinybpe
 
-**The project is still in progress ...**
+This is a meticulously designed library of ultra fast and clean BPE algorithms.
