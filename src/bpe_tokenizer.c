@@ -9,7 +9,12 @@
 struct bpe_merges_node {
     struct avl_node node;
     bpe_pair_t pair;
-    unsigned long id;
+    unsigned long rank;
+};
+
+struct bpe_pair_stats {
+    bpe_pair_t pair;
+    unsigned long merges_rank;
 };
 
 static int merges_cmp_func(struct avl_node *a, struct avl_node *b) {
@@ -31,7 +36,7 @@ struct bpe_merges *bpe_merges_build(bpe_pair_t *pairs, size_t len) {
 
     for (size_t i = 0; i < len; i++) {
         node_buf[i].pair = pairs[i];
-        node_buf[i].id = (unsigned long) (256 + i);
+        node_buf[i].rank = (unsigned long) (256 + i);
 
         avl_insert(&merges->tree, &node_buf[i].node, merges_cmp_func); // insert node to avltree
     }
@@ -45,47 +50,62 @@ void bpe_merges_free(struct bpe_merges *p) {
 }
 
 unsigned long *bpe_encode(size_t *ids_len, const struct bpe_merges *merges, const char *bytes, size_t bytes_size) {
-    unsigned long *buf_ids = bpe_malloc(2 * bytes_size * sizeof(unsigned long));
-    unsigned long *ctx_ids = buf_ids + bytes_size;
+    unsigned long *buf_ids = bpe_malloc(bytes_size * sizeof(unsigned long));
 
     // convert the bytes into a sequence of unsigned long .
     for (size_t i = 0; i < bytes_size; i++) {
-        ctx_ids[i] = (unsigned long) ((unsigned char) bytes[i]);
+        buf_ids[i] = (unsigned long) ((unsigned char) bytes[i]);
     }
 
-    size_t ids_size = bytes_size;
-    size_t size = bytes_size;
-    unsigned long *p = buf_ids;
+    size_t len = bytes_size;
+    struct bpe_pair_stats *stats = bpe_malloc((len - 1) * sizeof(struct bpe_pair_stats));
+
     struct bpe_merges_node lookup;
+    while (len > 1) {
+        for (size_t i = 0; i < len - 1; i++) {
+            lookup.pair._1 = buf_ids[i];
+            lookup.pair._2 = buf_ids[i + 1];
+            stats[i].pair = lookup.pair;
 
-    while (1) {
-        for (size_t i = 0; i < size; i++) {
-            *p = ctx_ids[i];
-
-            if (i < size - 1) {
-                lookup.pair._1 = ctx_ids[i];
-                lookup.pair._2 = ctx_ids[i + 1];
-                struct avl_node *node = avl_search((struct avl_tree *) &merges->tree,
-                                                   (struct avl_node *) &lookup, merges_cmp_func);
-                if (node != NULL) {
-                    *p = ((struct bpe_merges_node *) node)->id;
-                    ids_size--;
-                    i++;
-                }
+            struct avl_node *_node = avl_search(&merges->tree, &lookup.node, merges_cmp_func);
+            if (_node) {
+                struct bpe_merges_node *_n = _get_entry(_node, struct bpe_merges_node, node);
+                stats[i].merges_rank = _n->rank;
             }
-            p++;
+            else {
+                stats[i].merges_rank = (unsigned long) (-1);
+            }
         }
-        if (ids_size == size) {
+
+        struct bpe_pair_stats *_min = &stats[0];
+        for (size_t i = 1; i < len - 1; i++) {
+            if (stats[i].merges_rank < _min->merges_rank) {
+                _min = &stats[i];
+            }
+        }
+
+        if (_min->merges_rank == (unsigned long) (-1)) {
             break;
         }
         else {
-            memcpy(ctx_ids, buf_ids, ids_size * sizeof(unsigned long));
-            size = ids_size;
-            p = buf_ids;
+            size_t new_ids_i = 0;
+            for (size_t i = 0; i < len; i++) {
+                if (buf_ids[i] == _min->pair._1 && i < len - 1 && buf_ids[i + 1] == _min->pair._2) {
+                    buf_ids[new_ids_i++] = _min->merges_rank;
+                    i++;
+                }
+                else {
+                    buf_ids[new_ids_i++] = buf_ids[i];
+                }
+            }
+
+            len = new_ids_i;
         }
     }
 
-    *ids_len = ids_size;
+    bpe_free(stats);
+
+    *ids_len = len;
     return buf_ids;
 }
 
@@ -95,7 +115,7 @@ struct bpe_vocab *bpe_vocab_build(bpe_pair_t *pairs, size_t len) {
 
     size_t total_bytes_size = 256;
     // The size of the bytes corresponding to each Token ID
-    size_t *id_bytes_size = bpe_malloc(len * sizeof(size_t));
+    size_t *id_bytes_size_buf = bpe_malloc(len * sizeof(size_t));
 
     // Calculate the total memory occupied by the vocabulary in bytes.
     for (size_t i = 0; i < len; i++) {
@@ -104,17 +124,17 @@ struct bpe_vocab *bpe_vocab_build(bpe_pair_t *pairs, size_t len) {
             _size += 1;
         }
         else {
-            _size += id_bytes_size[pairs[i]._1 - 256];
+            _size += id_bytes_size_buf[pairs[i]._1 - 256];
         }
 
         if (pairs[i]._2 < 256) {
             _size += 1;
         }
         else {
-            _size += id_bytes_size[pairs[i]._2 - 256];
+            _size += id_bytes_size_buf[pairs[i]._2 - 256];
         }
 
-        id_bytes_size[i] = _size;
+        id_bytes_size_buf[i] = _size;
         total_bytes_size += _size;
     }
 
@@ -137,12 +157,12 @@ struct bpe_vocab *bpe_vocab_build(bpe_pair_t *pairs, size_t len) {
         memcpy(bytes_mem_p + _size, vocab->tokens[pairs[i]._2].bytes, vocab->tokens[pairs[i]._2].size);
 
         vocab->tokens[i + 256].bytes = bytes_mem_p;
-        vocab->tokens[i + 256].size = id_bytes_size[i];
+        vocab->tokens[i + 256].size = id_bytes_size_buf[i];
 
-        bytes_mem_p += id_bytes_size[i];
+        bytes_mem_p += id_bytes_size_buf[i];
     }
 
-    bpe_free(id_bytes_size);
+    bpe_free(id_bytes_size_buf);
 
     return vocab;
 }

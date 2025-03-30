@@ -270,7 +270,7 @@ struct avl_node *avl_insert(struct avl_tree *tree, struct avl_node *node, avl_cm
     return node_original;
 }
 
-struct avl_node *avl_search(struct avl_tree *tree, struct avl_node *node, avl_cmp_func *func) {
+struct avl_node *avl_search(const struct avl_tree *tree, struct avl_node *node, avl_cmp_func *func) {
     struct avl_node *p = tree->root;
 
     while (p) {

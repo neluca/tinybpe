@@ -47,6 +47,6 @@ struct avl_node *avl_insert(struct avl_tree *tree, struct avl_node *node, avl_cm
 
 // The operation of searching for a node in the tree
 // based on node information has a complexity of O(log n)
-struct avl_node *avl_search(struct avl_tree *tree, struct avl_node *node, avl_cmp_func *func);
+struct avl_node *avl_search(const struct avl_tree *tree, struct avl_node *node, avl_cmp_func *func);
 
 #endif  /* SRC_TREE_CORE_H */

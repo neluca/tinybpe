@@ -51,7 +51,7 @@ static int Trainer_init(TrainerObject *self, PyObject *args, PyObject *kwds) {
         return -1;
     }
 
-    self->ctx.id = BPE_TRAIN_ID_INIT;
+    self->ctx.rank = BPE_TRAIN_ID_INIT;
     self->ctx.pieces_len = (size_t) list_len;
     self->ctx.pieces = bpe_malloc(list_len * sizeof(bpe_piece_t));
 
@@ -101,13 +101,13 @@ static PyObject *Trainer_Get_merges_size(TrainerObject *self, void *Py_UNUSED(cl
 
 static PyObject *Trainer_step(TrainerObject *self, PyObject *Py_UNUSED(args)) {
     bpe_pair_t pair;
-    unsigned long rank = bpe_get_max_rank_pair(&pair, &self->ctx);
+    unsigned long count = bpe_get_max_count_pair(&pair, &self->ctx);
 
-    if (rank) {
+    if (count) {
         PyObject *pair_tuple = Py_BuildValue("(ii)", pair._1, pair._2); // yes incref
         PyList_Append(self->list_merges, pair_tuple); // yes incref
 
-        return Py_BuildValue("(Oii)", pair_tuple, self->ctx.id, rank); // yes incref
+        return Py_BuildValue("(Oii)", pair_tuple, self->ctx.rank, count); // yes incref
     }
 
     return Py_None;
