@@ -43,6 +43,7 @@ static inline int bpe_utf8_head_check(unsigned char head_byte) {
     return 0;
 }
 
+// Default UTF-8
 static inline int bpe_utf8_length_from_head(unsigned char head_byte) {
     if ((head_byte & 0x80) == 0) {
         return 1;
@@ -57,7 +58,7 @@ static inline int bpe_utf8_length_from_head(unsigned char head_byte) {
         return 4;
     }
 
-    return 1; // err. fake ((head_byte & 0x80) == 0)
+    return 1; // fake ((head_byte & 0x80) == 0)
 }
 
 // A general implementation for comparing two pairs.
