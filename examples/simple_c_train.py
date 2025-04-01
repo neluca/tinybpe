@@ -6,7 +6,7 @@ train = Trainer(text)
 train.load_merges(merges)
 
 for _ in range(40):
-    pair, token_id, rank = train.step()
-    print(f"{pair} -> {token_id} ({rank})")
+    pair, rank, freq = train.step()
+    print(f"{pair} -> {rank} ({freq})")
 
 train.save("simple_c")
