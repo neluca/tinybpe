@@ -3,7 +3,7 @@ from ._utils import _save_bpe_merges, _save_bpe_vocab, load_bpe_file
 from typing import Callable, Optional
 
 
-class Trainer(bpe.Trainer):
+class SimpleTrainer(bpe.Trainer):
     def __init__(self, text: str, preprocess: Optional[Callable[[str], list[bytes | bytearray]]] = None):
         if preprocess is None:
             text_bytes_list = [text.encode("utf-8")]
