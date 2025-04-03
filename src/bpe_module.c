@@ -183,8 +183,23 @@ static int Tokenizer_init(TokenizerObject *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
+    Py_ssize_t size = PyList_Size(list_merges);
+    if (size == 0) {
+        PyErr_SetString(PyExc_Exception,
+                        "The list must not be empty, and the objects in the list must be of tuple type.");
+        return -1;
+    }
+
+    PyObject *tuple_item = PyList_GetItem(list_merges, 0); // no incref
+    if (!PyTuple_Check(tuple_item) || PyTuple_Size(tuple_item) != 2) {
+        PyErr_SetString(PyExc_TypeError,
+                        "The list must not be empty, and the objects in the list must be of tuple type.");
+        return -1;
+    }
+
+
     if (dict_special_tokens) {
-        if (PyDict_Check(dict_special_tokens)) {
+        if (PyDict_Check(dict_special_tokens) && PyDict_Size(dict_special_tokens) != 0) {
             self->dict_special_tokens = dict_special_tokens;
             Py_INCREF(self->dict_special_tokens);
 
@@ -201,15 +216,13 @@ static int Tokenizer_init(TokenizerObject *self, PyObject *args, PyObject *kwds)
         else {
             self->dict_special_tokens = NULL;
             self->dict_inverse_special_tokens = NULL;
-            PyErr_WarnEx(PyExc_UserWarning, "special_tokens must be a dict.", 1);
+            PyErr_WarnEx(PyExc_UserWarning, "special_tokens must be a dict with a non-zero length.", 1);
         }
     }
     else {
         self->dict_special_tokens = NULL;
         self->dict_inverse_special_tokens = NULL;
     }
-
-    Py_ssize_t size = PyList_Size(list_merges);
 
     self->pairs_size = (size_t) size;
     self->pairs = bpe_malloc(size * sizeof(bpe_pair_t));
@@ -224,7 +237,7 @@ static int Tokenizer_init(TokenizerObject *self, PyObject *args, PyObject *kwds)
 
         if ((int) self->pairs[i]._1 < 0 || (int) self->pairs[i]._2 < 0) {
 
-            PyErr_SetString(PyExc_ValueError, "The \"merges\" must be positive integer.");
+            PyErr_SetString(PyExc_ValueError, "The pair of \"merges\" must be positive integer.");
             return -1;
         }
     }
@@ -360,7 +373,7 @@ static PyObject *Tokenizer_decode(TokenizerObject *self, PyObject *list_ids) {
                     PyBytes_Concat(&bytes, special_bytes); // no incref
                 }
                 else {
-                    PyErr_WarnFormat(PyExc_UserWarning, 1, "Unknown Token ID %lu \n", token_id);
+                    PyErr_WarnFormat(PyExc_UserWarning, 1, "Unknown Token ID (%lu) \n", token_id);
                 }
             }
             else {
@@ -414,7 +427,7 @@ static PyObject *Tokenizer_cache_decode(TokenizerObject *self, PyObject *id_obje
                 return special_bytes;
             }
             else {
-                PyErr_WarnFormat(PyExc_UserWarning, 1, "Unknown Token ID %lu \n", token_id);
+                PyErr_WarnFormat(PyExc_UserWarning, 1, "Unknown Token ID (%lu) \n", token_id);
             }
         }
         else {

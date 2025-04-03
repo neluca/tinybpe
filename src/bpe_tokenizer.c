@@ -95,7 +95,7 @@ unsigned long *bpe_encode(size_t *ids_len, const struct bpe_merges *merges, cons
                     i++;
                 }
                 else {
-                    buf_ids[new_ids_i++] = buf_ids[i];
+                    buf_ids[new_ids_i++] = buf_ids[i];  // new_ids_i always <= i
                 }
             }
 

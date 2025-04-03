@@ -16,8 +16,8 @@ def _save_bpe_vocab(file_prefix: str, vocab: dict[int, bytes]):
         f.write("tinybpe vocab\n")
         f.write(f"{len(vocab)}\n")
 
-        for token_id, text_bytes in vocab.items():
-            f.write(f"{token_id}: {text_bytes}\n")
+        for rank, text_bytes in vocab.items():
+            f.write(f"{rank}: {text_bytes}\n")
 
 
 def load_bpe_file(bpe_file: str) -> list[tuple[int, int]]:

@@ -58,6 +58,7 @@ static inline int bpe_utf8_length_from_head(unsigned char head_byte) {
         return 4;
     }
 
+    // this "return" will not be executed.
     return 1; // fake ((head_byte & 0x80) == 0)
 }
 
