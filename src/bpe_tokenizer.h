@@ -32,17 +32,16 @@ void bpe_merges_free(struct bpe_merges *p);
 // search merges to encode the bytes to a sequence of Token IDs.
 unsigned long *bpe_encode(size_t *ids_len, const struct bpe_merges *merges, const char *bytes, size_t bytes_size);
 
-// build the dictionary used for BPE decoding,
-// which includes a sequential array and dictionary information.
+// build the dictionary used for BPE decoding.
 struct bpe_vocab *bpe_vocab_build(bpe_pair_t *pairs, size_t len);
 
 // free the memory occupied by vocab.
 void bpe_vocab_free(struct bpe_vocab *p);
 
-// look up the dictionary to repair each Token ID to the bytes.
+// look up the dictionary to match each Token ID to the bytes.
 char *bpe_decode(size_t *bytes_size, const struct bpe_vocab *vocab, const unsigned long *ids, size_t ids_len);
 
-// look up the dictionary to repair one Token ID to the bytes.
+// look up the dictionary to match one Token ID to the bytes.
 char *bpe_decode_one(size_t *bytes_size, const struct bpe_vocab *vocab,
                      unsigned long id, unsigned char *cache, unsigned long *cache_size);
 
