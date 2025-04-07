@@ -46,6 +46,7 @@ struct bpe_merges *bpe_merges_build(bpe_pair_t *pairs, size_t len) {
 
 void bpe_merges_free(struct bpe_merges *p) {
     bpe_free(p->nodes_mem);
+    p->nodes_mem = NULL;
     bpe_free(p);
 }
 
@@ -169,7 +170,9 @@ struct bpe_vocab *bpe_vocab_build(bpe_pair_t *pairs, size_t len) {
 
 void bpe_vocab_free(struct bpe_vocab *p) {
     bpe_free(p->tokens);
+    p->tokens = NULL;
     bpe_free(p->bytes_mem);
+    p->bytes_mem = NULL;
     bpe_free(p);
 }
 
