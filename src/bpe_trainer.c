@@ -120,5 +120,6 @@ void bpe_train_ctx_idx_init(bpe_train_ctx_t *ctx, size_t idx, const char *bytes,
 void bpe_train_ctx_free(bpe_train_ctx_t *ctx) {
     for (size_t i = 0; i < ctx->pieces_len; i++) {
         bpe_free(ctx->pieces[i].ids);
+        ctx->pieces[i].ids = NULL;
     }
 }

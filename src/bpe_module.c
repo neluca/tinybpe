@@ -43,7 +43,7 @@ static int trainer_init(TrainerObject *self, PyObject *args, PyObject *kwds) {
     }
 
     Py_ssize_t list_len = PyList_Size(list);
-    self->list_merges = NULL;
+    self->list_merges = NULL; // init
 
     if (list_len == 0) {
         PyErr_SetString(PyExc_Exception,
@@ -71,10 +71,10 @@ static int trainer_init(TrainerObject *self, PyObject *args, PyObject *kwds) {
         }
 
         else {
-            PyErr_SetString(PyExc_TypeError, "The objects in the list must be of bytes-like type.");
-
             bpe_train_ctx_free(&self->ctx);
             bpe_free(self->ctx.pieces);
+            self->ctx.pieces = NULL;
+            PyErr_SetString(PyExc_TypeError, "The objects in the list must be of bytes-like type.");
             return -1;
         }
     }
@@ -153,7 +153,7 @@ static PyObject *trainer_load_merges(TrainerObject *self, PyObject *args, PyObje
         pairs[i]._2 = PyLong_AsUnsignedLong(item_2);
 
         if ((int) pairs[i]._1 < 0 || (int) pairs[i]._2 < 0) {
-
+            bpe_free(pairs);
             PyErr_SetString(PyExc_ValueError, "The \"merges\" must be positive integer.");
             return NULL;
         }
@@ -162,7 +162,7 @@ static PyObject *trainer_load_merges(TrainerObject *self, PyObject *args, PyObje
     if (!bpe_check(pairs, (size_t) merges_size)) {
         bpe_free(pairs);
         PyErr_SetString(PyExc_ValueError, "The provided \"merges\" is not valid.");
-        return Py_None;
+        return NULL;
     }
 
     Py_DECREF(self->list_merges);
@@ -203,6 +203,10 @@ static int tokenizer_init(TokenizerObject *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
+    // init
+    self->pairs = NULL;
+    self->merges = NULL;
+    self->vocab = NULL;
 
     if (dict_special_tokens) {
         if (PyDict_Check(dict_special_tokens) && PyDict_Size(dict_special_tokens) != 0) {
@@ -243,6 +247,7 @@ static int tokenizer_init(TokenizerObject *self, PyObject *args, PyObject *kwds)
 
         if ((int) self->pairs[i]._1 < 0 || (int) self->pairs[i]._2 < 0) {
             bpe_free(self->pairs); // Release in advance to avoid memory leaks.
+            self->pairs = NULL;
             PyErr_SetString(PyExc_ValueError, "The pair of \"merges\" must be positive integer.");
             return -1;
         }
@@ -250,6 +255,7 @@ static int tokenizer_init(TokenizerObject *self, PyObject *args, PyObject *kwds)
 
     if (!bpe_check(self->pairs, self->pairs_size)) {
         bpe_free(self->pairs); // Release in advance to avoid memory leaks.
+        self->pairs = NULL;
         PyErr_SetString(PyExc_ValueError, "The provided \"merges\" is not valid.");
         return -1;
     }
@@ -266,8 +272,11 @@ static int tokenizer_init(TokenizerObject *self, PyObject *args, PyObject *kwds)
 
 static void tokenizer_dealloc(TokenizerObject *self) {
     bpe_free(self->pairs);
+    self->pairs = NULL;
     bpe_merges_free(self->merges);
+    self->merges = NULL;
     bpe_vocab_free(self->vocab);
+    self->vocab = NULL;
 
     Py_DECREF(self->list_merges);
     Py_XDECREF(self->dict_special_tokens);
