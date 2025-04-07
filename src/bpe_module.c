@@ -43,6 +43,7 @@ static int trainer_init(TrainerObject *self, PyObject *args, PyObject *kwds) {
     }
 
     Py_ssize_t list_len = PyList_Size(list);
+    self->list_merges = NULL;
 
     if (list_len == 0) {
         PyErr_SetString(PyExc_Exception,
@@ -87,7 +88,7 @@ static void trainer_dealloc(TrainerObject *self) {
     bpe_train_ctx_free(&self->ctx);
     bpe_free(self->ctx.pieces);
 
-    Py_DECREF(self->list_merges);
+    Py_XDECREF(self->list_merges);
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
@@ -241,7 +242,7 @@ static int tokenizer_init(TokenizerObject *self, PyObject *args, PyObject *kwds)
         self->pairs[i]._2 = PyLong_AsUnsignedLong(item_2);
 
         if ((int) self->pairs[i]._1 < 0 || (int) self->pairs[i]._2 < 0) {
-
+            bpe_free(self->pairs); // Release in advance to avoid memory leaks.
             PyErr_SetString(PyExc_ValueError, "The pair of \"merges\" must be positive integer.");
             return -1;
         }
@@ -332,7 +333,7 @@ static PyObject *tokenizer_encode(TokenizerObject *self, PyObject *bytes_o) {
     size_t ids_len;
     unsigned long *ids = bpe_encode(&ids_len, self->merges, text_bytes, text_bytes_size);
 
-    PyObject *ids_list = PyList_New((Py_ssize_t) ids_len);
+    PyObject *ids_list = PyList_New((Py_ssize_t) ids_len); // yes incref
     for (size_t i = 0; i < ids_len; i++) {
         PyObject *id = PyLong_FromUnsignedLong(ids[i]); // yes incref
         PyList_SetItem(ids_list, (Py_ssize_t) i, id); // no incref
