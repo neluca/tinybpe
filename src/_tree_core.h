@@ -24,8 +24,8 @@ struct avl_tree {
     struct avl_node *root;
 };
 
-#define _get_entry(ELEM, STRUCT, MEMBER) \
-        ((STRUCT *) ((uint8_t *) (ELEM) - offsetof(STRUCT, MEMBER)))
+#define _get_entry(NODE, STRUCT, ENTRY) \
+        ((STRUCT *) (((uint8_t *) (NODE)) - offsetof(STRUCT, ENTRY)))
 
 #define avl_parent(node) \
         ((struct avl_node *)((uintptr_t)(node)->parent & ~0x3))
