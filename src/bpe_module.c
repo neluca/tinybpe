@@ -476,7 +476,7 @@ static PyMethodDef tokenizer_methods[] = {
         {NULL}  /* Sentinel */
 };
 
-static PyTypeObject TrainerType = {
+static PyTypeObject trainer_type = {
         .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
         .tp_name = "bpe.Trainer",
         .tp_doc = PyDoc_STR("BPE Trainer"),
@@ -490,7 +490,7 @@ static PyTypeObject TrainerType = {
         .tp_methods = trainer_methods,
 };
 
-static PyTypeObject TokenizerType = {
+static PyTypeObject tokenizer_type = {
         .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
         .tp_name = "bpe.Tokenizer",
         .tp_doc = PyDoc_STR("BPE Tokenizer"),
@@ -512,7 +512,7 @@ static PyModuleDef bpe_module = {
 };
 
 PyMODINIT_FUNC PyInit_bpe(void) {
-    if (PyType_Ready(&TrainerType) < 0 || PyType_Ready(&TokenizerType) < 0) {
+    if (PyType_Ready(&trainer_type) < 0 || PyType_Ready(&tokenizer_type) < 0) {
         return NULL;
     }
 
@@ -521,12 +521,12 @@ PyMODINIT_FUNC PyInit_bpe(void) {
         return NULL;
     }
 
-    if (PyModule_AddObjectRef(m, "Trainer", (PyObject *) &TrainerType) < 0) {
+    if (PyModule_AddObjectRef(m, "Trainer", (PyObject *) &trainer_type) < 0) {
         Py_DECREF(m);
         return NULL;
     }
 
-    if (PyModule_AddObjectRef(m, "Tokenizer", (PyObject *) &TokenizerType) < 0) {
+    if (PyModule_AddObjectRef(m, "Tokenizer", (PyObject *) &tokenizer_type) < 0) {
         Py_DECREF(m);
         return NULL;
     }
