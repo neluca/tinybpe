@@ -42,7 +42,6 @@ static int trainer_init(TrainerObject *self, PyObject *args, PyObject *kwds) {
         return -1;
     }
 
-    self->list_merges = PyList_New(0); // yes incref
     Py_ssize_t list_len = PyList_Size(list);
 
     if (list_len == 0) {
@@ -78,6 +77,8 @@ static int trainer_init(TrainerObject *self, PyObject *args, PyObject *kwds) {
             return -1;
         }
     }
+
+    self->list_merges = PyList_New(0); // yes incref
 
     return 0;
 }
