@@ -207,6 +207,7 @@ static int tokenizer_init(TokenizerObject *self, PyObject *args, PyObject *kwds)
     self->pairs = NULL;
     self->merges = NULL;
     self->vocab = NULL;
+    self->list_merges = NULL;
 
     if (dict_special_tokens) {
         if (PyDict_Check(dict_special_tokens) && PyDict_Size(dict_special_tokens) != 0) {
@@ -278,7 +279,7 @@ static void tokenizer_dealloc(TokenizerObject *self) {
     bpe_vocab_free(self->vocab);
     self->vocab = NULL;
 
-    Py_DECREF(self->list_merges);
+    Py_XDECREF(self->list_merges);
     Py_XDECREF(self->dict_special_tokens);
     Py_XDECREF(self->dict_inverse_special_tokens);
     Py_TYPE(self)->tp_free((PyObject *) self);
