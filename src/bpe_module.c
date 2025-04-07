@@ -60,13 +60,13 @@ static int trainer_init(TrainerObject *self, PyObject *args, PyObject *kwds) {
 
         if (PyBytes_Check(item)) {
             Py_ssize_t size = PyBytes_Size(item);
-            const char *bytes = PyBytes_AsString(item);
+            const char *bytes = PyBytes_AsString(item); // no free
             bpe_train_ctx_idx_init(&self->ctx, i, bytes, (size_t) size);
         }
 
         else if (PyByteArray_Check(item)) {
             Py_ssize_t size = PyByteArray_Size(item);
-            const char *bytes = PyByteArray_AsString(item);
+            const char *bytes = PyByteArray_AsString(item); // no free
             bpe_train_ctx_idx_init(&self->ctx, i, bytes, (size_t) size);
         }
 
