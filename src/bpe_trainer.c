@@ -42,7 +42,6 @@ static int pair_stat_cmp_func(struct avl_node *a, struct avl_node *b) {
     return bpe_pair_cmp(&n1->pair, &n2->pair);
 }
 
-
 unsigned long bpe_get_max_count_pair(bpe_pair_t *pair, bpe_train_ctx_t *ctx) {
     struct avl_tree tree;
     avl_init(&tree);
