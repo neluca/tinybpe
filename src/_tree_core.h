@@ -16,6 +16,9 @@
  * The space complexity is O(n)
  */
 
+// Compiler alignment: by default,
+// 32-bit systems use 4-byte alignment,
+// 64-bit systems use 8-byte alignment.
 struct avl_node {
     struct avl_node *parent, *left, *right;
 };
