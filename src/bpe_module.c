@@ -482,7 +482,7 @@ static int bytes_remap_init(BytesRemapObject *self, PyObject *args, PyObject *kw
 
         if (PyLong_Check(item)) {
             long item_long = PyLong_AsLong(item);
-            if (item_long < 0 || item_long >= 256) {
+            if (item_long >= 0 && item_long < 256) {
                 self->_map[i] = (unsigned char) item_long;
             }
             else {
