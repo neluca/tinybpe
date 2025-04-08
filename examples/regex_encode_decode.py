@@ -23,7 +23,7 @@ special_tokens = {
 }
 pre_tokenize = PreTokenize(special_tokens)
 
-merges = load_bpe_file("regex.bpe")
+merges = load_bpe_file("regex.tinybpe")
 
 tokenizer = Tokenizer(merges, special_tokens=special_tokens, pre_tokenize=pre_tokenize)
 
