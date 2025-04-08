@@ -1,5 +1,5 @@
 def _save_bpe_merges(file_prefix: str, merges: list[tuple[int, int]]):
-    bpe_file = file_prefix + ".bpe"
+    bpe_file = file_prefix + ".tinybpe"
 
     with open(bpe_file, 'w') as f:
         f.write("tinybpe model\n")
@@ -21,7 +21,7 @@ def _save_bpe_vocab(file_prefix: str, vocab: dict[int, bytes]):
 
 
 def load_bpe_file(bpe_file: str) -> list[tuple[int, int]]:
-    assert bpe_file.endswith(".bpe")
+    assert bpe_file.endswith(".tinybpe")
     merges = []
 
     with open(bpe_file, 'r', encoding="utf-8") as f:
