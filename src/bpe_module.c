@@ -620,10 +620,10 @@ PyMODINIT_FUNC PyInit_bpe(void) {
         return NULL;
     }
 
-    if (PyModule_AddObjectRef(m, "BytesRemap", (PyObject *) &bytes_remap_type) < 0) {
-        Py_DECREF(m);
-        return NULL;
-    }
+//    if (PyModule_AddObjectRef(m, "BytesRemap", (PyObject *) &bytes_remap_type) < 0) {
+//        Py_DECREF(m);
+//        return NULL;
+//    }
 
     return m;
 }
