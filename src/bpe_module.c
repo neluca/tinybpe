@@ -552,6 +552,7 @@ static PyMethodDef tokenizer_methods[] = {
         {NULL}  /* Sentinel */
 };
 
+// class Trainer
 static PyTypeObject trainer_type = {
         .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
         .tp_name = "bpe.Trainer",
@@ -566,6 +567,7 @@ static PyTypeObject trainer_type = {
         .tp_methods = trainer_methods,
 };
 
+// class Tokenizer
 static PyTypeObject tokenizer_type = {
         .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
         .tp_name = "bpe.Tokenizer",
@@ -580,6 +582,7 @@ static PyTypeObject tokenizer_type = {
         .tp_methods = tokenizer_methods,
 };
 
+// class BytesRemap
 static PyTypeObject bytes_remap_type = {
         .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
         .tp_name = "bpe.BytesRemap",
@@ -601,12 +604,14 @@ static PyModuleDef bpe_module = {
 };
 
 PyMODINIT_FUNC PyInit_bpe(void) {
+    // check
     if (PyType_Ready(&trainer_type) < 0
         || PyType_Ready(&tokenizer_type) < 0
         || PyType_Ready(&bytes_remap_type) < 0) {
         return NULL;
     }
 
+    // create module
     PyObject *m = PyModule_Create(&bpe_module);
     if (m == NULL) {
         return NULL;
