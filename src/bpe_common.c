@@ -5,9 +5,10 @@
 #define APPLY_PYTHON
 #ifdef APPLY_PYTHON
 #include <Python.h>
+#else
+#include <stdlib.h>
 #endif
 #include "bpe_common.h"
-#include <stdlib.h>
 
 struct bpe_pair_node {
     struct avl_node node;
@@ -69,17 +70,23 @@ int bpe_check(const bpe_pair_t *pairs, size_t len) {
 //}
 
 void *bpe_malloc(size_t size) {
-    void *p = malloc(size);
 #ifdef APPLY_PYTHON
+    void *p = PyMem_Malloc(size);
     if (p == NULL) {
         PyErr_NoMemory(); // Python error handling
     }
+#else
+    void *p = malloc(size);
 #endif
     return p;
 }
 
 void bpe_free(void *p) {
     if (p) {
+#ifdef APPLY_PYTHON
+        PyMem_Free(p);
+#else
         free(p);
+#endif
     }
 }
