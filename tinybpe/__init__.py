@@ -1,20 +1,8 @@
 from . import bpe
+from .simple import Trainer as SimpleTrainer
 from ._abc import ABCTokenizer
-from ._utils import _save_bpe_merges, _save_bpe_vocab, load_bpe_file
+from ._utils import load_bpe_file
 from typing import Callable, Optional
-
-
-class SimpleTrainer(bpe.Trainer):
-    def __init__(self, text: str, preprocess: Optional[Callable[[str], list[bytes | bytearray]]] = None):
-        if preprocess is None:
-            text_bytes_list = [text.encode("utf-8")]
-        else:
-            text_bytes_list = preprocess(text)
-
-        super().__init__(text_bytes_list)
-
-    def save(self, file_prefix: str) -> None:
-        _save_bpe_merges(file_prefix, self.merges)
 
 
 class Tokenizer(ABCTokenizer):
