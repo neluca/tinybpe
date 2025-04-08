@@ -601,7 +601,9 @@ static PyModuleDef bpe_module = {
 };
 
 PyMODINIT_FUNC PyInit_bpe(void) {
-    if (PyType_Ready(&trainer_type) < 0 || PyType_Ready(&tokenizer_type) < 0) {
+    if (PyType_Ready(&trainer_type) < 0
+        || PyType_Ready(&tokenizer_type) < 0
+        || PyType_Ready(&bytes_remap_type) < 0) {
         return NULL;
     }
 
@@ -620,10 +622,10 @@ PyMODINIT_FUNC PyInit_bpe(void) {
         return NULL;
     }
 
-//    if (PyModule_AddObjectRef(m, "BytesRemap", (PyObject *) &bytes_remap_type) < 0) {
-//        Py_DECREF(m);
-//        return NULL;
-//    }
+    if (PyModule_AddObjectRef(m, "BytesRemap", (PyObject *) &bytes_remap_type) < 0) {
+        Py_DECREF(m);
+        return NULL;
+    }
 
     return m;
 }
