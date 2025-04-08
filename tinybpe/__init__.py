@@ -1,4 +1,5 @@
 from . import bpe
+from ._abc import ABCTokenizer
 from ._utils import _save_bpe_merges, _save_bpe_vocab, load_bpe_file
 from typing import Callable, Optional
 
@@ -16,7 +17,7 @@ class SimpleTrainer(bpe.Trainer):
         _save_bpe_merges(file_prefix, self.merges)
 
 
-class Tokenizer:
+class Tokenizer(ABCTokenizer):
     def __init__(self, merges: list[tuple[int, int]], special_tokens: Optional[dict[str, int]] = None,
                  pre_tokenize: Optional[Callable[[str], list[bytes]]] = None):
         if special_tokens is None:
@@ -63,9 +64,3 @@ class Tokenizer:
     @property
     def n_vocab(self) -> int:
         return self._enc.size
-
-    def save(self, file_prefix: str) -> None:
-        _save_bpe_merges(file_prefix, self.merges)
-
-    def save_vocab(self, file_prefix: str) -> None:
-        _save_bpe_vocab(file_prefix, self.vocab)
