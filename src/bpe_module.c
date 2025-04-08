@@ -29,6 +29,12 @@ typedef struct {
     unsigned long bytes_cache_size;
 } TokenizerObject;
 
+typedef struct {
+    PyObject_HEAD
+
+    unsigned char _map[256];
+} BytesRemapObject;
+
 static int trainer_init(TrainerObject *self, PyObject *args, PyObject *kwds) {
     static char *kwlist[] = {"list_bytes", NULL};
     PyObject *list = NULL;
@@ -362,7 +368,7 @@ static PyObject *tokenizer_decode(TokenizerObject *self, PyObject *list_ids) {
 
     unsigned long *ids = bpe_malloc(size * sizeof(unsigned long));
     size_t ids_size = 0;
-    PyObject *bytes = PyBytes_FromString(""); // yes incref
+    PyObject *bytes_obj = PyBytes_FromString(""); // yes incref
 
     for (Py_ssize_t i = 0; i < size; i++) {
         PyObject *item_id = PyList_GetItem(list_ids, i);
@@ -374,7 +380,7 @@ static PyObject *tokenizer_decode(TokenizerObject *self, PyObject *list_ids) {
                 size_t bytes_size;
                 char *c_bytes = bpe_decode(&bytes_size, self->vocab, ids, ids_size);
 
-                PyBytes_Concat(&bytes, PyBytes_FromStringAndSize(c_bytes, (Py_ssize_t) bytes_size)); // no incref
+                PyBytes_Concat(&bytes_obj, PyBytes_FromStringAndSize(c_bytes, (Py_ssize_t) bytes_size)); // no incref
 
                 bpe_free(c_bytes);
                 ids_size = 0;
@@ -386,7 +392,7 @@ static PyObject *tokenizer_decode(TokenizerObject *self, PyObject *list_ids) {
                 if (special_bytes) {
                     Py_INCREF(special_bytes);
 
-                    PyBytes_Concat(&bytes, special_bytes); // no incref
+                    PyBytes_Concat(&bytes_obj, special_bytes); // no incref
                 }
                 else {
                     PyErr_WarnFormat(PyExc_UserWarning, 1, "Unknown Token ID (%lu) \n", token_id);
@@ -405,14 +411,14 @@ static PyObject *tokenizer_decode(TokenizerObject *self, PyObject *list_ids) {
         size_t bytes_size;
         char *c_bytes = bpe_decode(&bytes_size, self->vocab, ids, ids_size);
 
-        PyBytes_Concat(&bytes, PyBytes_FromStringAndSize(c_bytes, (Py_ssize_t) bytes_size)); // no incref
+        PyBytes_Concat(&bytes_obj, PyBytes_FromStringAndSize(c_bytes, (Py_ssize_t) bytes_size)); // no incref
 
         bpe_free(c_bytes);
     }
 
     bpe_free(ids);
 
-    return bytes;
+    return bytes_obj;
 }
 
 static PyObject *tokenizer_cache_decode(TokenizerObject *self, PyObject *id_object) {
@@ -424,15 +430,15 @@ static PyObject *tokenizer_cache_decode(TokenizerObject *self, PyObject *id_obje
     if (token_id < self->vocab->vocab_size) {
         size_t bytes_size;
         char *c_bytes = bpe_decode_one(&bytes_size, self->vocab, token_id, self->bytes_cache, &self->bytes_cache_size);
-        PyObject *bytes = Py_None;
+        PyObject *bytes_obj = Py_None;
 
         if (bytes_size) {
-            bytes = PyBytes_FromStringAndSize(c_bytes, (Py_ssize_t) bytes_size); // yes incref
+            bytes_obj = PyBytes_FromStringAndSize(c_bytes, (Py_ssize_t) bytes_size); // yes incref
         }
 
         bpe_free(c_bytes);
 
-        return bytes;
+        return bytes_obj;
     }
     else {
         if (self->dict_inverse_special_tokens) {
@@ -457,6 +463,64 @@ static PyObject *tokenizer_cache_decode(TokenizerObject *self, PyObject *id_obje
 static PyObject *tokenizer_cache_clean(TokenizerObject *self, PyObject *Py_UNUSED(args)) {
     self->bytes_cache_size = 0;
     Py_RETURN_NONE;
+}
+
+static int bytes_remap_init(BytesRemapObject *self, PyObject *args, PyObject *kwds) {
+    static char *kwlist[] = {"_remap", NULL};
+    PyObject *list = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O", kwlist, &list)) {
+        return -1;
+    }
+
+    if (!PyList_Check(list) || PyList_Size(list) != 256) {
+        return -1;
+    }
+
+    for (Py_ssize_t i = 0; i < 256; i++) {
+        PyObject *item = PyList_GetItem(list, i);
+
+        if (PyLong_Check(item)) {
+            long item_long = PyLong_AsLong(item);
+            if (item_long < 0 || item_long >= 256) {
+                self->_map[i] = (unsigned char) item_long;
+            }
+            else {
+                return -1;
+            }
+        }
+        else {
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+static void bytes_remap_dealloc(BytesRemapObject *self) {
+    Py_TYPE(self)->tp_free((PyObject *) self);
+}
+
+static PyObject *bytes_remap_call(BytesRemapObject *self, PyObject *args, PyObject *kwds) {
+    static char *kwlist[] = {"_bytes", NULL};
+    const char *bytes = NULL;
+    Py_ssize_t bytes_size;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "y#", kwlist, &bytes, &bytes_size)) {
+        return NULL;
+    }
+
+    unsigned char *buf_bytes = bpe_malloc((size_t) bytes_size);
+    for (Py_ssize_t i = 0; i < bytes_size; i++) {
+        unsigned char map_i = (unsigned char) bytes[i];
+        buf_bytes[i] = self->_map[map_i];
+    }
+
+    PyObject *bytes_obj = PyBytes_FromStringAndSize((const char *) buf_bytes, bytes_size);
+
+    bpe_free(buf_bytes);
+
+    return bytes_obj;
 }
 
 static PyGetSetDef trainer_getset[] = {
@@ -516,6 +580,19 @@ static PyTypeObject tokenizer_type = {
         .tp_methods = tokenizer_methods,
 };
 
+static PyTypeObject bytes_remap_type = {
+        .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
+        .tp_name = "bpe.BytesRemap",
+        .tp_doc = PyDoc_STR("BytesRemap"),
+        .tp_basicsize = sizeof(BytesRemapObject),
+        .tp_itemsize = 0,
+        .tp_flags = Py_TPFLAGS_DEFAULT,
+        .tp_new = PyType_GenericNew,
+        .tp_init = (initproc) bytes_remap_init,
+        .tp_dealloc = (destructor) bytes_remap_dealloc,
+        .tp_call = (ternaryfunc) bytes_remap_call,
+};
+
 static PyModuleDef bpe_module = {
         .m_base = PyModuleDef_HEAD_INIT,
         .m_name = "bpe",
@@ -539,6 +616,11 @@ PyMODINIT_FUNC PyInit_bpe(void) {
     }
 
     if (PyModule_AddObjectRef(m, "Tokenizer", (PyObject *) &tokenizer_type) < 0) {
+        Py_DECREF(m);
+        return NULL;
+    }
+
+    if (PyModule_AddObjectRef(m, "BytesRemap", (PyObject *) &bytes_remap_type) < 0) {
         Py_DECREF(m);
         return NULL;
     }

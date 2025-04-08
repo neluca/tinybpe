@@ -35,7 +35,7 @@ class Tokenizer:
 
 
 class Trainer:
-    def __init__(self, text_bytes_list: list[bytes]):
+    def __init__(self, list_bytes: list[bytes]):
         ...
 
     @property
@@ -50,4 +50,12 @@ class Trainer:
         ...
 
     def load_merges(self, merges: list[tuple[int, int]]) -> None:
+        ...
+
+
+class BytesRemap:
+    def __init__(self, _remap: list[int]):
+        ...
+
+    def __call__(self, _bytes: bytes):
         ...
