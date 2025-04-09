@@ -78,7 +78,7 @@ static inline int bpe_pair_cmp(const bpe_pair_t *p1, const bpe_pair_t *p2) {
             return 1;
         }
         else {
-            return 0;
+            return 0; // equal
         }
     }
 }

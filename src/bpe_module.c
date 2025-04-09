@@ -66,13 +66,13 @@ static int trainer_init(TrainerObject *self, PyObject *args, PyObject *kwds) {
 
         if (PyBytes_Check(item)) {
             Py_ssize_t size = PyBytes_Size(item);
-            const char *bytes = PyBytes_AsString(item); // no free
+            const char *bytes = PyBytes_AsString(item); // no need to free
             bpe_train_ctx_idx_init(&self->ctx, i, bytes, (size_t) size);
         }
 
         else if (PyByteArray_Check(item)) {
             Py_ssize_t size = PyByteArray_Size(item);
-            const char *bytes = PyByteArray_AsString(item); // no free
+            const char *bytes = PyByteArray_AsString(item); // no need to free
             bpe_train_ctx_idx_init(&self->ctx, i, bytes, (size_t) size);
         }
 
@@ -374,18 +374,22 @@ static PyObject *tokenizer_decode(TokenizerObject *self, PyObject *list_ids) {
         PyObject *item_id = PyList_GetItem(list_ids, i);
         unsigned long token_id = PyLong_AsLong(item_id);
 
+        // use special tokens
         if (token_id >= self->vocab->vocab_size) {
 
             if (ids_size) {
                 size_t bytes_size;
                 char *c_bytes = bpe_decode(&bytes_size, self->vocab, ids, ids_size);
 
+                // concat bytes
                 PyBytes_Concat(&bytes_obj, PyBytes_FromStringAndSize(c_bytes, (Py_ssize_t) bytes_size)); // no incref
 
                 bpe_free(c_bytes);
+                // clear
                 ids_size = 0;
             }
 
+            // lookup table of special tokens
             if (self->dict_inverse_special_tokens) {
                 PyObject *special_bytes = PyDict_GetItem(self->dict_inverse_special_tokens, item_id); // no incref
 
@@ -403,10 +407,12 @@ static PyObject *tokenizer_decode(TokenizerObject *self, PyObject *list_ids) {
             }
         }
         else {
+            // add token_id to buf
             ids[ids_size++] = token_id;
         }
     }
 
+    // process the tail
     if (ids_size) {
         size_t bytes_size;
         char *c_bytes = bpe_decode(&bytes_size, self->vocab, ids, ids_size);

@@ -71,7 +71,7 @@ int bpe_check(const bpe_pair_t *pairs, size_t len) {
 
 void *bpe_malloc(size_t size) {
 #ifdef APPLY_PYTHON
-    void *p = PyMem_Malloc(size);
+    void *p = PyMem_Malloc(size); // fast
     if (p == NULL) {
         PyErr_NoMemory(); // Python error handling
     }
