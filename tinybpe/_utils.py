@@ -20,6 +20,17 @@ def _save_bpe_vocab(file_prefix: str, vocab: dict[int, bytes]):
             f.write(f"{rank}: {text_bytes}\n")
 
 
+def load_bpe_remaps(remaps_file: str) -> list[int]:
+    assert remaps_file.endswith(".map")
+    remaps = []
+    with open(remaps_file, 'r', encoding="utf-8") as f:
+        magic = f.readline().strip()
+        assert magic == "tinybpe remaps"
+        for line in f:
+            remaps.append(int(line))
+    return remaps
+
+
 def load_bpe_file(bpe_file: str) -> list[tuple[int, int]]:
     assert bpe_file.endswith(".tinybpe")
     merges = []
@@ -31,5 +42,4 @@ def load_bpe_file(bpe_file: str) -> list[tuple[int, int]]:
         for line in f:
             p1, p2 = map(int, line.split())
             merges.append((p1, p2))
-
     return merges
