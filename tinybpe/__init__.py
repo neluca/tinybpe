@@ -1,3 +1,5 @@
+__version__ = "0.1.0"
+
 from . import bpe
 from .simple import Trainer as SimpleTrainer
 from ._abc import ABCTokenizer
