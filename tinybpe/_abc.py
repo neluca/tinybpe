@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from ._utils import _save_bpe_merges, _save_bpe_vocab
+from typing import Callable
 
 
 class ABCTokenizer(ABC):
@@ -14,6 +15,14 @@ class ABCTokenizer(ABC):
     @abstractmethod
     def decode(self, ids: list[int]) -> str:
         raise NotImplementedError("Subclasses must implement the \"decode\" method.")
+
+    @abstractmethod
+    def stream_decode(self, callback_fn: Callable[[str], None]) -> Callable[[int], None]:
+        raise NotImplementedError("Subclasses must implement the \"stream_decode\" method.")
+
+    @abstractmethod
+    def stream_decode_cache_clean(self):
+        raise NotImplementedError("Subclasses must implement the \"stream_decode_cache_clean\" method.")
 
     @property
     def merges(self) -> list[tuple[int, int]]:
