@@ -11,6 +11,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 license = { file = "LICENSE" }
 dynamic = ["version"]
+keywords = ["BPE", "Byte Pair Encoding", "LLM", "tokenizer"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3.9",
