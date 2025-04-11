@@ -11,7 +11,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 license = { file = "LICENSE" }
 dynamic = ["version"]
-keywords = ["BPE", "Byte Pair Encoding", "LLM", "tokenizer"]
+keywords = ["BPE", "Byte Pair Encoding", "LLM", "Tokenizer"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3.9",
@@ -29,7 +29,7 @@ classifiers = [
 ]
 
 [project.urls]
-homepage = "https://github.com/neluca/tinybpe"
+Homepage = "https://github.com/neluca/tinybpe"
 
 [tool.setuptools.dynamic]
 version = { attr = "tinybpe.__version__" }
