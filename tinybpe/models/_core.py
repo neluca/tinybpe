@@ -6,8 +6,8 @@ from .. import bpe
 class Encoding(ABCTokenizer):
     def __init__(self, merges: list[tuple[int, int]],
                  *,
-                 remaps: Optional[list[int]] = None,
                  pat_str: str = None,
+                 remaps: Optional[list[int]] = None,
                  special_tokens: Optional[dict[str, int]] = None,
                  ):
         if special_tokens is None:
