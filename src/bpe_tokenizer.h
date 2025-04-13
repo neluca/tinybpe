@@ -2,8 +2,8 @@
  * Copyright Yinan Liao. and other contributors. All rights reserved.
  */
 
-#ifndef ULTRA_BPE_TOKENIZER_H
-#define ULTRA_BPE_TOKENIZER_H
+#ifndef SRC_BPE_TOKENIZER_H
+#define SRC_BPE_TOKENIZER_H
 
 #include "bpe_common.h"
 
@@ -45,4 +45,4 @@ char *bpe_decode(size_t *bytes_size, const struct bpe_vocab *vocab, const unsign
 char *bpe_decode_one(size_t *bytes_size, const struct bpe_vocab *vocab,
                      unsigned long id, unsigned char *cache, unsigned long *cache_size);
 
-#endif  /* ULTRA_BPE_TOKENIZER_H */
+#endif  /* SRC_BPE_TOKENIZER_H */
