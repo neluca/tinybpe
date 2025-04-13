@@ -21,7 +21,7 @@ def _save_bpe_vocab(file_prefix: str, vocab: dict[int, bytes]):
 
 
 def load_bpe_remaps(remaps_file: str) -> list[int]:
-    assert remaps_file.endswith(".map")
+    assert remaps_file.endswith(".remaps")
     remaps = []
 
     with open(remaps_file, 'r', encoding="utf-8") as f:

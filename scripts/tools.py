@@ -10,7 +10,7 @@ def bpe_save_merges(file_prefix: str, merges: list[tuple[int, int]]):
 
 
 def bpe_save_remaps(file_prefix: str, remaps: list[int]):
-    remaps_file = file_prefix + ".map"
+    remaps_file = file_prefix + ".remaps"
     with open(remaps_file, 'w') as f:
         f.write("tinybpe remaps\n")
         for i in remaps:
@@ -18,7 +18,7 @@ def bpe_save_remaps(file_prefix: str, remaps: list[int]):
 
 
 def bpe_load_remaps(remaps_file: str) -> list[int]:
-    assert remaps_file.endswith(".map")
+    assert remaps_file.endswith(".remaps")
     remaps = []
     with open(remaps_file, 'r', encoding="utf-8") as f:
         magic = f.readline().strip()

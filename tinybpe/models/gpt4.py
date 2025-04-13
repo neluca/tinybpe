@@ -15,5 +15,5 @@ GPT4_SPECIAL_TOKENS = {
 class GPT4Tokenizer(Encoding):
     def __init__(self):
         merges = load_bpe_file(str(Path(__file__).parent.absolute().joinpath("cl100k_base.tinybpe")))
-        remaps = load_bpe_remaps(str(Path(__file__).parent.absolute().joinpath("cl100k_base.map")))
+        remaps = load_bpe_remaps(str(Path(__file__).parent.absolute().joinpath("cl100k_base.remaps")))
         super().__init__(merges, GPT4_SPLIT_PATTERN, remaps=remaps, special_tokens=GPT4_SPECIAL_TOKENS)

@@ -1,5 +1,3 @@
-# import tiktoken
-# from tinybpe import bpe
 from tools import bpe_save_merges, bpe_save_remaps
 
 
@@ -46,16 +44,3 @@ def bpe_mergeable_ranks_save(file_prefix: str, mergeable_ranks: dict[bytes, int]
     bpe_save_merges(file_prefix, merges)
     if remaps is not None:
         bpe_save_remaps(file_prefix, remaps)
-
-# enc = tiktoken.get_encoding("cl100k_base")
-# mergeable_ranks = enc._mergeable_ranks
-#
-# merges_, remap_ = bpe_get_merges_and_remap(mergeable_ranks)
-#
-# bytes_remap = bpe.BytesRemap(remap_)
-
-# print(merges_)
-# print(remap_)
-#
-# s = b"abcdefg 1234567"
-# print(bytes_remap(s))
