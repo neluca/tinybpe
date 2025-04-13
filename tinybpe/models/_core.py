@@ -11,16 +11,6 @@ class Encoding(ABCTokenizer):
                  remaps: Optional[list[int]] = None,
                  special_tokens: Optional[dict[str, int]] = None,
                  ):
-        if special_tokens is None:
-            self._enc = bpe.Tokenizer(merges)
-            self.special_tokens = None
-            self.special_pattern = None
-        else:
-            self.special_tokens = special_tokens
-            _special_tokens = {k.encode("utf-8"): v for k, v in special_tokens.items()}
-            self._enc = bpe.Tokenizer(merges, _special_tokens)
-            self.special_pattern = "(" + "|".join(re.escape(k) for k in special_tokens) + ")"
-
         if remaps is None:
             self.bytes_remap = None
             self.inverse_bytes_remap = None
@@ -31,17 +21,27 @@ class Encoding(ABCTokenizer):
                 _inverse_remaps[v] = i
             self.inverse_bytes_remap = bpe.BytesRemap(_inverse_remaps)
 
+        if special_tokens is None:
+            self._enc = bpe.Tokenizer(merges)
+            self.special_tokens = None
+            self.special_pattern = None
+        else:
+            self.special_tokens = special_tokens
+            if self.bytes_remap is None:
+                _special_tokens = {k.encode("utf-8"): v for k, v in special_tokens.items()}
+            else:
+                _special_tokens = {self.bytes_remap(k.encode("utf-8")): v for k, v in special_tokens.items()}
+            self._enc = bpe.Tokenizer(merges, _special_tokens)
+            self.special_pattern = "(" + "|".join(re.escape(k) for k in special_tokens) + ")"
+
         self.compiled_pattern = re.compile(pat_str)
 
     def encode_ordinary(self, text: str) -> list[int]:
         text_chunks = re.findall(self.compiled_pattern, text)
-        # all chunks of text are encoded separately, then results are joined
-        ids = []
-        for chunk in text_chunks:
-            chunk_bytes = chunk.encode("utf-8")  # raw bytes
-            chunk_bytes = self.bytes_remap(chunk_bytes)
-            chunk_ids = self._enc.encode(chunk_bytes)
-            ids.extend(chunk_ids)
+        chunk_bytes = [ch.encode("utf-8") for ch in text_chunks]
+        if self.bytes_remap is not None:
+            chunk_bytes = list(map(self.bytes_remap, chunk_bytes))
+        ids = sum(list(map(self._enc.encode, chunk_bytes)), [])
         return ids
 
     def encode(self, text: str) -> list[int]:
@@ -49,16 +49,15 @@ class Encoding(ABCTokenizer):
         ids = []
         for part in special_chunks:
             if part in self.special_tokens:
-                # this is a special token, encode it separately as a special case
-                ids.append(self._enc.encode(part.encode("utf-8")))
+                ids.append(self.special_tokens[part])
             else:
-                # this is an ordinary sequence, encode it normally
                 ids.extend(self.encode_ordinary(part))
         return ids
 
     def decode(self, ids: list[int]) -> str:
         _bytes = self._enc.decode(ids)
-        _bytes = self.inverse_bytes_remap(_bytes)
+        if self.inverse_bytes_remap is not None:
+            _bytes = self.inverse_bytes_remap(_bytes)
         return _bytes.decode("utf-8")
 
     def stream_decode(self, callback_fn: Callable[[str], None]) -> Callable[[int], None]:
@@ -73,4 +72,8 @@ class Encoding(ABCTokenizer):
 
     @property
     def vocab(self) -> dict[int, bytes]:
-        return self._enc.vocab
+        if self.inverse_bytes_remap is not None:
+            _vocab = {k: self.inverse_bytes_remap(v) for k, v in self._enc.vocab.items()}
+        else:
+            _vocab = self._enc.vocab
+        return _vocab
