@@ -13,8 +13,10 @@ class Encoding(ABCTokenizer):
                  ):
         if special_tokens is None:
             self._enc = bpe.Tokenizer(merges)
+            self.special_tokens = None
             self.special_pattern = None
         else:
+            self.special_tokens = special_tokens
             _special_tokens = {k.encode("utf-8"): v for k, v in special_tokens.items()}
             self._enc = bpe.Tokenizer(merges, _special_tokens)
             self.special_pattern = "(" + "|".join(re.escape(k) for k in special_tokens) + ")"
@@ -31,11 +33,27 @@ class Encoding(ABCTokenizer):
 
         self.compiled_pattern = re.compile(pat_str)
 
+    def encode_ordinary(self, text: str) -> list[int]:
+        text_chunks = re.findall(self.compiled_pattern, text)
+        # all chunks of text are encoded separately, then results are joined
+        ids = []
+        for chunk in text_chunks:
+            chunk_bytes = chunk.encode("utf-8")  # raw bytes
+            chunk_bytes = self.bytes_remap(chunk_bytes)
+            chunk_ids = self._enc.encode(chunk_bytes)
+            ids.extend(chunk_ids)
+        return ids
+
     def encode(self, text: str) -> list[int]:
-        text_chunks = re.split(self.special_pattern, text)
-        _bytes = [ch.encode("utf-8") for ch in text_chunks]
-        _bytes = list(map(self.bytes_remap, _bytes))
-        ids = sum(list(map(self._enc.encode, _bytes)), [])
+        special_chunks = re.split(self.special_pattern, text)
+        ids = []
+        for part in special_chunks:
+            if part in self.special_tokens:
+                # this is a special token, encode it separately as a special case
+                ids.append(self._enc.encode(part.encode("utf-8")))
+            else:
+                # this is an ordinary sequence, encode it normally
+                ids.extend(self.encode_ordinary(part))
         return ids
 
     def decode(self, ids: list[int]) -> str:
