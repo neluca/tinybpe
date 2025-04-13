@@ -35,6 +35,7 @@ class Encoding(ABCTokenizer):
             self.special_pattern = "(" + "|".join(re.escape(k) for k in special_tokens) + ")"
 
         self.compiled_pattern = re.compile(pat_str)
+        self._cache = b""
 
     def encode_ordinary(self, text: str) -> list[int]:
         text_chunks = re.findall(self.compiled_pattern, text)
@@ -61,10 +62,25 @@ class Encoding(ABCTokenizer):
         return _bytes.decode("utf-8")
 
     def stream_decode(self, callback_fn: Callable[[str], None]) -> Callable[[int], None]:
-        pass
+        self._cache = b""
+
+        def _decode(token_id: int):
+            _bytes = self._enc.decode([token_id])
+            if self.inverse_bytes_remap is not None:
+                _bytes = self.inverse_bytes_remap(_bytes)
+
+            _bytes = self._cache + _bytes
+            try:
+                _text = _bytes.decode("utf-8")
+                self._cache = b""
+                callback_fn(_text)
+            except UnicodeDecodeError:
+                self._cache = _bytes
+
+        return _decode
 
     def stream_decode_cache_clean(self):
-        pass
+        self._cache = b""
 
     @property
     def merges(self) -> list[tuple[int, int]]:
