@@ -23,6 +23,7 @@ def _save_bpe_vocab(file_prefix: str, vocab: dict[int, bytes]):
 def load_bpe_remaps(remaps_file: str) -> list[int]:
     assert remaps_file.endswith(".map")
     remaps = []
+
     with open(remaps_file, 'r', encoding="utf-8") as f:
         magic = f.readline().strip()
         assert magic == "tinybpe remaps"
