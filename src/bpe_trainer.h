@@ -2,8 +2,8 @@
  * Copyright Yinan Liao. and other contributors. All rights reserved.
  */
 
-#ifndef ULTRA_BPE_TRAINER_H
-#define ULTRA_BPE_TRAINER_H
+#ifndef SRC_BPE_TRAINER_H
+#define SRC_BPE_TRAINER_H
 
 #include "bpe_common.h"
 
@@ -29,4 +29,4 @@ unsigned long bpe_get_max_count_pair(bpe_pair_t *pair, bpe_train_ctx_t *ctx);
 // merge the pairs into the context information through external imports of merges.
 void bpe_apply_merges(bpe_train_ctx_t *ctx, const bpe_pair_t *pairs, size_t pairs_len);
 
-#endif  /* ULTRA_BPE_TRAINER_H */
+#endif  /* SRC_BPE_TRAINER_H */

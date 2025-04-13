@@ -2,8 +2,8 @@
  * Copyright Yinan Liao. and other contributors. All rights reserved.
  */
 
-#ifndef ULTRA_BPE_COMMON_H
-#define ULTRA_BPE_COMMON_H
+#ifndef SRC_BPE_COMMON_H
+#define SRC_BPE_COMMON_H
 
 #include "_tree_core.h"
 
@@ -89,4 +89,4 @@ void *bpe_malloc(size_t size);
 // Free memory
 void bpe_free(void *p);
 
-#endif  /* ULTRA_BPE_COMMON_H */
+#endif  /* SRC_BPE_COMMON_H */
