@@ -1,12 +1,6 @@
 import sys
 from setuptools import Extension, setup
 
-package_data = {
-    "tinybpe": [
-        "models/*"
-    ]
-}
-
 ext_modules = [
     Extension(
         "tinybpe.bpe",
@@ -30,6 +24,5 @@ ext_modules = [
 setup(
     name="tinybpe",
     packages=["tinybpe"],
-    package_data=package_data,
     ext_modules=ext_modules
 )
