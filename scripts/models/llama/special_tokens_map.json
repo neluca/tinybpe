@@ -1,5 +1,0 @@
-{
-  "bos_token": "<|begin_of_text|>",
-  "eos_token": "<|eot|>",
-  "pad_token": "<|finetune_right_pad_id|>"
-}
