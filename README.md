@@ -5,18 +5,18 @@
 ## 📦 Setup
 
 ```bash
-pip install tinybpe
+python -m build
 ```
 
 ## 🌟 Features
 
-- Core is thoughtfully designed and implemented in **C** language, fast and efficient
-- Used as a **Python** module, simple and elegant
-- Supports **BPE** model training and importing models for continued training to expand the vocabulary
-- Implements a general byte-level tokenizer, supporting encoding, decoding, and streaming decoding
-- Supports regular expression pre-tokenization and adding special **Tokens**
-- Supports conversion of **tiktoken** model parameters
-- Very easy to integrate and extend, and the core is zero dependencies
+- Core is thoughtfully designed and implemented in **C** language, fast and efficient.
+- Used as a **Python** module, simple and elegant.
+- Supports **BPE** model training and importing models for continued training to expand the vocabulary.
+- Implements a general byte-level tokenizer, supporting encoding, decoding, and streaming decoding.
+- Supports regular expression pre-tokenization and adding special **Tokens**.
+- Supports conversion of **tiktoken** model parameters.
+- Very easy to integrate and extend, and the core is zero dependencies.
 
 
 
