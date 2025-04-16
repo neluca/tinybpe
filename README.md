@@ -148,6 +148,15 @@ save_from_tiktoken("cl100k_base", enc._mergeable_ranks)  # 将 tiktoken 参数�
 
 
 
+## 🚧贡献
+
+欢迎贡献代码，如果您发现了 **bug** 或者有任何建议和改进意见，欢迎开启一个 **issue** 来讨论，如果需要往代码中加入您的创意，或者修改一个 **bug**，欢迎提交一个 **pull request**。
+
+## 🤝参考
+
+[minbpe]: https://github.com/karpathy/minbpe
+[tiktoken]: https://github.com/openai/tiktoken
+
 ## ⌛单元测试
 
 ```bash
