@@ -8,4 +8,6 @@ for _ in range(merges_size):
     pair, rank, freq = trainer.step()
     print(f"{pair} -> {rank} ({freq})")
 
+print(trainer.merges)
+print(trainer.merges_size)
 trainer.save("simple")
