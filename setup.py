@@ -1,6 +1,10 @@
 import sys
 from setuptools import Extension, setup
 
+package_data = {
+    "tinybpe": ["*"]
+}
+
 ext_modules = [
     Extension(
         "tinybpe.bpe",
@@ -17,12 +21,13 @@ ext_modules = [
             "src/bpe_trainer.h",
             "src/bpe_tokenizer.h",
         ],
-        extra_compile_args={"win32": []}.get(sys.platform, ["-std=c99"]),
+        extra_compile_args={"win32": []}.get(sys.platform, ["-Werror", "-std=c99"]),
     )
 ]
 
 setup(
     name="tinybpe",
     packages=["tinybpe"],
+    package_data=package_data,
     ext_modules=ext_modules
 )
