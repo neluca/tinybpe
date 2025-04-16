@@ -99,7 +99,8 @@ static void trainer_dealloc(TrainerObject *self) {
 }
 
 static PyObject *trainer_get_merges(TrainerObject *self, void *Py_UNUSED(closure)) {
-    return Py_NewRef(self->list_merges);  // yes incref
+    Py_INCREF(self->list_merges);
+    return self->list_merges;
 }
 
 static PyObject *trainer_get_merges_size(TrainerObject *self, void *Py_UNUSED(closure)) {
@@ -292,7 +293,8 @@ static void tokenizer_dealloc(TokenizerObject *self) {
 }
 
 static PyObject *tokenizer_get_merges(TokenizerObject *self, void *Py_UNUSED(closure)) {
-    return Py_NewRef(self->list_merges); // yes incref
+    Py_INCREF(self->list_merges);
+    return self->list_merges;
 }
 
 static PyObject *tokenizer_get_vocab(TokenizerObject *self, void *Py_UNUSED(closure)) {
@@ -623,17 +625,23 @@ PyMODINIT_FUNC PyInit_bpe(void) {
         return NULL;
     }
 
-    if (PyModule_AddObjectRef(m, "Trainer", (PyObject *) &trainer_type) < 0) {
+    Py_INCREF(&trainer_type);
+    if (PyModule_AddObject(m, "Trainer", (PyObject *) &trainer_type) < 0) {
+        Py_DECREF(&trainer_type);
         Py_DECREF(m);
         return NULL;
     }
 
-    if (PyModule_AddObjectRef(m, "Tokenizer", (PyObject *) &tokenizer_type) < 0) {
+    Py_INCREF(&tokenizer_type);
+    if (PyModule_AddObject(m, "Tokenizer", (PyObject *) &tokenizer_type) < 0) {
+        Py_DECREF(&tokenizer_type);
         Py_DECREF(m);
         return NULL;
     }
 
-    if (PyModule_AddObjectRef(m, "BytesRemap", (PyObject *) &bytes_remap_type) < 0) {
+    Py_INCREF(&bytes_remap_type);
+    if (PyModule_AddObject(m, "BytesRemap", (PyObject *) &bytes_remap_type) < 0) {
+        Py_DECREF(&bytes_remap_type);
         Py_DECREF(m);
         return NULL;
     }
