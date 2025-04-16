@@ -1,5 +1,4 @@
-from ._utils import save_bpe_model
-from . import bpe
+from tinybpe import bpe, save_bpe_model
 from typing import Callable, Optional, Union
 
 

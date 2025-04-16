@@ -1,5 +1,5 @@
-from . import bpe
-from ._utils import save_bpe_vocab, save_bpe_model, BPEParam
+from tinybpe import bpe
+from tinybpe._utils import save_bpe_vocab, save_bpe_model, BPEParam
 from typing import Callable, Optional
 import regex as re  # type: ignore
 
