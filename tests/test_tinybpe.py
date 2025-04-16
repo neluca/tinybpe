@@ -31,6 +31,7 @@ class TestTinyBPE(unittest.TestCase):
         model = tb.load_bpe_model(file_simple)
         self.assertEqual(merges_1, model.merges)
         self.assertIsNone(model.bytes_maps)
+        self.assertEqual(trainer_1.merges_size, merges_size)
 
         tokenizer = tb.CommonTokenizer(model.merges)
         s1 = "hello world, old man !"
@@ -39,6 +40,7 @@ class TestTinyBPE(unittest.TestCase):
         s1 = "你好世界 1234"
         s2 = tokenizer.decode(tokenizer.encode(s1))
         self.assertEqual(s1, s2)
+        self.assertEqual(tokenizer.n_vocab, vocab_size)
 
     def test_regex(self):
         vocab_size = 1000
