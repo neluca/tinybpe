@@ -63,9 +63,9 @@ jobs:
       run: |
         python -m build
         pip install (Get-ChildItem dist/*.whl)
-#    - name: Test with pytest on Windows
-#      run: |
-#        python -m pytest
+    - name: Test with pytest on Windows
+      run: |
+        python -m pytest
 #    - name: Generate coverage report
 #      run: |
 #        coverage run --source tinybpe --parallel-mode -m pytest
