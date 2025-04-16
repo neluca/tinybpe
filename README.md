@@ -154,8 +154,9 @@ save_from_tiktoken("cl100k_base", enc._mergeable_ranks)  # 将 tiktoken 参数�
 
 ## 🤝参考
 
-[minbpe]: https://github.com/karpathy/minbpe
-[tiktoken]: https://github.com/openai/tiktoken
+[minbpe](https://github.com/karpathy/minbpe)
+
+[tiktoken](https://github.com/openai/tiktoken)
 
 ## ⌛单元测试
 
