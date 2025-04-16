@@ -17,7 +17,7 @@ def save_bpe_vocab(file_prefix: str, vocab: dict[int, bytes]):
         file.write(f"n_vocab: {len(vocab)}\n")
 
         for rank, text_bytes in vocab.items():
-            file.write(f"{rank}: {text_bytes}\n")
+            file.write(f"{rank}: {text_bytes}\n")  # type: ignore
 
 
 def save_bpe_model(file_prefix: str, merges: list[tuple[int, int]], bytes_maps: Optional[list[int]] = None):
@@ -50,7 +50,7 @@ def load_bpe_model(model_file: str) -> BPEParam:
             for _ in range(256):
                 bytes_maps.append(int(file.readline().strip()))
         else:
-            bytes_maps = None
+            bytes_maps = None  # type: ignore
 
         for line in file:
             p1, p2 = map(int, line.split())
@@ -58,7 +58,7 @@ def load_bpe_model(model_file: str) -> BPEParam:
     return BPEParam(bytes_maps=bytes_maps, merges=merges)
 
 
-def _bpe_pair(mergeable_ranks: dict[bytes, int], token: bytes) -> list[bytes, bytes]:
+def _bpe_pair(mergeable_ranks: dict[bytes, int], token: bytes) -> list[bytes, bytes]:  # type: ignore
     parts = [bytes([b]) for b in token]
     max_rank = mergeable_ranks[token]
 

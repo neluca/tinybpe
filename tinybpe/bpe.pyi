@@ -2,7 +2,7 @@
 This is a Python-C-Extension module that implements the core algorithm of BPE (Byte-Pair-Encoding).
 """
 
-from typing import Optional
+from typing import Optional, Union
 
 
 class Tokenizer:
@@ -23,7 +23,7 @@ class Tokenizer:
 
     def decode(self, ids: list[int]) -> bytes: ...
 
-    def cache_decode(self, token_id: int) -> bytes | None: ...
+    def cache_decode(self, token_id: int) -> Union[bytes, None]: ...
 
     def cache_clean(self): ...
 
@@ -39,7 +39,7 @@ class Trainer:
     @property
     def merges(self) -> list[tuple[int, int]]: ...
 
-    def step(self) -> tuple[tuple[int, int], int, int] | None:
+    def step(self) -> Union[tuple[tuple[int, int], int, int], None]:
         """ :returns pair, rank, frequency. """
 
     ...
@@ -52,4 +52,4 @@ class BytesRemap:
 
     def __init__(self, _remap: list[int]): ...
 
-    def __call__(self, _bytes: bytes): ...
+    def __call__(self, _bytes: bytes) -> bytes: ...
