@@ -1,7 +1,7 @@
 from . import bpe
 from ._utils import save_bpe_vocab, save_bpe_model, BPEParam
 from typing import Callable, Optional
-import regex as re
+import regex as re  # type: ignore
 
 
 class CommonTokenizer:
@@ -38,8 +38,8 @@ class CommonTokenizer:
         special_chunks = re.split(self._special_pattern, text)
         ids = []
         for part in special_chunks:
-            if part in self._special_tokens:
-                ids.append(self._special_tokens[part])
+            if part in self._special_tokens:  # type: ignore
+                ids.append(self._special_tokens[part])  # type: ignore
             else:
                 ids.extend(self.encode_ordinary(part))
         return ids
@@ -129,7 +129,7 @@ class Tokenizer(CommonTokenizer):
 
         text_chunks = re.findall(self._compiled_pattern, text)
         chunk_bytes = [ch.encode("utf-8") for ch in text_chunks]
-        chunk_bytes = list(map(self._map, chunk_bytes))
+        chunk_bytes = list(map(self._map, chunk_bytes))  # type: ignore
         ids = sum(list(map(self._enc.encode, chunk_bytes)), [])
         return ids
 
@@ -138,7 +138,7 @@ class Tokenizer(CommonTokenizer):
             return super().decode(ids)
 
         text_bytes = self._enc.decode(ids)
-        text_bytes = self._inv_map(text_bytes)
+        text_bytes = self._inv_map(text_bytes)  # type: ignore
         return text_bytes.decode("utf-8")
 
     def stream_decode(self, callback: Callable[[str], None]) -> Callable[[int], None]:
@@ -149,7 +149,7 @@ class Tokenizer(CommonTokenizer):
 
         def _decode(token_id: int):
             text_bytes = self._enc.decode([token_id])
-            text_bytes = self._inv_map(text_bytes)
+            text_bytes = self._inv_map(text_bytes)  # type: ignore
             text_bytes = self._cache + text_bytes
             try:
                 text = text_bytes.decode("utf-8")
@@ -169,7 +169,7 @@ class Tokenizer(CommonTokenizer):
     def vocab(self) -> dict[int, bytes]:
         if self._bytes_maps is None:
             return super().vocab
-        return {k: self._inv_map(v) for k, v in self._enc.vocab.items()}
+        return {k: self._inv_map(v) for k, v in self._enc.vocab.items()}  # type: ignore
 
     def save(self, file_prefix: str) -> None:
         if self._bytes_maps is None:
