@@ -4,6 +4,7 @@
 
 [![build](https://github.com/neluca/tinybpe/workflows/build/badge.svg)](https://github.com/neluca/tinybpe/actions/workflows/python-package.yml)
 [![lint](https://github.com/neluca/tinybpe/workflows/lint/badge.svg)](https://github.com/neluca/tinybpe/actions/workflows/lint.yml)
+[![coverage](https://img.shields.io/codecov/c/github/neluca/tinybpe)](https://codecov.io/gh/neluca/tinybpe)
 [![license](https://img.shields.io/github/license/neluca/tinybpe)](https://github.com/neluca/tinybpe/blob/main/LICENSE)
 
 👋 **tinybpe** 是一个高性能、轻量、整洁的**语言模型**分词器和 **BPE** 训练器。
