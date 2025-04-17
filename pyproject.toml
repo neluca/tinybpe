@@ -7,7 +7,7 @@ name = "tinybpe"
 authors = [{ name = "E.T. Romani", email = "myneluca@gmail.com" }]
 description = "This is an ultra-fast, lightweight and clean code implementation of the Byte Pair Encoding (BPE) algorithm."
 dependencies = ["regex"]
-readme = "README.md"
+readme = "README_en.md"
 requires-python = ">=3.9"
 license = { file = "LICENSE" }
 dynamic = ["version"]
