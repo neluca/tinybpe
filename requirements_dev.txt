@@ -1,6 +1,7 @@
 # Test
 tiktoken
 pytest
+pytest-cov
 
 # Build Packages
 build
@@ -11,4 +12,3 @@ twine
 # Lint & Coverage
 flake8
 mypy
-coverage
