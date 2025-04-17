@@ -634,6 +634,7 @@ PyMODINIT_FUNC PyInit_bpe(void) {
 
     Py_INCREF(&tokenizer_type);
     if (PyModule_AddObject(m, "Tokenizer", (PyObject *) &tokenizer_type) < 0) {
+        Py_DECREF(&trainer_type);
         Py_DECREF(&tokenizer_type);
         Py_DECREF(m);
         return NULL;
@@ -641,6 +642,8 @@ PyMODINIT_FUNC PyInit_bpe(void) {
 
     Py_INCREF(&bytes_remap_type);
     if (PyModule_AddObject(m, "BytesRemap", (PyObject *) &bytes_remap_type) < 0) {
+        Py_DECREF(&trainer_type);
+        Py_DECREF(&tokenizer_type);
         Py_DECREF(&bytes_remap_type);
         Py_DECREF(m);
         return NULL;
