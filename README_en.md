@@ -6,6 +6,7 @@
 [![wheels](https://github.com/neluca/tinybpe/workflows/wheels/badge.svg)](https://github.com/neluca/tinybpe/actions/workflows/wheels.yml)
 [![lint](https://github.com/neluca/tinybpe/workflows/lint/badge.svg)](https://github.com/neluca/tinybpe/actions/workflows/lint.yml)
 [![coverage](https://img.shields.io/codecov/c/github/neluca/tinybpe)](https://codecov.io/gh/neluca/tinybpe)
+[![support-version](https://img.shields.io/pypi/pyversions/tinybpe)](https://pypi.org/project/tinybpe/)
 [![license](https://img.shields.io/github/license/neluca/tinybpe)](https://github.com/neluca/tinybpe/blob/main/LICENSE)
 
 👋 `TinyBPE` is a fast, lightweight, and clean **language model** tokenizer and basic **BPE** model trainer, implemented as a **CPython** extension.
