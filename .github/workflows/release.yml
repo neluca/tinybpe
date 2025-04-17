@@ -1,6 +1,10 @@
 name: Python package build and publish
 
 on:
+  push:
+    branches: [ main ]
+    paths:
+      - ".github/workflows/release.yml"
   release:
     types: [created]
 
@@ -49,8 +53,8 @@ jobs:
       - name: Publish wheels to PyPI Unix
         continue-on-error: true
         env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           twine upload wheelhouse/*.whl
 
@@ -97,8 +101,8 @@ jobs:
         if: matrix.os != 'windows-latest' 
         continue-on-error: true
         env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           twine upload --skip-existing wheelhouse/*.whl
 
@@ -106,7 +110,7 @@ jobs:
         if: matrix.os == 'windows-latest' 
         continue-on-error: true
         env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           twine upload --skip-existing (Get-ChildItem wheelhouse/*.whl)
