@@ -6,6 +6,7 @@
 [![wheels](https://github.com/neluca/tinybpe/workflows/wheels/badge.svg)](https://github.com/neluca/tinybpe/actions/workflows/wheels.yml)
 [![lint](https://github.com/neluca/tinybpe/workflows/lint/badge.svg)](https://github.com/neluca/tinybpe/actions/workflows/lint.yml)
 [![coverage](https://img.shields.io/codecov/c/github/neluca/tinybpe)](https://codecov.io/gh/neluca/tinybpe)
+[![support-version](https://img.shields.io/pypi/pyversions/tinybpe)](https://pypi.org/project/tinybpe/)
 [![license](https://img.shields.io/github/license/neluca/tinybpe)](https://github.com/neluca/tinybpe/blob/main/LICENSE)
 
 👋 **TinyBPE** 是一个包含高性能、轻量、整洁的语言模型分词器和基本的 **BPE** 模型训练器的 **CPython** 扩展。
