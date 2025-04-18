@@ -1,4 +1,4 @@
-[[中文](https://github.com/neluca/tinybpe/blob/main/README.md)|English]
+[[中文](https://github.com/neluca/tinybpe/blob/main/README.md)|[English](https://github.com/neluca/tinybpe/blob/main/README_en.md)]
 
 # 🚀tinybpe
 
