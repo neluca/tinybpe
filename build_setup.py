@@ -26,16 +26,16 @@ setup(
     ext_modules=ext_modules
 )
 
-bpe_file_path = None
+bpe_dylib_path = None
 
 for root, dirs, files in os.walk("build"):
     for file in files:
         if (file.endswith(".pyd") or file.endswith(".so") or file.endswith(".dylib")) \
                 and file.startswith("bpe"):
-            bpe_file_path = os.path.join(root, file)
+            bpe_dylib_path = os.path.join(root, file)
             break
 
-if bpe_file_path is not None:
-    shutil.copy(bpe_file_path, "tinybpe")
+if bpe_dylib_path is not None:
+    shutil.copy(bpe_dylib_path, "tinybpe")
 else:
     raise RuntimeError("Error ...")
