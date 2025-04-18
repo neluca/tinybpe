@@ -167,6 +167,7 @@ save_from_tiktoken("cl100k_base", enc._mergeable_ranks)  # 将 tiktoken 模型�
 
 ```bash
 pip install -r requirements_dev.txt
+python build_setup.py build_ext
 python -m pytest
 ```
 
