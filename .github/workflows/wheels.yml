@@ -7,13 +7,11 @@ on:
       - "src/**"
       - "tinybpe/**"
       - "setup.py"
-      - ".github/workflows/wheels.yml"
   pull_request:
     paths:
       - "src/**"
       - "tinybpe/**"
       - "setup.py"
-      - ".github/workflows/wheels.yml"
 
 jobs:
   build-wheels-linux:
@@ -21,9 +19,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        manylinux-image: [manylinux2014]
-        arch: [auto, aarch64]
+        os: [ ubuntu-latest ]
+        manylinux-image: [ manylinux2014 ]
+        arch: [ auto, aarch64 ]
 
     steps:
       - uses: actions/checkout@v4
@@ -59,7 +57,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, macos-13, windows-latest]
+        os: [ macos-latest, macos-13, windows-latest ]
 
     steps:
       - uses: actions/checkout@v4
