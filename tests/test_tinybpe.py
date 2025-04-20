@@ -2,6 +2,7 @@ import tinybpe as tb
 import unittest
 from pathlib import Path
 import tiktoken
+import regex as re
 
 file_cl100k_base = str(Path(__file__).parent.absolute().joinpath("cl100k_base.tinymodel"))
 file_t_cl100k_base = str(Path(__file__).parent.absolute().joinpath("t_cl100k_base"))
@@ -33,6 +34,12 @@ class TestTinyBPE(unittest.TestCase):
         self.assertIsNone(model.bytes_maps)
         self.assertEqual(trainer_1.merges_size, merges_size)
 
+        trainer_1.save(file_simple_t_vocab)
+        file_simple_t_vocab_ = file_simple_t_vocab + ".vocab"
+        text_vocab = open(file_simple_vocab, "r", encoding="utf-8").read()
+        text_t_vocab = open(file_simple_t_vocab_, "r", encoding="utf-8").read()
+        self.assertEqual(text_vocab, text_t_vocab)
+
         tokenizer = tb.CommonTokenizer(model.merges)
         s1 = "hello world, old man !"
         s2 = tokenizer.decode(tokenizer.encode(s1))
@@ -41,6 +48,38 @@ class TestTinyBPE(unittest.TestCase):
         s2 = tokenizer.decode(tokenizer.encode(s1))
         self.assertEqual(s1, s2)
         self.assertEqual(tokenizer.n_vocab, vocab_size)
+        self.assertEqual(tokenizer.merges, model.merges)
+
+        tokenizer = tb.Tokenizer(model)
+        s1 = "hello world, old man !"
+        s2 = tokenizer.decode(tokenizer.encode(s1))
+        self.assertEqual(s1, s2)
+        s1 = "你好世界 1234"
+        s2 = tokenizer.decode(tokenizer.encode(s1))
+        self.assertEqual(s1, s2)
+        self.assertEqual(tokenizer.n_vocab, vocab_size)
+        self.assertEqual(tokenizer.merges, model.merges)
+
+    def test_regex_train(self):
+        class Preprocess:
+            def __init__(self):
+                self.pattern = SPLIT_PATTERN
+                self.compiled_pattern = re.compile(self.pattern)
+
+            def __call__(self, text_):
+                text_chunks = re.findall(self.compiled_pattern, text_)
+                ids = [ch.encode("utf-8") for ch in text_chunks]
+                return ids
+
+        proc = Preprocess()
+        text = open(file_text, "r", encoding="utf-8").read()
+        trainer = tb.SimpleTrainer(text, proc)
+        vocab_size = 1000
+        merges_size = vocab_size - 256
+        for _ in range(merges_size):
+            trainer.step()
+        model = tb.load_bpe_model(file_regex)
+        self.assertEqual(trainer.merges, model.merges)
 
     def test_regex(self):
         vocab_size = 1000
@@ -87,6 +126,23 @@ class TestTinyBPE(unittest.TestCase):
         text_t_vocab = open(file_simple_t_vocab_, "r", encoding="utf-8").read()
         self.assertEqual(text_vocab, text_t_vocab)
 
+    def test_simple_stream_decode(self):
+        model_simple = tb.load_bpe_model(file_simple)
+        tokenizer_simple = tb.Tokenizer(model_simple)
+        tokenizer_simple.stream_decode_cache_clean()
+        s = "Hello world this is test case"
+        ids = tokenizer_simple.encode(s)
+        s1 = ""
+
+        def cb(text):
+            nonlocal s1
+            s1 += text
+
+        decode = tokenizer_simple.stream_decode(cb)
+        for i in ids:
+            decode(i)
+        self.assertEqual(s, s1)
+
 
 class TestFromTikToken(unittest.TestCase):
 
@@ -122,6 +178,7 @@ class TestFromTikToken(unittest.TestCase):
     def test_stream_decode(self):
         model = tb.load_bpe_model(file_cl100k_base)
         tokenizer = tb.Tokenizer(model)
+        tokenizer.stream_decode_cache_clean()
         s = "Hello world this is test case. <|endoftext|>"
         ids = tokenizer.encode(s)
         s1 = ""
