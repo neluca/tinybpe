@@ -8,6 +8,7 @@ file_cl100k_base = str(Path(__file__).parent.absolute().joinpath("cl100k_base.ti
 file_t_cl100k_base = str(Path(__file__).parent.absolute().joinpath("t_cl100k_base"))
 file_regex = str(Path(__file__).parent.absolute().joinpath("regex.tinymodel"))
 file_simple = str(Path(__file__).parent.absolute().joinpath("simple.tinymodel"))
+file_simple_t_model = str(Path(__file__).parent.absolute().joinpath("t_simple"))
 file_simple_chinese = str(Path(__file__).parent.absolute().joinpath("simple-chinese.tinymodel"))
 file_simple_vocab = str(Path(__file__).parent.absolute().joinpath("simple.vocab"))
 file_simple_t_vocab = str(Path(__file__).parent.absolute().joinpath("t_simple"))
@@ -34,11 +35,11 @@ class TestTinyBPE(unittest.TestCase):
         self.assertIsNone(model.bytes_maps)
         self.assertEqual(trainer_1.merges_size, merges_size)
 
-        trainer_1.save(file_simple_t_vocab)
-        file_simple_t_vocab_ = file_simple_t_vocab + ".vocab"
-        text_vocab = open(file_simple_vocab, "r", encoding="utf-8").read()
-        text_t_vocab = open(file_simple_t_vocab_, "r", encoding="utf-8").read()
-        self.assertEqual(text_vocab, text_t_vocab)
+        trainer_1.save(file_simple_t_model)
+        file_simple_t_model_ = file_simple_t_model + ".tinymodel"
+        text_model = open(file_simple, "r", encoding="utf-8").read()
+        text_t_model = open(file_simple_t_model_, "r", encoding="utf-8").read()
+        self.assertEqual(text_model, text_t_model)
 
         tokenizer = tb.CommonTokenizer(model.merges)
         s1 = "hello world, old man !"
