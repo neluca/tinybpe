@@ -50,6 +50,7 @@ target-version = "py39"
 select = ["E", "F", "W", "I", "N", "UP", "B", "C4"]
 
 [tool.ruff.format]
+line-length = 120
 quote-style = "double"
 indent-style = "space"
 
