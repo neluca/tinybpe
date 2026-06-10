@@ -7,8 +7,8 @@
 
 #include "_tree_core.h"
 
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#define abs(a) ((a) < 0 ? (-(a)) : (a))
+#define AVL_MAX(a, b) (((a) > (b)) ? (a) : (b))
+#define AVL_ABS(a)     ((a) < 0 ? (-(a)) : (a))
 
 static inline void avl_set_parent(struct avl_node *node, struct avl_node *parent) {
     node->parent = (struct avl_node *) ((uintptr_t) parent | ((uintptr_t) node->parent & 0x3));
@@ -32,7 +32,7 @@ static inline struct avl_node *avl_rotate_LL(struct avl_node *parent, int parent
         parent_right_bf = child_left_bf + 1 + parent_bf;
 
         if (height_delta) {
-            *height_delta = max(child_left_bf, max(child_right_bf, parent_right_bf) + 1) - (child_left_bf + 1);
+            *height_delta = AVL_MAX(child_left_bf, AVL_MAX(child_right_bf, parent_right_bf) + 1) - (child_left_bf + 1);
         }
     }
     else {
@@ -41,11 +41,11 @@ static inline struct avl_node *avl_rotate_LL(struct avl_node *parent, int parent
         parent_right_bf = child_right_bf + 1 + parent_bf;
 
         if (height_delta) {
-            *height_delta = max(child_left_bf, max(child_right_bf, parent_right_bf) + 1) - (child_right_bf + 1);
+            *height_delta = AVL_MAX(child_left_bf, AVL_MAX(child_right_bf, parent_right_bf) + 1) - (child_right_bf + 1);
         }
     }
 
-    *child_bf = (max(child_right_bf, parent_right_bf) + 1) - child_left_bf;
+    *child_bf = (AVL_MAX(child_right_bf, parent_right_bf) + 1) - child_left_bf;
     avl_set_bf(parent, parent_right_bf - child_right_bf);
 
     parent->left = child->right;
@@ -74,7 +74,7 @@ static inline struct avl_node *avl_rotate_RR(struct avl_node *parent, int parent
         parent_left_bf = child_left_bf + 1 - parent_bf;
 
         if (height_delta) {
-            *height_delta = max(child_right_bf, max(child_left_bf, parent_left_bf) + 1) - (child_left_bf + 1);
+            *height_delta = AVL_MAX(child_right_bf, AVL_MAX(child_left_bf, parent_left_bf) + 1) - (child_left_bf + 1);
         }
     }
     else {
@@ -83,11 +83,11 @@ static inline struct avl_node *avl_rotate_RR(struct avl_node *parent, int parent
         parent_left_bf = child_right_bf + 1 - parent_bf;
 
         if (height_delta) {
-            *height_delta = max(child_right_bf, max(child_left_bf, parent_left_bf) + 1) - (child_right_bf + 1);
+            *height_delta = AVL_MAX(child_right_bf, AVL_MAX(child_left_bf, parent_left_bf) + 1) - (child_right_bf + 1);
         }
     }
 
-    *child_bf = child_right_bf - (max(child_left_bf, parent_left_bf) + 1);
+    *child_bf = child_right_bf - (AVL_MAX(child_left_bf, parent_left_bf) + 1);
     avl_set_bf(parent, child_left_bf - parent_left_bf);
 
     parent->right = child->left;
@@ -246,7 +246,7 @@ struct avl_node *avl_insert(struct avl_tree *tree, struct avl_node *node, avl_cm
                 // index node
                 bf = 0;
                 int bf_node = avl_bf(node);
-                if (abs(bf_old) < abs(bf_node)) {
+                if (AVL_ABS(bf_old) < AVL_ABS(bf_node)) {
                     // if ABS of balance factor increases
                     // cascade to parent
                     if (p->left == node) {

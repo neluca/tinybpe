@@ -3,12 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#define APPLY_PYTHON
-#ifdef APPLY_PYTHON
 #include <Python.h>
-#else
-#include <stdlib.h>
-#endif
 #include "bpe_common.h"
 
 struct bpe_pair_node {

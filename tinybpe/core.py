@@ -173,6 +173,10 @@ class CommonTokenizer:
     def save(self, file_prefix: str) -> None:
         """Save model parameters to ``<file_prefix>.tinymodel``.
 
+        Only the BPE merge pairs (and byte remapping, if present) are saved.
+        The regex pattern and special tokens configuration are NOT preserved.
+        Use :func:`tinybpe.save_bpe_model` directly for full control.
+
         Parameters
         ----------
         file_prefix : str

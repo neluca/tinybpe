@@ -53,7 +53,7 @@ static int trainer_init(TrainerObject *self, PyObject *args, PyObject *kwds) {
     self->list_merges = NULL; // init
 
     if (list_len == 0) {
-        PyErr_SetString(PyExc_Exception,
+        PyErr_SetString(PyExc_ValueError,
                         "The list must not be empty, and the objects in the list must be of bytes-like type.");
         return -1;
     }
@@ -147,7 +147,7 @@ static PyObject *trainer_load_merges(TrainerObject *self, PyObject *args, PyObje
 
     Py_ssize_t merges_size = PyList_Size(list_merges);
     if (merges_size == 0) {
-        PyErr_SetString(PyExc_ValueError, "The \"merges\" is a list with a non-zero length.");
+        PyErr_SetString(PyExc_ValueError, "The \"merges\" list must not be empty.");
         return NULL;
     }
     bpe_pair_t *pairs = bpe_malloc(merges_size * sizeof(bpe_pair_t));
@@ -193,7 +193,7 @@ static int tokenizer_init(TokenizerObject *self, PyObject *args, PyObject *kwds)
 
     Py_ssize_t merges_size = PyList_Size(list_merges);
     if (merges_size == 0) {
-        PyErr_SetString(PyExc_Exception,
+        PyErr_SetString(PyExc_ValueError,
                         "The list must not be empty, and the objects in the list must be of tuple type.");
         return -1;
     }
@@ -497,6 +497,7 @@ static int bytes_remap_init(BytesRemapObject *self, PyObject *args, PyObject *kw
     }
 
     if (!PyList_Check(list) || PyList_Size(list) != 256) {
+        PyErr_SetString(PyExc_ValueError, "The \"_remap\" must be a list of exactly 256 integers.");
         return -1;
     }
 
@@ -509,10 +510,12 @@ static int bytes_remap_init(BytesRemapObject *self, PyObject *args, PyObject *kw
                 self->_map[i] = (unsigned char) item_long;
             }
             else {
+                PyErr_SetString(PyExc_ValueError, "All elements in \"_remap\" must be integers in the range 0-255.");
                 return -1;
             }
         }
         else {
+            PyErr_SetString(PyExc_TypeError, "All elements in \"_remap\" must be integers.");
             return -1;
         }
     }

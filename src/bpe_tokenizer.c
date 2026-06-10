@@ -221,13 +221,15 @@ char *bpe_decode_one(size_t *bytes_size, const struct bpe_vocab *vocab,
     size_t utf8_size = 0;
 
     size_t i = bpe_utf8_length_from_head(buf_bytes[0]);
+    if (i == 0) i = 1; // treat continuation/invalid byte as 1-byte fragment
     while (i <= buf_size) {
         utf8_size = i;
         if (i == buf_size) {
             break;
         }
 
-        i += bpe_utf8_length_from_head(buf_bytes[i]);
+        size_t next_len = bpe_utf8_length_from_head(buf_bytes[i]);
+        i += (next_len == 0) ? 1 : next_len;
     }
 
     *bytes_size = utf8_size;

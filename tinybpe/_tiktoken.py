@@ -32,7 +32,8 @@ def _bpe_pair(mergeable_ranks: dict[bytes, int], token: bytes) -> list[bytes]:
         if min_rank is None or (max_rank is not None and min_rank >= max_rank):
             break
 
-        assert min_idx is not None
+        if min_idx is None:
+            raise ValueError(f"Failed to find merge pair for token {token!r}")
         parts = (
             parts[:min_idx]
             + [parts[min_idx] + parts[min_idx + 1]]
@@ -63,7 +64,8 @@ def get_from_tiktoken(mergeable_ranks: dict[bytes, int]) -> BPEParam:
         if len(token) == 1:
             continue
         pair = _bpe_pair(mergeable_ranks, token)
-        assert len(pair) == 2
+        if len(pair) != 2:
+            raise ValueError(f"Expected 2 parts for token {token!r}, got {len(pair)}")
         i_0 = mergeable_ranks[pair[0]]
         i_1 = mergeable_ranks[pair[1]]
         merges_info[rank] = (i_0, i_1)

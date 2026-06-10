@@ -29,3 +29,20 @@ jobs:
         run: ruff format --check tinybpe/
       - name: Run mypy
         run: mypy tinybpe/ --strict
+
+  c-compile-check:
+    strategy:
+      matrix:
+        python-version: [ '3.9', '3.13' ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install build dependencies
+        run: pip install setuptools wheel
+      - name: Compile C extension with warnings as errors
+        run: |
+          python setup.py build_ext --inplace

@@ -24,9 +24,6 @@ typedef struct bpe_piece_s bpe_piece_t;
 // Check whether the input merges are valid.
 int bpe_check(const bpe_pair_t *pairs, size_t len);
 
-// Check whether the input Token ID sequence is valid.
-//int bpe_ids_check(const unsigned long *ids, size_t ids_size, size_t vocab_size);
-
 // Return the UTF-8 character length from the leading byte.
 // Returns 0 for continuation bytes and invalid bytes.
 static inline int bpe_utf8_length_from_head(unsigned char head_byte) {
@@ -43,8 +40,8 @@ static inline int bpe_utf8_length_from_head(unsigned char head_byte) {
         return 4;
     }
 
-    // this "return" will not be executed.
-    return 1; // fake ((head_byte & 0x80) == 0)
+    // continuation bytes (0x80-0xBF) and invalid bytes (0xF5-0xFF)
+    return 0;
 }
 
 // A general implementation for comparing two pairs.
