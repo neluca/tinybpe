@@ -1,0 +1,14 @@
+# C extension source files
+include src/*.c
+include src/*.h
+
+# Package metadata
+include LICENSE
+include README.md
+include pyproject.toml
+include setup.py
+include requirements_dev.txt
+
+# Type information
+include tinybpe/py.typed
+include tinybpe/bpe.pyi
