@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.2] - 2026-06-11
 
 ### Added
 - `SECURITY.md` with vulnerability reporting process
@@ -20,22 +20,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bounds checking in `bpe_decode` to prevent segfault on invalid IDs
 - Overflow guards on memory allocations in C layer
 - Model file format versioning (`TinyBPE Model v1`)
+- Codecov coverage badge in README
+- Edge case and fuzz tests for robust coverage
+- Benchmarks for encode, decode, and training
+- Chinese README (`README_zh.md`)
+- `MANIFEST.in` for proper sdist packaging
+- `.gitattributes` for consistent LF line endings
 
 ### Changed
 - Renamed `Tokenizer.size` to `Tokenizer.n_vocab` for naming consistency
 - Renamed `Trainer.merges_size` to `Trainer.n_merges` for naming consistency
 - Split `_utils.py` into `_model_io.py` and `_tiktoken.py`
 - Improved `save_bpe_vocab` to write tab-separated, machine-parseable format
-- Added NULL-safety to `bpe_merges_free` and `bpe_vocab_free`
-- Optimized list flattening in `encode_ordinary` to avoid O(n²) behavior
+- Use `X | Y` type annotation syntax (PEP 604)
 - Updated CI from flake8 to ruff
 - Removed `build_setup.py` in favor of standard setuptools build
+- Updated `macos-13` to `macos-latest` in CI workflows
 
 ### Fixed
 - Integer truncation bug in pair validation (`(int)` cast on unsigned long)
 - Missing NULL checks after `bpe_encode`, `bpe_decode`, `bpe_malloc` calls
 - Duplicate `bpe_utf8_head_check` function removed
-- C struct fields `_1`/`_2` renamed to `left`/`right` for clarity
+- `bpe_utf8_length_from_head` returning wrong value for continuation bytes
+- Circular import when importing `tinybpe` during build
+- `bytes_remap_init` not setting Python error before returning -1
+- Bare `assert` replaced with explicit `ValueError` in `_tiktoken.py`
+- `AVL_MAX`/`AVL_ABS` macros renamed to avoid stdlib shadowing
+- Removed `cp313t-*` free-threaded builds (not supported by cibuildwheel 4.x)
+- CI workflow fixes for build isolation and sdist verification
 
 ### Security
 - Added bounds checking in `bpe_decode` to prevent out-of-bounds memory access

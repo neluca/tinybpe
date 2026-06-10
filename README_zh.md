@@ -5,6 +5,7 @@
 [![build](https://github.com/neluca/tinybpe/workflows/build/badge.svg)](https://github.com/neluca/tinybpe/actions/workflows/python-package.yml)
 [![wheels](https://github.com/neluca/tinybpe/workflows/wheels/badge.svg)](https://github.com/neluca/tinybpe/actions/workflows/wheels.yml)
 [![lint](https://github.com/neluca/tinybpe/workflows/lint/badge.svg)](https://github.com/neluca/tinybpe/actions/workflows/lint.yml)
+[![codecov](https://codecov.io/gh/neluca/tinybpe/branch/main/graph/badge.svg)](https://codecov.io/gh/neluca/tinybpe)
 [![PyPI version](https://img.shields.io/pypi/v/tinybpe)](https://pypi.org/project/tinybpe/)
 [![Python versions](https://img.shields.io/pypi/pyversions/tinybpe)](https://pypi.org/project/tinybpe/)
 [![License](https://img.shields.io/github/license/neluca/tinybpe)](https://github.com/neluca/tinybpe/blob/main/LICENSE)
