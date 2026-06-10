@@ -62,7 +62,7 @@ class Trainer(bpe.Trainer):
         callback: Callable[[int, int, tuple[int, int], int, int], None] | None = None,
     ) -> None:
         if preprocess is None:
-            text_bytes_list = [text.encode("utf-8")]
+            text_bytes_list: list[bytes | bytearray] = [text.encode("utf-8")]
         else:
             text_bytes_list = preprocess(text)
 
