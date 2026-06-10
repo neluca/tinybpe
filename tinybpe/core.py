@@ -11,7 +11,7 @@ from typing import Callable
 
 import regex as re
 
-from tinybpe import bpe
+import tinybpe.bpe as bpe
 from tinybpe._model_io import BPEParam, save_bpe_model, save_bpe_vocab
 
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-from tinybpe import bpe
+import tinybpe.bpe as bpe
 from tinybpe._model_io import save_bpe_model
 
 
