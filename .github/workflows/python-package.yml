@@ -80,4 +80,6 @@ jobs:
         run: |
           pip install dist/*.tar.gz
       - name: Verify import
-        run: python -c "import tinybpe; print(tinybpe.__version__)"
+        run: |
+          cd /tmp
+          python -c "import tinybpe; print(tinybpe.__version__)"
