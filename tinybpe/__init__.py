@@ -1,3 +1,12 @@
+"""TinyBPE — an ultra-fast, lightweight CPython BPE tokenizer and trainer.
+
+Provides:
+  - :class:`Tokenizer` / :class:`CommonTokenizer` — encode/decode with regex pre-tokenization
+  - :class:`SimpleTrainer` — train BPE models from text corpora
+  - :func:`load_bpe_model` / :func:`save_bpe_model` — model file I/O
+  - :func:`get_from_tiktoken` / :func:`save_from_tiktoken` — tiktoken compatibility
+"""
+
 __all__ = [
     "__version__",
     "BPEParam",

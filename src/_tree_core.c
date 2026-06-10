@@ -2,6 +2,17 @@
  * Copyright (c) 2025-2026 Yinan Liao and other contributors.
  * SPDX-License-Identifier: MIT
  *
+ * Generic AVL tree implementation (self-balancing binary search tree).
+ *
+ * An AVL tree maintains O(log n) height by ensuring the absolute
+ * difference in height (balance factor) between left and right
+ * subtrees of any node never exceeds 1.
+ *
+ * Memory optimization: the 2-bit balance factor (-1, 0, +1) is packed
+ * into the low 2 bits of each node's parent pointer, avoiding an extra
+ * field per node. The macros avl_parent() and avl_bf() extract the
+ * real parent address and balance factor respectively.
+ *
  * Reference: https://github.com/greensky00/avltree/blob/master/avltree/avltree.c
  */
 

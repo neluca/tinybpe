@@ -241,10 +241,7 @@ class Tokenizer(CommonTokenizer):
             self._special_tokens = None
             self._special_pattern = None
         else:
-            _special_tokens = {
-                self._map(k.encode("utf-8")): v
-                for k, v in special_tokens.items()
-            }
+            _special_tokens = {self._map(k.encode("utf-8")): v for k, v in special_tokens.items()}
             self._enc = bpe.Tokenizer(bpe_param.merges, _special_tokens)
             self._special_tokens = special_tokens
             self._special_pattern = "(" + "|".join(re.escape(k) for k in special_tokens) + ")"
