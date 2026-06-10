@@ -18,6 +18,7 @@ class BPEParam:
         bytes_maps: Byte remapping table (list of 256 ints), or None for identity.
         merges: List of merge pairs (left, right) that define the BPE vocabulary.
     """
+
     bytes_maps: Optional[list[int]]
     merges: list[tuple[int, int]]
 
@@ -33,9 +34,10 @@ def save_bpe_vocab(file_prefix: str, vocab: dict[int, bytes]) -> None:
         vocab: Dictionary mapping token IDs to byte sequences.
     """
     import base64
+
     vocab_file = file_prefix + ".vocab"
 
-    with open(vocab_file, 'w', encoding="utf-8") as f:
+    with open(vocab_file, "w", encoding="utf-8") as f:
         f.write(f"TinyBPE Vocabulary v{MODEL_VERSION}\n")
         for rank in sorted(vocab.keys()):
             encoded = base64.b64encode(vocab[rank]).decode("ascii")
@@ -52,9 +54,10 @@ def load_bpe_vocab(vocab_file: str) -> dict[int, bytes]:
         Dictionary mapping token IDs to byte sequences.
     """
     import base64
+
     vocab: dict[int, bytes] = {}
 
-    with open(vocab_file, 'r', encoding="utf-8") as f:
+    with open(vocab_file, encoding="utf-8") as f:
         header = f.readline().strip()
         if not header.startswith("TinyBPE Vocabulary"):
             raise ValueError(f"Invalid vocabulary file header: {header}")
@@ -88,7 +91,7 @@ def save_bpe_model(
     """
     bpe_file = file_prefix + ".tinymodel"
 
-    with open(bpe_file, 'w', encoding="utf-8") as f:
+    with open(bpe_file, "w", encoding="utf-8") as f:
         f.write(f"TinyBPE Model v{MODEL_VERSION}\n")
         if bytes_maps is not None:
             if len(bytes_maps) != 256:
@@ -119,9 +122,10 @@ def load_bpe_model(model_file: str) -> BPEParam:
         raise ValueError("Model file must end with .tinymodel")
 
     merges: list[tuple[int, int]] = []
-    bytes_maps: Optional[list[int]] = []
+    bytes_maps: Optional[list[int]] = None
+    remap_builder: list[int] = []
 
-    with open(model_file, 'r', encoding="utf-8") as f:
+    with open(model_file, encoding="utf-8") as f:
         magic = f.readline().strip()
 
         # Parse version from header
@@ -129,17 +133,14 @@ def load_bpe_model(model_file: str) -> BPEParam:
             version_str = magic.split("v")[-1]
             try:
                 version = int(version_str)
-            except ValueError:
-                raise ValueError(f"Invalid model file header: {magic}")
+            except ValueError as err:
+                raise ValueError(f"Invalid model file header: {magic}") from err
         else:
             # Legacy format without version
             version = 0
 
         if version > MODEL_VERSION:
-            raise ValueError(
-                f"Model file version {version} is newer than "
-                f"the supported version ({MODEL_VERSION})"
-            )
+            raise ValueError(f"Model file version {version} is newer than the supported version ({MODEL_VERSION})")
 
         if not magic.startswith("TinyBPE Model"):
             raise ValueError(f"Invalid model file header: {magic}")
@@ -148,7 +149,8 @@ def load_bpe_model(model_file: str) -> BPEParam:
         remap_count_line = f.readline().strip()
         if remap_count_line == "256":
             for _ in range(256):
-                bytes_maps.append(int(f.readline().strip()))
+                remap_builder.append(int(f.readline().strip()))
+            bytes_maps = remap_builder
         elif remap_count_line == "0":
             bytes_maps = None
         else:

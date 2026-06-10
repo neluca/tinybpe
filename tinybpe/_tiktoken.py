@@ -34,13 +34,9 @@ def _bpe_pair(mergeable_ranks: dict[bytes, int], token: bytes) -> list[bytes]:
 
         if min_idx is None:
             raise ValueError(f"Failed to find merge pair for token {token!r}")
-        parts = (
-            parts[:min_idx]
-            + [parts[min_idx] + parts[min_idx + 1]]
-            + parts[min_idx + 2:]
-        )
+        parts = parts[:min_idx] + [parts[min_idx] + parts[min_idx + 1]] + parts[min_idx + 2 :]
 
-    return parts  # type: ignore[return-value]
+    return parts
 
 
 def get_from_tiktoken(mergeable_ranks: dict[bytes, int]) -> BPEParam:

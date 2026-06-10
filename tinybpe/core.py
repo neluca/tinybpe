@@ -7,9 +7,9 @@ byte remapping, and streaming decode support.
 
 from __future__ import annotations
 
-from typing import Callable, Optional
+from typing import Callable
 
-import regex as re  # type: ignore
+import regex as re
 
 from tinybpe import bpe
 from tinybpe._model_io import BPEParam, save_bpe_model, save_bpe_vocab
@@ -36,9 +36,9 @@ class CommonTokenizer:
     def __init__(
         self,
         merges: list[tuple[int, int]],
-        pat_str: Optional[str] = None,
+        pat_str: str | None = None,
         *,
-        special_tokens: Optional[dict[str, int]] = None,
+        special_tokens: dict[str, int] | None = None,
     ) -> None:
         """Initialize the tokenizer.
 
@@ -57,9 +57,7 @@ class CommonTokenizer:
             _special_tokens = {k.encode("utf-8"): v for k, v in special_tokens.items()}
             self._enc = bpe.Tokenizer(merges, _special_tokens)
             self._special_tokens = special_tokens
-            self._special_pattern = (
-                "(" + "|".join(re.escape(k) for k in special_tokens) + ")"
-            )
+            self._special_pattern = "(" + "|".join(re.escape(k) for k in special_tokens) + ")"
 
         if pat_str is None:
             pat_str = r"^.*$"  # do nothing
@@ -124,9 +122,7 @@ class CommonTokenizer:
         text_bytes = self._enc.decode(ids)
         return text_bytes.decode("utf-8")
 
-    def stream_decode(
-        self, callback: Callable[[str], None]
-    ) -> Callable[[int], None]:
+    def stream_decode(self, callback: Callable[[str], None]) -> Callable[[int], None]:
         """Create a streaming decoder that calls ``callback`` for each decoded fragment.
 
         Stream decoding processes one token ID at a time and handles
@@ -215,9 +211,9 @@ class Tokenizer(CommonTokenizer):
     def __init__(
         self,
         bpe_param: BPEParam,
-        pat_str: Optional[str] = None,
+        pat_str: str | None = None,
         *,
-        special_tokens: Optional[dict[str, int]] = None,
+        special_tokens: dict[str, int] | None = None,
     ) -> None:
         """Initialize the tokenizer with optional byte remapping.
 
@@ -246,14 +242,12 @@ class Tokenizer(CommonTokenizer):
             self._special_pattern = None
         else:
             _special_tokens = {
-                self._map(k.encode("utf-8")): v  # type: ignore[misc]
+                self._map(k.encode("utf-8")): v
                 for k, v in special_tokens.items()
             }
             self._enc = bpe.Tokenizer(bpe_param.merges, _special_tokens)
             self._special_tokens = special_tokens
-            self._special_pattern = (
-                "(" + "|".join(re.escape(k) for k in special_tokens) + ")"
-            )
+            self._special_pattern = "(" + "|".join(re.escape(k) for k in special_tokens) + ")"
 
         if pat_str is None:
             pat_str = r"^.*$"
@@ -302,9 +296,7 @@ class Tokenizer(CommonTokenizer):
         text_bytes = self._inv_map(text_bytes)  # type: ignore[misc]
         return text_bytes.decode("utf-8")
 
-    def stream_decode(
-        self, callback: Callable[[str], None]
-    ) -> Callable[[int], None]:
+    def stream_decode(self, callback: Callable[[str], None]) -> Callable[[int], None]:
         """Create a streaming decoder with byte remapping.
 
         Parameters

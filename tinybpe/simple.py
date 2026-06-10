@@ -6,7 +6,7 @@ Provides :class:`Trainer` (``SimpleTrainer``) which wraps the C-level
 
 from __future__ import annotations
 
-from typing import Callable, Optional, Union
+from typing import Callable
 
 from tinybpe import bpe
 from tinybpe._model_io import save_bpe_model
@@ -57,9 +57,9 @@ class Trainer(bpe.Trainer):
     def __init__(
         self,
         text: str,
-        preprocess: Optional[Callable[[str], list[Union[bytes, bytearray]]]] = None,
+        preprocess: Callable[[str], list[bytes | bytearray]] | None = None,
         *,
-        callback: Optional[Callable[[int, int, tuple[int, int], int, int], None]] = None,
+        callback: Callable[[int, int, tuple[int, int], int, int], None] | None = None,
     ) -> None:
         if preprocess is None:
             text_bytes_list = [text.encode("utf-8")]
@@ -70,7 +70,7 @@ class Trainer(bpe.Trainer):
         self._callback = callback
         self._step_count = 0
 
-    def step(self):
+    def step(self) -> tuple[tuple[int, int], int, int] | None:
         """Perform one BPE training step.
 
         Returns
@@ -88,7 +88,7 @@ class Trainer(bpe.Trainer):
             self._step_count += 1
         return result
 
-    def train(self, n_merges: int):
+    def train(self, n_merges: int) -> int:
         """Train for ``n_merges`` steps.
 
         Parameters
