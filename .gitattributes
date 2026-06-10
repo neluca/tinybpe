@@ -1,0 +1,8 @@
+# Enforce LF line endings for all text files
+* text=auto eol=lf
+
+# Binary files
+*.pyd binary
+*.so binary
+*.png binary
+*.jpg binary
