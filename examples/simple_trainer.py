@@ -9,5 +9,5 @@ for _ in range(merges_size):
     print(f"{pair} -> {rank} ({freq})")
 
 print(trainer.merges)
-print(trainer.merges_size)
+print(trainer.n_merges)
 trainer.save("simple")

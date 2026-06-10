@@ -1,1002 +1,1001 @@
-TinyBPE Vocabulary
-n_vocab: 1000
-0: b'\x00'
-1: b'\x01'
-2: b'\x02'
-3: b'\x03'
-4: b'\x04'
-5: b'\x05'
-6: b'\x06'
-7: b'\x07'
-8: b'\x08'
-9: b'\t'
-10: b'\n'
-11: b'\x0b'
-12: b'\x0c'
-13: b'\r'
-14: b'\x0e'
-15: b'\x0f'
-16: b'\x10'
-17: b'\x11'
-18: b'\x12'
-19: b'\x13'
-20: b'\x14'
-21: b'\x15'
-22: b'\x16'
-23: b'\x17'
-24: b'\x18'
-25: b'\x19'
-26: b'\x1a'
-27: b'\x1b'
-28: b'\x1c'
-29: b'\x1d'
-30: b'\x1e'
-31: b'\x1f'
-32: b' '
-33: b'!'
-34: b'"'
-35: b'#'
-36: b'$'
-37: b'%'
-38: b'&'
-39: b"'"
-40: b'('
-41: b')'
-42: b'*'
-43: b'+'
-44: b','
-45: b'-'
-46: b'.'
-47: b'/'
-48: b'0'
-49: b'1'
-50: b'2'
-51: b'3'
-52: b'4'
-53: b'5'
-54: b'6'
-55: b'7'
-56: b'8'
-57: b'9'
-58: b':'
-59: b';'
-60: b'<'
-61: b'='
-62: b'>'
-63: b'?'
-64: b'@'
-65: b'A'
-66: b'B'
-67: b'C'
-68: b'D'
-69: b'E'
-70: b'F'
-71: b'G'
-72: b'H'
-73: b'I'
-74: b'J'
-75: b'K'
-76: b'L'
-77: b'M'
-78: b'N'
-79: b'O'
-80: b'P'
-81: b'Q'
-82: b'R'
-83: b'S'
-84: b'T'
-85: b'U'
-86: b'V'
-87: b'W'
-88: b'X'
-89: b'Y'
-90: b'Z'
-91: b'['
-92: b'\\'
-93: b']'
-94: b'^'
-95: b'_'
-96: b'`'
-97: b'a'
-98: b'b'
-99: b'c'
-100: b'd'
-101: b'e'
-102: b'f'
-103: b'g'
-104: b'h'
-105: b'i'
-106: b'j'
-107: b'k'
-108: b'l'
-109: b'm'
-110: b'n'
-111: b'o'
-112: b'p'
-113: b'q'
-114: b'r'
-115: b's'
-116: b't'
-117: b'u'
-118: b'v'
-119: b'w'
-120: b'x'
-121: b'y'
-122: b'z'
-123: b'{'
-124: b'|'
-125: b'}'
-126: b'~'
-127: b'\x7f'
-128: b'\x80'
-129: b'\x81'
-130: b'\x82'
-131: b'\x83'
-132: b'\x84'
-133: b'\x85'
-134: b'\x86'
-135: b'\x87'
-136: b'\x88'
-137: b'\x89'
-138: b'\x8a'
-139: b'\x8b'
-140: b'\x8c'
-141: b'\x8d'
-142: b'\x8e'
-143: b'\x8f'
-144: b'\x90'
-145: b'\x91'
-146: b'\x92'
-147: b'\x93'
-148: b'\x94'
-149: b'\x95'
-150: b'\x96'
-151: b'\x97'
-152: b'\x98'
-153: b'\x99'
-154: b'\x9a'
-155: b'\x9b'
-156: b'\x9c'
-157: b'\x9d'
-158: b'\x9e'
-159: b'\x9f'
-160: b'\xa0'
-161: b'\xa1'
-162: b'\xa2'
-163: b'\xa3'
-164: b'\xa4'
-165: b'\xa5'
-166: b'\xa6'
-167: b'\xa7'
-168: b'\xa8'
-169: b'\xa9'
-170: b'\xaa'
-171: b'\xab'
-172: b'\xac'
-173: b'\xad'
-174: b'\xae'
-175: b'\xaf'
-176: b'\xb0'
-177: b'\xb1'
-178: b'\xb2'
-179: b'\xb3'
-180: b'\xb4'
-181: b'\xb5'
-182: b'\xb6'
-183: b'\xb7'
-184: b'\xb8'
-185: b'\xb9'
-186: b'\xba'
-187: b'\xbb'
-188: b'\xbc'
-189: b'\xbd'
-190: b'\xbe'
-191: b'\xbf'
-192: b'\xc0'
-193: b'\xc1'
-194: b'\xc2'
-195: b'\xc3'
-196: b'\xc4'
-197: b'\xc5'
-198: b'\xc6'
-199: b'\xc7'
-200: b'\xc8'
-201: b'\xc9'
-202: b'\xca'
-203: b'\xcb'
-204: b'\xcc'
-205: b'\xcd'
-206: b'\xce'
-207: b'\xcf'
-208: b'\xd0'
-209: b'\xd1'
-210: b'\xd2'
-211: b'\xd3'
-212: b'\xd4'
-213: b'\xd5'
-214: b'\xd6'
-215: b'\xd7'
-216: b'\xd8'
-217: b'\xd9'
-218: b'\xda'
-219: b'\xdb'
-220: b'\xdc'
-221: b'\xdd'
-222: b'\xde'
-223: b'\xdf'
-224: b'\xe0'
-225: b'\xe1'
-226: b'\xe2'
-227: b'\xe3'
-228: b'\xe4'
-229: b'\xe5'
-230: b'\xe6'
-231: b'\xe7'
-232: b'\xe8'
-233: b'\xe9'
-234: b'\xea'
-235: b'\xeb'
-236: b'\xec'
-237: b'\xed'
-238: b'\xee'
-239: b'\xef'
-240: b'\xf0'
-241: b'\xf1'
-242: b'\xf2'
-243: b'\xf3'
-244: b'\xf4'
-245: b'\xf5'
-246: b'\xf6'
-247: b'\xf7'
-248: b'\xf8'
-249: b'\xf9'
-250: b'\xfa'
-251: b'\xfb'
-252: b'\xfc'
-253: b'\xfd'
-254: b'\xfe'
-255: b'\xff'
-256: b'e '
-257: b'th'
-258: b'd '
-259: b't '
-260: b's '
-261: b'an'
-262: b'the '
-263: b'in'
-264: b'. '
-265: b'er'
-266: b'and '
-267: b' the '
-268: b' h'
-269: b'ou'
-270: b'y '
-271: b'on'
-272: b'en'
-273: b'ed '
-274: b' \n'
-275: b'ea'
-276: b'ing'
-277: b'wa'
-278: b'is '
-279: b'to'
-280: b'of'
-281: b'sh'
-282: b'or'
-283: b'll'
-284: b'he '
-285: b' a'
-286: b' and '
-287: b'ar'
-288: b'ld '
-289: b'no'
-290: b'gh'
-291: b' w'
-292: b' s'
-293: b'at '
-294: b' th'
-295: b'im'
-296: b'fi'
-297: b'was '
-298: b' he '
-299: b'. \n'
-300: b'st'
-301: b'om'
-302: b', '
-303: b'it '
-304: b'ow'
-305: b'man'
-306: b'ch'
-307: b'st '
-308: b'. \n\n'
-309: b'ai'
-310: b' b'
-311: b'fish'
-312: b'ha'
-313: b'it'
-314: b'. "'
-315: b're'
-316: b' c'
-317: b'le'
-318: b'ut '
-319: b'old '
-320: b'ing '
-321: b'ac'
-322: b'of the '
-323: b'ere '
-324: b'He '
-325: b' his '
-326: b' \n\n'
-327: b'. T'
-328: b'ith'
-329: b'ough'
-330: b'li'
-331: b'ti'
-332: b'ter'
-333: b' m'
-334: b'rea'
-335: b've '
-336: b'oo'
-337: b'al'
-338: b'em'
-339: b'for'
-340: b'el'
-341: b'old man'
-342: b'es '
-343: b'un'
-344: b' d'
-345: b'ould '
-346: b'ri'
-347: b'. I'
-348: b'ur'
-349: b'not '
-350: b'ill'
-351: b'ver'
-352: b'ain'
-353: b'to '
-354: b'in the '
-355: b'ro'
-356: b'his '
-357: b'es'
-358: b'of '
-359: b'ly '
-360: b'o '
-361: b'now'
-362: b'bo'
-363: b'you'
-364: b'be'
-365: b'. He '
-366: b'hen'
-367: b'k '
-368: b'lin'
-369: b'But '
-370: b'though'
-371: b'him'
-372: b'. " \n\n'
-373: b'ir'
-374: b'ght '
-375: b'sai'
-376: b'at'
-377: b'ag'
-378: b'a '
-379: b', he '
-380: b'out '
-381: b' ha'
-382: b' that '
-383: b'ne'
-384: b'le '
-385: b'if'
-386: b'de '
-387: b'ey '
-388: b'tr'
-389: b'ther'
-390: b'with'
-391: b'all'
-392: b'that '
-393: b'ep'
-394: b'ke '
-395: b'ed'
-396: b'se'
-397: b'had '
-398: b'. But '
-399: b'thought'
-400: b'si'
-401: b'ed the '
-402: b'one '
-403: b'der'
-404: b'. The '
-405: b' f'
-406: b' with'
-407: b'. \n\n"'
-408: b'se '
-409: b'rom'
-410: b'ear'
-411: b'in '
-412: b'ell'
-413: b'as '
-414: b'\xe2\x80'
-415: b'to the '
-416: b"'s "
-417: b'The '
-418: b'and'
-419: b'la'
-420: b'line '
-421: b'ma'
-422: b' as '
-423: b' p'
-424: b' him'
-425: b' I'
-426: b', he thought'
-427: b'ent '
-428: b'were '
-429: b'wh'
-430: b'd. "'
-431: b'ust '
-432: b's and '
-433: b'di'
-434: b'own'
-435: b'ook'
-436: b'up'
-437: b'water'
-438: b'am'
-439: b'an '
-440: b'on the '
-441: b'ong'
-442: b'et '
-443: b'sk'
-444: b'sp'
-445: b'ark'
-446: b' wh'
-447: b'ome '
-448: b'ack'
-449: b'lo'
-450: b'en '
-451: b'. " \n\n"'
-452: b'ce '
-453: b' a '
-454: b'ta'
-455: b' and the '
-456: b'tion'
-457: b'ull'
-458: b'tim'
-459: b'ly'
-460: b'and the '
-461: b'ent'
-462: b'ec'
-463: b'hea'
-464: b'are '
-465: b'. Th'
-466: b'grea'
-467: b'ck'
-468: b'boy '
-469: b'ol'
-470: b' to'
-471: b'\xe2\x80\x9d'
-472: b', \n'
-473: b'have '
-474: b', and '
-475: b'aw'
-476: b'po'
-477: b'be '
-478: b'from'
-479: b' of'
-480: b'hen he '
-481: b'again'
-482: b'ay'
-483: b' was '
-484: b',"'
-485: b'tw'
-486: b'other'
-487: b'way'
-488: b'mor'
-489: b'. It '
-490: b'pp'
-491: b'great '
-492: b'ght'
-493: b' of the '
-494: b'mo'
-495: b'str'
-496: b'ood '
-497: b'down'
-498: b'ome'
-499: b'fe'
-500: b'op'
-501: b'could '
-502: b'ul'
-503: b' had '
-504: b'them'
-505: b'so'
-506: b'per'
-507: b'uch'
-508: b'and he '
-509: b'ted '
-510: b'over'
-511: b' have '
-512: b'would '
-513: b'nd '
-514: b'thing'
-515: b'they '
-516: b'ig'
-517: b'said. "'
-518: b'ight '
-519: b'sel'
-520: b' in'
-521: b'tur'
-522: b'our'
-523: b' \nthe '
-524: b'old man s'
-525: b'too'
-526: b'et'
-527: b'um'
-528: b'new'
-529: b'way '
-530: b'low'
-531: b' in the '
-532: b'ex'
-533: b'Hem'
-534: b'Heming'
-535: b'iff'
-536: b' and he '
-537: b'lu'
-538: b' it '
-539: b'fa'
-540: b'de'
-541: b's \n'
-542: b'hand'
-543: b't the '
-544: b'ing the '
-545: b'go'
-546: b'then'
-547: b'hand '
-548: b'self'
-549: b'shark'
-550: b'gain'
-551: b'look'
-552: b'know'
-553: b'long'
-554: b'ay '
-555: b'ey'
-556: b' must '
-557: b'qu'
-558: b'kill'
-559: b'sun'
-560: b'ss '
-561: b'war'
-562: b' is '
-563: b'af'
-564: b'like '
-565: b'e and '
-566: b' on'
-567: b' \n\n"'
-568: b'back'
-569: b' will'
-570: b'ail'
-571: b'eir'
-572: b'ame '
-573: b'ca'
-574: b'ever'
-575: b'lef'
-576: b'ce'
-577: b'com'
-578: b'is'
-579: b'.)'
-580: b'br'
-581: b' you'
-582: b'You'
-583: b', the '
-584: b'. \n\nThe '
-585: b' for'
-586: b'sea'
-587: b'old man sai'
-588: b'ad'
-589: b'con'
-590: b' be '
-591: b'ph'
-592: b'head '
-593: b'wor'
-594: b'il'
-595: b'sed '
-596: b' again'
-597: b'. A'
-598: b'eat '
-599: b'more '
-600: b' them'
-601: b'ab'
-602: b'pl'
-603: b'id'
-604: b'knew'
-605: b'ish'
-606: b'pull'
-607: b'e the '
-608: b'skiff'
-609: b'har'
-610: b'. \n\nHe '
-611: b'rit'
-612: b'ef'
-613: b'ber'
-614: b'tch'
-615: b' all'
-616: b'left '
-617: b'will'
-618: b'ack '
-619: b' g'
-620: b'," he '
-621: b' se'
-622: b'Th'
-623: b'tor'
-624: b'there '
-625: b'st the '
-626: b'\n\n'
-627: b'ke'
-628: b'ound '
-629: b'its '
-630: b'cl'
-631: b' could '
-632: b', "'
-633: b'd not '
-634: b'turn'
-635: b'has '
-636: b'of his '
-637: b'?"'
-638: b'ang'
-639: b'oul'
-640: b' str'
-641: b'res'
-642: b'Now'
-643: b' of '
-644: b'ic'
-645: b'ed him'
-646: b'ind '
-647: b'ba'
-648: b'thing '
-649: b'ster'
-650: b's of '
-651: b'ut'
-652: b'with the '
-653: b'eat'
-654: b' am'
-655: b'su'
-656: b' from'
-657: b'rough'
-658: b'do'
-659: b', s'
-660: b'time '
-661: b'Hemingway'
-662: b'but '
-663: b'made '
-664: b'each'
-665: b'can'
-666: b' can'
-667: b'said '
-668: b'I '
-669: b"'ll"
-670: b'Wh'
-671: b'fisher'
-672: b'ps '
-673: b'what '
-674: b'leep'
-675: b'very '
-676: b'ed \n'
-677: b'watch'
-678: b'ream'
-679: b' bo'
-680: b'fac'
-681: b' the boy '
-682: b'it was '
-683: b' ar'
-684: b'under'
-685: b' to '
-686: b'itt'
-687: b'fel'
-688: b'looked '
-689: b'te'
-690: b'old man '
-691: b'ven'
-692: b"'t "
-693: b'ing and '
-694: b'shoul'
-695: b'only '
-696: b'side '
-697: b'ru'
-698: b'we'
-699: b' be'
-700: b'many '
-701: b'get '
-702: b'ge'
-703: b'feel'
-704: b'sm'
-705: b'ed his '
-706: b'star'
-707: b'well'
-708: b' do '
-709: b'saw'
-710: b'good '
-711: b'No'
-712: b'men'
-713: b'ink'
-714: b' ma'
-715: b'much'
-716: b'ark '
-717: b' they '
-718: b'sur'
-719: b'right '
-720: b'back '
-721: b'. They '
-722: b',\xe2\x80\x9d'
-723: b'ember'
-724: b'. H'
-725: b'er '
-726: b'stea'
-727: b'bow'
-728: b', \n\xe2\x80\x9d'
-729: b'no '
-730: b'shoulder'
-731: b' with the '
-732: b'fir'
-733: b'.) \n\n'
-734: b'nor'
-735: b'did not '
-736: b'ing \n'
-737: b'ide '
-738: b'tri'
-739: b'a s'
-740: b'said'
-741: b'imp'
-742: b'some'
-743: b'ra'
-744: b'ds '
-745: b'e \n'
-746: b'as'
-747: b'igh'
-748: b'. \n\nI'
-749: b' the fish'
-750: b'been'
-751: b'par'
-752: b'their'
-753: b'sail'
-754: b'rem'
-755: b'use '
-756: b' what '
-757: b'row'
-758: b'when'
-759: b'befor'
-760: b' though'
-761: b' al'
-762: b'he'
-763: b'pro'
-764: b'alou'
-765: b'. In'
-766: b' were '
-767: b'car'
-768: b's, '
-769: b'two'
-770: b'tru'
-771: b'mov'
-772: b'ant '
-773: b' this '
-774: b'stern'
-775: b'put '
-776: b'ten'
-777: b'he had '
-778: b'still'
-779: b'he was '
-780: b'and \n'
-781: b'eng'
-782: b'any '
-783: b'co'
-784: b' in '
-785: b'?" \n\n"'
-786: b'for the '
-787: b's of the '
-788: b'gi'
-789: b'. Then he '
-790: b'dark'
-791: b' and \n'
-792: b'reach'
-793: b', he thought. '
-794: b'after'
-795: b' hand'
-796: b'lea'
-797: b'take '
-798: b'ross '
-799: b' would '
-800: b'. \n\n"I'
-801: b'never'
-802: b' now'
-803: b' there '
-804: b'. There '
-805: b'vel'
-806: b'slow'
-807: b'sw'
-808: b'ump'
-809: b'first '
-810: b'big'
-811: b'show'
-812: b'dy '
-813: b'two '
-814: b'to \n'
-815: b'. He was '
-816: b'your'
-817: b'olph'
-818: b'ick'
-819: b'lean'
-820: b'keep'
-821: b'the \n'
-822: b'ink '
-823: b'lif'
-824: b'ung'
-825: b'this '
-826: b'til'
-827: b'. It was '
-828: b'ength'
-829: b'amp'
-830: b'litt'
-831: b'ight'
-832: b'should '
-833: b'on his '
-834: b'crea'
-835: b'sion'
-836: b' di'
-837: b'ap'
-838: b'cur'
-839: b'ess'
-840: b' when'
-841: b'tail'
-842: b'ts '
-843: b' wor'
-844: b' so'
-845: b'tu'
-846: b'. Then'
-847: b'times '
-848: b'me'
-849: b'from the '
-850: b'light '
-851: b'oar'
-852: b'bir'
-853: b'ing a'
-854: b'another'
-855: b'ite '
-856: b'ank'
-857: b' but '
-858: b'boat '
-859: b'bl'
-860: b'my '
-861: b'far'
-862: b'most '
-863: b' do'
-864: b'with '
-865: b'ation'
-866: b'.('
-867: b'against the '
-868: b'ion'
-869: b'little '
-870: b'by '
-871: b'the fish'
-872: b'he could '
-873: b'eath'
-874: b' the old man sai'
-875: b'. S'
-876: b'me '
-877: b'cut '
-878: b'to s'
-879: b'ard'
-880: b'till'
-881: b' can '
-882: b'light'
-883: b'I will'
-884: b'work'
-885: b'red '
-886: b'oun'
-887: b'\nand '
-888: b'came '
-889: b'over the '
-890: b'kn'
-891: b'until'
-892: b'any'
-893: b'her'
-894: b'ing fish'
-895: b'end'
-896: b'Hemingway '
-897: b"Hemingway's "
-898: b'day'
-899: b' whi'
-900: b' or'
-901: b'with his '
-902: b'went '
-903: b'poon'
-904: b' hea'
-905: b'\nthe '
-906: b'. W'
-907: b'some '
-908: b'took'
-909: b'shi'
-910: b'just '
-911: b'? '
-912: b'fter'
-913: b'gu'
-914: b'19'
-915: b'haps '
-916: b'of \n'
-917: b'night '
-918: b'. It is '
-919: b'head'
-920: b'hook'
-921: b'poin'
-922: b'cir'
-923: b'jump'
-924: b'must '
-925: b'left hand '
-926: b'," he said. "'
-927: b'writ'
-928: b'remember'
-929: b'about '
-930: b'curr'
-931: b' out '
-932: b'where '
-933: b'ting'
-934: b'too '
-935: b' with his '
-936: b'one'
-937: b'ed it '
-938: b'before '
-939: b'it is '
-940: b'air'
-941: b'\xe2\x80\x99'
-942: b' much'
-943: b'e, '
-944: b'come '
-945: b'ak'
-946: b'let '
-947: b'pe'
-948: b'in the water'
-949: b'ate '
-950: b'pain'
-951: b' wish'
-952: b'ramp'
-953: b' a s'
-954: b' come '
-955: b'atch'
-956: b'ction'
-957: b'bout '
-958: b'cep'
-959: b'ful'
-960: b'rac'
-961: b'. O'
-962: b' to the '
-963: b'off'
-964: b'across '
-965: b' from the '
-966: b'into the '
-967: b'ble'
-968: b'I have '
-969: b'ree'
-970: b' see '
-971: b'see '
-972: b'ood'
-973: b"old man's "
-974: b'What '
-975: b'ous'
-976: b'sleep'
-977: b'ting '
-978: b'he \n'
-979: b'ble '
-980: b'held '
-981: b'lash'
-982: b't of the '
-983: b'vi'
-984: b'said alou'
-985: b'knif'
-986: b'boy'
-987: b': '
-988: b'boat'
-989: b' with '
-990: b'at the '
-991: b' their'
-992: b'early '
-993: b'tain'
-994: b'out'
-995: b'for '
-996: b'open'
-997: b'lic'
-998: b'y the '
-999: b'in his '
+TinyBPE Vocabulary v1
+AA== 0
+AQ== 1
+Ag== 2
+Aw== 3
+BA== 4
+BQ== 5
+Bg== 6
+Bw== 7
+CA== 8
+CQ== 9
+Cg== 10
+Cw== 11
+DA== 12
+DQ== 13
+Dg== 14
+Dw== 15
+EA== 16
+EQ== 17
+Eg== 18
+Ew== 19
+FA== 20
+FQ== 21
+Fg== 22
+Fw== 23
+GA== 24
+GQ== 25
+Gg== 26
+Gw== 27
+HA== 28
+HQ== 29
+Hg== 30
+Hw== 31
+IA== 32
+IQ== 33
+Ig== 34
+Iw== 35
+JA== 36
+JQ== 37
+Jg== 38
+Jw== 39
+KA== 40
+KQ== 41
+Kg== 42
+Kw== 43
+LA== 44
+LQ== 45
+Lg== 46
+Lw== 47
+MA== 48
+MQ== 49
+Mg== 50
+Mw== 51
+NA== 52
+NQ== 53
+Ng== 54
+Nw== 55
+OA== 56
+OQ== 57
+Og== 58
+Ow== 59
+PA== 60
+PQ== 61
+Pg== 62
+Pw== 63
+QA== 64
+QQ== 65
+Qg== 66
+Qw== 67
+RA== 68
+RQ== 69
+Rg== 70
+Rw== 71
+SA== 72
+SQ== 73
+Sg== 74
+Sw== 75
+TA== 76
+TQ== 77
+Tg== 78
+Tw== 79
+UA== 80
+UQ== 81
+Ug== 82
+Uw== 83
+VA== 84
+VQ== 85
+Vg== 86
+Vw== 87
+WA== 88
+WQ== 89
+Wg== 90
+Ww== 91
+XA== 92
+XQ== 93
+Xg== 94
+Xw== 95
+YA== 96
+YQ== 97
+Yg== 98
+Yw== 99
+ZA== 100
+ZQ== 101
+Zg== 102
+Zw== 103
+aA== 104
+aQ== 105
+ag== 106
+aw== 107
+bA== 108
+bQ== 109
+bg== 110
+bw== 111
+cA== 112
+cQ== 113
+cg== 114
+cw== 115
+dA== 116
+dQ== 117
+dg== 118
+dw== 119
+eA== 120
+eQ== 121
+eg== 122
+ew== 123
+fA== 124
+fQ== 125
+fg== 126
+fw== 127
+gA== 128
+gQ== 129
+gg== 130
+gw== 131
+hA== 132
+hQ== 133
+hg== 134
+hw== 135
+iA== 136
+iQ== 137
+ig== 138
+iw== 139
+jA== 140
+jQ== 141
+jg== 142
+jw== 143
+kA== 144
+kQ== 145
+kg== 146
+kw== 147
+lA== 148
+lQ== 149
+lg== 150
+lw== 151
+mA== 152
+mQ== 153
+mg== 154
+mw== 155
+nA== 156
+nQ== 157
+ng== 158
+nw== 159
+oA== 160
+oQ== 161
+og== 162
+ow== 163
+pA== 164
+pQ== 165
+pg== 166
+pw== 167
+qA== 168
+qQ== 169
+qg== 170
+qw== 171
+rA== 172
+rQ== 173
+rg== 174
+rw== 175
+sA== 176
+sQ== 177
+sg== 178
+sw== 179
+tA== 180
+tQ== 181
+tg== 182
+tw== 183
+uA== 184
+uQ== 185
+ug== 186
+uw== 187
+vA== 188
+vQ== 189
+vg== 190
+vw== 191
+wA== 192
+wQ== 193
+wg== 194
+ww== 195
+xA== 196
+xQ== 197
+xg== 198
+xw== 199
+yA== 200
+yQ== 201
+yg== 202
+yw== 203
+zA== 204
+zQ== 205
+zg== 206
+zw== 207
+0A== 208
+0Q== 209
+0g== 210
+0w== 211
+1A== 212
+1Q== 213
+1g== 214
+1w== 215
+2A== 216
+2Q== 217
+2g== 218
+2w== 219
+3A== 220
+3Q== 221
+3g== 222
+3w== 223
+4A== 224
+4Q== 225
+4g== 226
+4w== 227
+5A== 228
+5Q== 229
+5g== 230
+5w== 231
+6A== 232
+6Q== 233
+6g== 234
+6w== 235
+7A== 236
+7Q== 237
+7g== 238
+7w== 239
+8A== 240
+8Q== 241
+8g== 242
+8w== 243
+9A== 244
+9Q== 245
+9g== 246
+9w== 247
++A== 248
++Q== 249
++g== 250
++w== 251
+/A== 252
+/Q== 253
+/g== 254
+/w== 255
+ZSA= 256
+dGg= 257
+ZCA= 258
+dCA= 259
+cyA= 260
+YW4= 261
+dGhlIA== 262
+aW4= 263
+LiA= 264
+ZXI= 265
+YW5kIA== 266
+IHRoZSA= 267
+IGg= 268
+b3U= 269
+eSA= 270
+b24= 271
+ZW4= 272
+ZWQg 273
+IAo= 274
+ZWE= 275
+aW5n 276
+d2E= 277
+aXMg 278
+dG8= 279
+b2Y= 280
+c2g= 281
+b3I= 282
+bGw= 283
+aGUg 284
+IGE= 285
+IGFuZCA= 286
+YXI= 287
+bGQg 288
+bm8= 289
+Z2g= 290
+IHc= 291
+IHM= 292
+YXQg 293
+IHRo 294
+aW0= 295
+Zmk= 296
+d2FzIA== 297
+IGhlIA== 298
+LiAK 299
+c3Q= 300
+b20= 301
+LCA= 302
+aXQg 303
+b3c= 304
+bWFu 305
+Y2g= 306
+c3Qg 307
+LiAKCg== 308
+YWk= 309
+IGI= 310
+ZmlzaA== 311
+aGE= 312
+aXQ= 313
+LiAi 314
+cmU= 315
+IGM= 316
+bGU= 317
+dXQg 318
+b2xkIA== 319
+aW5nIA== 320
+YWM= 321
+b2YgdGhlIA== 322
+ZXJlIA== 323
+SGUg 324
+IGhpcyA= 325
+IAoK 326
+LiBU 327
+aXRo 328
+b3VnaA== 329
+bGk= 330
+dGk= 331
+dGVy 332
+IG0= 333
+cmVh 334
+dmUg 335
+b28= 336
+YWw= 337
+ZW0= 338
+Zm9y 339
+ZWw= 340
+b2xkIG1hbg== 341
+ZXMg 342
+dW4= 343
+IGQ= 344
+b3VsZCA= 345
+cmk= 346
+LiBJ 347
+dXI= 348
+bm90IA== 349
+aWxs 350
+dmVy 351
+YWlu 352
+dG8g 353
+aW4gdGhlIA== 354
+cm8= 355
+aGlzIA== 356
+ZXM= 357
+b2Yg 358
+bHkg 359
+byA= 360
+bm93 361
+Ym8= 362
+eW91 363
+YmU= 364
+LiBIZSA= 365
+aGVu 366
+ayA= 367
+bGlu 368
+QnV0IA== 369
+dGhvdWdo 370
+aGlt 371
+LiAiIAoK 372
+aXI= 373
+Z2h0IA== 374
+c2Fp 375
+YXQ= 376
+YWc= 377
+YSA= 378
+LCBoZSA= 379
+b3V0IA== 380
+IGhh 381
+IHRoYXQg 382
+bmU= 383
+bGUg 384
+aWY= 385
+ZGUg 386
+ZXkg 387
+dHI= 388
+dGhlcg== 389
+d2l0aA== 390
+YWxs 391
+dGhhdCA= 392
+ZXA= 393
+a2Ug 394
+ZWQ= 395
+c2U= 396
+aGFkIA== 397
+LiBCdXQg 398
+dGhvdWdodA== 399
+c2k= 400
+ZWQgdGhlIA== 401
+b25lIA== 402
+ZGVy 403
+LiBUaGUg 404
+IGY= 405
+IHdpdGg= 406
+LiAKCiI= 407
+c2Ug 408
+cm9t 409
+ZWFy 410
+aW4g 411
+ZWxs 412
+YXMg 413
+4oA= 414
+dG8gdGhlIA== 415
+J3Mg 416
+VGhlIA== 417
+YW5k 418
+bGE= 419
+bGluZSA= 420
+bWE= 421
+IGFzIA== 422
+IHA= 423
+IGhpbQ== 424
+IEk= 425
+LCBoZSB0aG91Z2h0 426
+ZW50IA== 427
+d2VyZSA= 428
+d2g= 429
+ZC4gIg== 430
+dXN0IA== 431
+cyBhbmQg 432
+ZGk= 433
+b3du 434
+b29r 435
+dXA= 436
+d2F0ZXI= 437
+YW0= 438
+YW4g 439
+b24gdGhlIA== 440
+b25n 441
+ZXQg 442
+c2s= 443
+c3A= 444
+YXJr 445
+IHdo 446
+b21lIA== 447
+YWNr 448
+bG8= 449
+ZW4g 450
+LiAiIAoKIg== 451
+Y2Ug 452
+IGEg 453
+dGE= 454
+IGFuZCB0aGUg 455
+dGlvbg== 456
+dWxs 457
+dGlt 458
+bHk= 459
+YW5kIHRoZSA= 460
+ZW50 461
+ZWM= 462
+aGVh 463
+YXJlIA== 464
+LiBUaA== 465
+Z3JlYQ== 466
+Y2s= 467
+Ym95IA== 468
+b2w= 469
+IHRv 470
+4oCd 471
+LCAK 472
+aGF2ZSA= 473
+LCBhbmQg 474
+YXc= 475
+cG8= 476
+YmUg 477
+ZnJvbQ== 478
+IG9m 479
+aGVuIGhlIA== 480
+YWdhaW4= 481
+YXk= 482
+IHdhcyA= 483
+LCI= 484
+dHc= 485
+b3RoZXI= 486
+d2F5 487
+bW9y 488
+LiBJdCA= 489
+cHA= 490
+Z3JlYXQg 491
+Z2h0 492
+IG9mIHRoZSA= 493
+bW8= 494
+c3Ry 495
+b29kIA== 496
+ZG93bg== 497
+b21l 498
+ZmU= 499
+b3A= 500
+Y291bGQg 501
+dWw= 502
+IGhhZCA= 503
+dGhlbQ== 504
+c28= 505
+cGVy 506
+dWNo 507
+YW5kIGhlIA== 508
+dGVkIA== 509
+b3Zlcg== 510
+IGhhdmUg 511
+d291bGQg 512
+bmQg 513
+dGhpbmc= 514
+dGhleSA= 515
+aWc= 516
+c2FpZC4gIg== 517
+aWdodCA= 518
+c2Vs 519
+IGlu 520
+dHVy 521
+b3Vy 522
+IAp0aGUg 523
+b2xkIG1hbiBz 524
+dG9v 525
+ZXQ= 526
+dW0= 527
+bmV3 528
+d2F5IA== 529
+bG93 530
+IGluIHRoZSA= 531
+ZXg= 532
+SGVt 533
+SGVtaW5n 534
+aWZm 535
+IGFuZCBoZSA= 536
+bHU= 537
+IGl0IA== 538
+ZmE= 539
+ZGU= 540
+cyAK 541
+aGFuZA== 542
+dCB0aGUg 543
+aW5nIHRoZSA= 544
+Z28= 545
+dGhlbg== 546
+aGFuZCA= 547
+c2VsZg== 548
+c2hhcms= 549
+Z2Fpbg== 550
+bG9vaw== 551
+a25vdw== 552
+bG9uZw== 553
+YXkg 554
+ZXk= 555
+IG11c3Qg 556
+cXU= 557
+a2lsbA== 558
+c3Vu 559
+c3Mg 560
+d2Fy 561
+IGlzIA== 562
+YWY= 563
+bGlrZSA= 564
+ZSBhbmQg 565
+IG9u 566
+IAoKIg== 567
+YmFjaw== 568
+IHdpbGw= 569
+YWls 570
+ZWly 571
+YW1lIA== 572
+Y2E= 573
+ZXZlcg== 574
+bGVm 575
+Y2U= 576
+Y29t 577
+aXM= 578
+Lik= 579
+YnI= 580
+IHlvdQ== 581
+WW91 582
+LCB0aGUg 583
+LiAKClRoZSA= 584
+IGZvcg== 585
+c2Vh 586
+b2xkIG1hbiBzYWk= 587
+YWQ= 588
+Y29u 589
+IGJlIA== 590
+cGg= 591
+aGVhZCA= 592
+d29y 593
+aWw= 594
+c2VkIA== 595
+IGFnYWlu 596
+LiBB 597
+ZWF0IA== 598
+bW9yZSA= 599
+IHRoZW0= 600
+YWI= 601
+cGw= 602
+aWQ= 603
+a25ldw== 604
+aXNo 605
+cHVsbA== 606
+ZSB0aGUg 607
+c2tpZmY= 608
+aGFy 609
+LiAKCkhlIA== 610
+cml0 611
+ZWY= 612
+YmVy 613
+dGNo 614
+IGFsbA== 615
+bGVmdCA= 616
+d2lsbA== 617
+YWNrIA== 618
+IGc= 619
+LCIgaGUg 620
+IHNl 621
+VGg= 622
+dG9y 623
+dGhlcmUg 624
+c3QgdGhlIA== 625
+Cgo= 626
+a2U= 627
+b3VuZCA= 628
+aXRzIA== 629
+Y2w= 630
+IGNvdWxkIA== 631
+LCAi 632
+ZCBub3Qg 633
+dHVybg== 634
+aGFzIA== 635
+b2YgaGlzIA== 636
+PyI= 637
+YW5n 638
+b3Vs 639
+IHN0cg== 640
+cmVz 641
+Tm93 642
+IG9mIA== 643
+aWM= 644
+ZWQgaGlt 645
+aW5kIA== 646
+YmE= 647
+dGhpbmcg 648
+c3Rlcg== 649
+cyBvZiA= 650
+dXQ= 651
+d2l0aCB0aGUg 652
+ZWF0 653
+IGFt 654
+c3U= 655
+IGZyb20= 656
+cm91Z2g= 657
+ZG8= 658
+LCBz 659
+dGltZSA= 660
+SGVtaW5nd2F5 661
+YnV0IA== 662
+bWFkZSA= 663
+ZWFjaA== 664
+Y2Fu 665
+IGNhbg== 666
+c2FpZCA= 667
+SSA= 668
+J2xs 669
+V2g= 670
+ZmlzaGVy 671
+cHMg 672
+d2hhdCA= 673
+bGVlcA== 674
+dmVyeSA= 675
+ZWQgCg== 676
+d2F0Y2g= 677
+cmVhbQ== 678
+IGJv 679
+ZmFj 680
+IHRoZSBib3kg 681
+aXQgd2FzIA== 682
+IGFy 683
+dW5kZXI= 684
+IHRvIA== 685
+aXR0 686
+ZmVs 687
+bG9va2VkIA== 688
+dGU= 689
+b2xkIG1hbiA= 690
+dmVu 691
+J3Qg 692
+aW5nIGFuZCA= 693
+c2hvdWw= 694
+b25seSA= 695
+c2lkZSA= 696
+cnU= 697
+d2U= 698
+IGJl 699
+bWFueSA= 700
+Z2V0IA== 701
+Z2U= 702
+ZmVlbA== 703
+c20= 704
+ZWQgaGlzIA== 705
+c3Rhcg== 706
+d2VsbA== 707
+IGRvIA== 708
+c2F3 709
+Z29vZCA= 710
+Tm8= 711
+bWVu 712
+aW5r 713
+IG1h 714
+bXVjaA== 715
+YXJrIA== 716
+IHRoZXkg 717
+c3Vy 718
+cmlnaHQg 719
+YmFjayA= 720
+LiBUaGV5IA== 721
+LOKAnQ== 722
+ZW1iZXI= 723
+LiBI 724
+ZXIg 725
+c3RlYQ== 726
+Ym93 727
+LCAK4oCd 728
+bm8g 729
+c2hvdWxkZXI= 730
+IHdpdGggdGhlIA== 731
+Zmly 732
+LikgCgo= 733
+bm9y 734
+ZGlkIG5vdCA= 735
+aW5nIAo= 736
+aWRlIA== 737
+dHJp 738
+YSBz 739
+c2FpZA== 740
+aW1w 741
+c29tZQ== 742
+cmE= 743
+ZHMg 744
+ZSAK 745
+YXM= 746
+aWdo 747
+LiAKCkk= 748
+IHRoZSBmaXNo 749
+YmVlbg== 750
+cGFy 751
+dGhlaXI= 752
+c2FpbA== 753
+cmVt 754
+dXNlIA== 755
+IHdoYXQg 756
+cm93 757
+d2hlbg== 758
+YmVmb3I= 759
+IHRob3VnaA== 760
+IGFs 761
+aGU= 762
+cHJv 763
+YWxvdQ== 764
+LiBJbg== 765
+IHdlcmUg 766
+Y2Fy 767
+cywg 768
+dHdv 769
+dHJ1 770
+bW92 771
+YW50IA== 772
+IHRoaXMg 773
+c3Rlcm4= 774
+cHV0IA== 775
+dGVu 776
+aGUgaGFkIA== 777
+c3RpbGw= 778
+aGUgd2FzIA== 779
+YW5kIAo= 780
+ZW5n 781
+YW55IA== 782
+Y28= 783
+IGluIA== 784
+PyIgCgoi 785
+Zm9yIHRoZSA= 786
+cyBvZiB0aGUg 787
+Z2k= 788
+LiBUaGVuIGhlIA== 789
+ZGFyaw== 790
+IGFuZCAK 791
+cmVhY2g= 792
+LCBoZSB0aG91Z2h0LiA= 793
+YWZ0ZXI= 794
+IGhhbmQ= 795
+bGVh 796
+dGFrZSA= 797
+cm9zcyA= 798
+IHdvdWxkIA== 799
+LiAKCiJJ 800
+bmV2ZXI= 801
+IG5vdw== 802
+IHRoZXJlIA== 803
+LiBUaGVyZSA= 804
+dmVs 805
+c2xvdw== 806
+c3c= 807
+dW1w 808
+Zmlyc3Qg 809
+Ymln 810
+c2hvdw== 811
+ZHkg 812
+dHdvIA== 813
+dG8gCg== 814
+LiBIZSB3YXMg 815
+eW91cg== 816
+b2xwaA== 817
+aWNr 818
+bGVhbg== 819
+a2VlcA== 820
+dGhlIAo= 821
+aW5rIA== 822
+bGlm 823
+dW5n 824
+dGhpcyA= 825
+dGls 826
+LiBJdCB3YXMg 827
+ZW5ndGg= 828
+YW1w 829
+bGl0dA== 830
+aWdodA== 831
+c2hvdWxkIA== 832
+b24gaGlzIA== 833
+Y3JlYQ== 834
+c2lvbg== 835
+IGRp 836
+YXA= 837
+Y3Vy 838
+ZXNz 839
+IHdoZW4= 840
+dGFpbA== 841
+dHMg 842
+IHdvcg== 843
+IHNv 844
+dHU= 845
+LiBUaGVu 846
+dGltZXMg 847
+bWU= 848
+ZnJvbSB0aGUg 849
+bGlnaHQg 850
+b2Fy 851
+Ymly 852
+aW5nIGE= 853
+YW5vdGhlcg== 854
+aXRlIA== 855
+YW5r 856
+IGJ1dCA= 857
+Ym9hdCA= 858
+Ymw= 859
+bXkg 860
+ZmFy 861
+bW9zdCA= 862
+IGRv 863
+d2l0aCA= 864
+YXRpb24= 865
+Lig= 866
+YWdhaW5zdCB0aGUg 867
+aW9u 868
+bGl0dGxlIA== 869
+Ynkg 870
+dGhlIGZpc2g= 871
+aGUgY291bGQg 872
+ZWF0aA== 873
+IHRoZSBvbGQgbWFuIHNhaQ== 874
+LiBT 875
+bWUg 876
+Y3V0IA== 877
+dG8gcw== 878
+YXJk 879
+dGlsbA== 880
+IGNhbiA= 881
+bGlnaHQ= 882
+SSB3aWxs 883
+d29yaw== 884
+cmVkIA== 885
+b3Vu 886
+CmFuZCA= 887
+Y2FtZSA= 888
+b3ZlciB0aGUg 889
+a24= 890
+dW50aWw= 891
+YW55 892
+aGVy 893
+aW5nIGZpc2g= 894
+ZW5k 895
+SGVtaW5nd2F5IA== 896
+SGVtaW5nd2F5J3Mg 897
+ZGF5 898
+IHdoaQ== 899
+IG9y 900
+d2l0aCBoaXMg 901
+d2VudCA= 902
+cG9vbg== 903
+IGhlYQ== 904
+CnRoZSA= 905
+LiBX 906
+c29tZSA= 907
+dG9vaw== 908
+c2hp 909
+anVzdCA= 910
+PyA= 911
+ZnRlcg== 912
+Z3U= 913
+MTk= 914
+aGFwcyA= 915
+b2YgCg== 916
+bmlnaHQg 917
+LiBJdCBpcyA= 918
+aGVhZA== 919
+aG9vaw== 920
+cG9pbg== 921
+Y2ly 922
+anVtcA== 923
+bXVzdCA= 924
+bGVmdCBoYW5kIA== 925
+LCIgaGUgc2FpZC4gIg== 926
+d3JpdA== 927
+cmVtZW1iZXI= 928
+YWJvdXQg 929
+Y3Vycg== 930
+IG91dCA= 931
+d2hlcmUg 932
+dGluZw== 933
+dG9vIA== 934
+IHdpdGggaGlzIA== 935
+b25l 936
+ZWQgaXQg 937
+YmVmb3JlIA== 938
+aXQgaXMg 939
+YWly 940
+4oCZ 941
+IG11Y2g= 942
+ZSwg 943
+Y29tZSA= 944
+YWs= 945
+bGV0IA== 946
+cGU= 947
+aW4gdGhlIHdhdGVy 948
+YXRlIA== 949
+cGFpbg== 950
+IHdpc2g= 951
+cmFtcA== 952
+IGEgcw== 953
+IGNvbWUg 954
+YXRjaA== 955
+Y3Rpb24= 956
+Ym91dCA= 957
+Y2Vw 958
+ZnVs 959
+cmFj 960
+LiBP 961
+IHRvIHRoZSA= 962
+b2Zm 963
+YWNyb3NzIA== 964
+IGZyb20gdGhlIA== 965
+aW50byB0aGUg 966
+Ymxl 967
+SSBoYXZlIA== 968
+cmVl 969
+IHNlZSA= 970
+c2VlIA== 971
+b29k 972
+b2xkIG1hbidzIA== 973
+V2hhdCA= 974
+b3Vz 975
+c2xlZXA= 976
+dGluZyA= 977
+aGUgCg== 978
+YmxlIA== 979
+aGVsZCA= 980
+bGFzaA== 981
+dCBvZiB0aGUg 982
+dmk= 983
+c2FpZCBhbG91 984
+a25pZg== 985
+Ym95 986
+OiA= 987
+Ym9hdA== 988
+IHdpdGgg 989
+YXQgdGhlIA== 990
+IHRoZWly 991
+ZWFybHkg 992
+dGFpbg== 993
+b3V0 994
+Zm9yIA== 995
+b3Blbg== 996
+bGlj 997
+eSB0aGUg 998
+aW4gaGlzIA== 999

@@ -20,16 +20,16 @@ class TestBPE(unittest.TestCase):
             self.assertEqual(rank, 256 + i)
             self.assertEqual(freq, 2)
 
-        merges_size = trainer.merges_size
-        self.assertEqual(merges_size, 11)
+        n_merges = trainer.n_merges
+        self.assertEqual(n_merges, 11)
         trainer.step()
         self.assertEqual(trainer.merges, self.merges)
 
     def test_continue_training(self) -> None:
         trainer = bpe.Trainer([self.text1.encode("utf-8"), self.text2.encode("utf-8")])
         trainer.load_merges(self.merges[:5])
-        merges_size = trainer.merges_size
-        self.assertEqual(merges_size, 5)
+        n_merges = trainer.n_merges
+        self.assertEqual(n_merges, 5)
 
         for i in range(7):
             pair, rank, freq = trainer.step()
@@ -42,14 +42,14 @@ class TestBPE(unittest.TestCase):
 
         self.assertEqual(tokenizer_1.merges, self.merges)
         self.assertEqual(tokenizer_2.merges, self.merges)
-        self.assertEqual(tokenizer_1.size, 256 + 13)
-        self.assertEqual(tokenizer_2.size, 256 + 12)
+        self.assertEqual(tokenizer_1.n_vocab, 256 + 13)
+        self.assertEqual(tokenizer_2.n_vocab, 256 + 12)
 
         vocab_1 = tokenizer_1.vocab
         vocab_2 = tokenizer_2.vocab
 
-        self.assertEqual(vocab_1[tokenizer_1.size - 1], b"<eot>")
-        for i in range(tokenizer_2.size):
+        self.assertEqual(vocab_1[tokenizer_1.n_vocab - 1], b"<eot>")
+        for i in range(tokenizer_2.n_vocab):
             self.assertEqual(vocab_1[i], vocab_2[i])
 
         for i in range(256):

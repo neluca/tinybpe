@@ -5,13 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tinybpe"
 authors = [{ name = "E.T. Romani", email = "myneluca@gmail.com" }]
-description = "This is an ultra-fast, lightweight and clean code implementation of the Byte Pair Encoding (BPE) algorithm."
+description = "An ultra-fast, lightweight and clean CPython implementation of the Byte Pair Encoding (BPE) algorithm for language model tokenization."
 dependencies = ["regex"]
-readme = "README_en.md"
+readme = "README.md"
 requires-python = ">=3.9"
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 dynamic = ["version"]
-keywords = ["BPE", "Byte Pair Encoding", "LLM", "Tokenizer"]
+keywords = ["BPE", "Byte Pair Encoding", "LLM", "Tokenizer", "CPython"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3.9",
@@ -19,6 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Operating System :: MacOS",
@@ -30,6 +32,12 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/neluca/tinybpe"
+Repository = "https://github.com/neluca/tinybpe"
+Issues = "https://github.com/neluca/tinybpe/issues"
+Documentation = "https://github.com/neluca/tinybpe#readme"
+
+[tool.setuptools]
+packages = ["tinybpe"]
 
 [tool.setuptools.dynamic]
-version = { attr = "tinybpe.__version__" }
+version = { attr = "tinybpe._version.__version__" }

@@ -1,5 +1,6 @@
 /*
- * Copyright Yinan Liao. and other contributors. All rights reserved.
+ * Copyright (c) 2025-2026 Yinan Liao and other contributors.
+ * SPDX-License-Identifier: MIT
  *
  * Reference: https://github.com/greensky00/avltree/blob/master/avltree/avltree.c
  */

@@ -1,5 +1,6 @@
 /*
- * Copyright Yinan Liao. and other contributors. All rights reserved.
+ * Copyright (c) 2025-2026 Yinan Liao and other contributors.
+ * SPDX-License-Identifier: MIT
  */
 
 #define APPLY_PYTHON
@@ -30,7 +31,7 @@ int bpe_check(const bpe_pair_t *pairs, size_t len) {
 
         // The pair ID at the current position cannot be greater than or equal
         // to the ID corresponding to the current position.
-        if (pairs[i]._1 >= max_id || pairs[i]._2 >= max_id) {
+        if (pairs[i].left >= max_id || pairs[i].right >= max_id) {
             return 0;
         }
 
@@ -42,8 +43,8 @@ int bpe_check(const bpe_pair_t *pairs, size_t len) {
     avl_init(&tree);
 
     for (size_t i = 0; i < len; i++) {
-        buf_nodes[i].pair._1 = pairs[i]._1;
-        buf_nodes[i].pair._2 = pairs[i]._2;
+        buf_nodes[i].pair.left = pairs[i].left;
+        buf_nodes[i].pair.right = pairs[i].right;
 
         struct avl_node *node = avl_insert(&tree, &buf_nodes[i].node, pair_cmp_func);
         if (node != &buf_nodes[i].node) {

@@ -1,5 +1,6 @@
 /*
- * Copyright Yinan Liao. and other contributors. All rights reserved.
+ * Copyright (c) 2025-2026 Yinan Liao and other contributors.
+ * SPDX-License-Identifier: MIT
  */
 
 #ifndef SRC_BPE_COMMON_H
@@ -8,8 +9,8 @@
 #include "_tree_core.h"
 
 struct bpe_pair_s {
-    unsigned long _1;
-    unsigned long _2;
+    unsigned long left;
+    unsigned long right;
 };
 
 struct bpe_piece_s {
@@ -26,24 +27,8 @@ int bpe_check(const bpe_pair_t *pairs, size_t len);
 // Check whether the input Token ID sequence is valid.
 //int bpe_ids_check(const unsigned long *ids, size_t ids_size, size_t vocab_size);
 
-static inline int bpe_utf8_head_check(unsigned char head_byte) {
-    if ((head_byte & 0x80) == 0) {
-        return 1;
-    }
-    else if ((head_byte & 0xE0) == 0xC0) {
-        return 2;
-    }
-    else if ((head_byte & 0xF0) == 0xE0) {
-        return 3;
-    }
-    else if ((head_byte & 0xF8) == 0xF0) {
-        return 4;
-    }
-
-    return 0;
-}
-
-// Default UTF-8
+// Return the UTF-8 character length from the leading byte.
+// Returns 0 for continuation bytes and invalid bytes.
 static inline int bpe_utf8_length_from_head(unsigned char head_byte) {
     if ((head_byte & 0x80) == 0) {
         return 1;
@@ -64,17 +49,17 @@ static inline int bpe_utf8_length_from_head(unsigned char head_byte) {
 
 // A general implementation for comparing two pairs.
 static inline int bpe_pair_cmp(const bpe_pair_t *p1, const bpe_pair_t *p2) {
-    if (p1->_1 < p2->_1) {
+    if (p1->left < p2->left) {
         return -1;
     }
-    else if (p1->_1 > p2->_1) {
+    else if (p1->left > p2->left) {
         return 1;
     }
     else {
-        if (p1->_2 < p2->_2) {
+        if (p1->right < p2->right) {
             return -1;
         }
-        else if (p1->_2 > p2->_2) {
+        else if (p1->right > p2->right) {
             return 1;
         }
         else {

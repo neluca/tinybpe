@@ -1,5 +1,6 @@
 /*
- * Copyright Yinan Liao. and other contributors. All rights reserved.
+ * Copyright (c) 2025-2026 Yinan Liao and other contributors.
+ * SPDX-License-Identifier: MIT
  */
 
 #define PY_SSIZE_T_CLEAN
@@ -113,7 +114,7 @@ static PyObject *trainer_step(TrainerObject *self, PyObject *Py_UNUSED(args)) {
     unsigned long count = bpe_get_max_count_pair(&pair, &self->ctx);
 
     if (count) {
-        PyObject *pair_tuple = Py_BuildValue("(ii)", pair._1, pair._2); // yes incref
+        PyObject *pair_tuple = Py_BuildValue("(ii)", pair.left, pair.right); // yes incref
         PyList_Append(self->list_merges, pair_tuple); // yes incref
 
         return Py_BuildValue("(Oii)", pair_tuple, self->ctx.rank, count); // yes incref
@@ -156,14 +157,8 @@ static PyObject *trainer_load_merges(TrainerObject *self, PyObject *args, PyObje
         PyObject *item_1 = PyTuple_GetItem(item, 0); // no incref
         PyObject *item_2 = PyTuple_GetItem(item, 1); // no incref
 
-        pairs[i]._1 = PyLong_AsUnsignedLong(item_1);
-        pairs[i]._2 = PyLong_AsUnsignedLong(item_2);
-
-        if ((int) pairs[i]._1 < 0 || (int) pairs[i]._2 < 0) {
-            bpe_free(pairs);
-            PyErr_SetString(PyExc_ValueError, "The \"merges\" must be positive integer.");
-            return NULL;
-        }
+        pairs[i].left = PyLong_AsUnsignedLong(item_1);
+        pairs[i].right = PyLong_AsUnsignedLong(item_2);
     }
 
     if (!bpe_check(pairs, (size_t) merges_size)) {
@@ -250,15 +245,8 @@ static int tokenizer_init(TokenizerObject *self, PyObject *args, PyObject *kwds)
         PyObject *item_1 = PyTuple_GetItem(item, 0); // no incref
         PyObject *item_2 = PyTuple_GetItem(item, 1); // no incref
 
-        self->pairs[i]._1 = PyLong_AsUnsignedLong(item_1);
-        self->pairs[i]._2 = PyLong_AsUnsignedLong(item_2);
-
-        if ((int) self->pairs[i]._1 < 0 || (int) self->pairs[i]._2 < 0) {
-            bpe_free(self->pairs); // Release in advance to avoid memory leaks.
-            self->pairs = NULL;
-            PyErr_SetString(PyExc_ValueError, "The pair of \"merges\" must be positive integer.");
-            return -1;
-        }
+        self->pairs[i].left = PyLong_AsUnsignedLong(item_1);
+        self->pairs[i].right = PyLong_AsUnsignedLong(item_2);
     }
 
     if (!bpe_check(self->pairs, self->pairs_size)) {
@@ -272,7 +260,15 @@ static int tokenizer_init(TokenizerObject *self, PyObject *args, PyObject *kwds)
     Py_INCREF(self->list_merges);
 
     self->merges = bpe_merges_build(self->pairs, self->pairs_size);
+    if (self->merges == NULL) {
+        return -1;
+    }
     self->vocab = bpe_vocab_build(self->pairs, self->pairs_size);
+    if (self->vocab == NULL) {
+        bpe_merges_free(self->merges);
+        self->merges = NULL;
+        return -1;
+    }
     self->bytes_cache_size = 0;
 
     return 0;
@@ -350,6 +346,9 @@ static PyObject *tokenizer_encode(TokenizerObject *self, PyObject *bytes_o) {
 
     size_t ids_len;
     unsigned long *ids = bpe_encode(&ids_len, self->merges, text_bytes, text_bytes_size);
+    if (ids == NULL) {
+        return NULL;
+    }
 
     PyObject *ids_list = PyList_New((Py_ssize_t) ids_len); // yes incref
     for (size_t i = 0; i < ids_len; i++) {
@@ -369,6 +368,9 @@ static PyObject *tokenizer_decode(TokenizerObject *self, PyObject *list_ids) {
     }
 
     unsigned long *ids = bpe_malloc(size * sizeof(unsigned long));
+    if (ids == NULL) {
+        return NULL;
+    }
     size_t ids_size = 0;
     PyObject *bytes_obj = PyBytes_FromString(""); // yes incref
 
@@ -382,6 +384,11 @@ static PyObject *tokenizer_decode(TokenizerObject *self, PyObject *list_ids) {
             if (ids_size) {
                 size_t bytes_size;
                 char *c_bytes = bpe_decode(&bytes_size, self->vocab, ids, ids_size);
+                if (c_bytes == NULL) {
+                    bpe_free(ids);
+                    Py_DECREF(bytes_obj);
+                    return NULL;
+                }
 
                 // concat bytes
                 PyBytes_Concat(&bytes_obj, PyBytes_FromStringAndSize(c_bytes, (Py_ssize_t) bytes_size)); // no incref
@@ -418,6 +425,11 @@ static PyObject *tokenizer_decode(TokenizerObject *self, PyObject *list_ids) {
     if (ids_size) {
         size_t bytes_size;
         char *c_bytes = bpe_decode(&bytes_size, self->vocab, ids, ids_size);
+        if (c_bytes == NULL) {
+            bpe_free(ids);
+            Py_DECREF(bytes_obj);
+            return NULL;
+        }
 
         PyBytes_Concat(&bytes_obj, PyBytes_FromStringAndSize(c_bytes, (Py_ssize_t) bytes_size)); // no incref
 
@@ -430,7 +442,7 @@ static PyObject *tokenizer_decode(TokenizerObject *self, PyObject *list_ids) {
 }
 
 static PyObject *tokenizer_cache_decode(TokenizerObject *self, PyObject *id_object) {
-    if (self->bytes_cache_size && !bpe_utf8_head_check(self->bytes_cache[0])) {
+    if (self->bytes_cache_size && !bpe_utf8_length_from_head(self->bytes_cache[0])) {
         self->bytes_cache_size = 0;
     }
     unsigned long token_id = PyLong_AsLong(id_object);
@@ -438,6 +450,9 @@ static PyObject *tokenizer_cache_decode(TokenizerObject *self, PyObject *id_obje
     if (token_id < self->vocab->vocab_size) {
         size_t bytes_size;
         char *c_bytes = bpe_decode_one(&bytes_size, self->vocab, token_id, self->bytes_cache, &self->bytes_cache_size);
+        if (c_bytes == NULL) {
+            return NULL;
+        }
         PyObject *bytes_obj = Py_None;
 
         if (bytes_size) {
@@ -532,15 +547,15 @@ static PyObject *bytes_remap_call(BytesRemapObject *self, PyObject *args, PyObje
 }
 
 static PyGetSetDef trainer_getset[] = {
-        {"merges",      (getter) trainer_get_merges,      NULL, "The \"merges\" list of the BPE algorithm", NULL},
-        {"merges_size", (getter) trainer_get_merges_size, NULL, "The length of the \"merges\"",             NULL},
+        {"merges",   (getter) trainer_get_merges,      NULL, "The merges list of the BPE algorithm", NULL},
+        {"n_merges", (getter) trainer_get_merges_size, NULL, "Number of merges (vocab_size - 256)",   NULL},
         {NULL}  /* Sentinel */
 };
 
 static PyGetSetDef tokenizer_getset[] = {
-        {"merges", (getter) tokenizer_get_merges, NULL, "The \"merges\" list of the BPE algorithm", NULL},
-        {"vocab",  (getter) tokenizer_get_vocab,  NULL, "Vocabulary dict of the BPE algorithm",     NULL},
-        {"size",   (getter) tokenizer_get_size,   NULL, "The length of the vocabulary",             NULL},
+        {"merges",   (getter) tokenizer_get_merges, NULL, "The merges list of the BPE algorithm",                    NULL},
+        {"vocab",    (getter) tokenizer_get_vocab,  NULL, "Vocabulary dict of the BPE algorithm",                    NULL},
+        {"n_vocab",  (getter) tokenizer_get_size,   NULL, "Size of the vocabulary (256 + n_merges + n_special)",    NULL},
         {NULL}  /* Sentinel */
 };
 

@@ -1,5 +1,6 @@
 /*
- * Copyright Yinan Liao. and other contributors. All rights reserved.
+ * Copyright (c) 2025-2026 Yinan Liao and other contributors.
+ * SPDX-License-Identifier: MIT
  */
 
 #include "bpe_tokenizer.h"
@@ -45,12 +46,18 @@ struct bpe_merges *bpe_merges_build(bpe_pair_t *pairs, size_t len) {
 }
 
 void bpe_merges_free(struct bpe_merges *p) {
-    bpe_free(p->nodes_mem);
-    p->nodes_mem = NULL;
-    bpe_free(p);
+    if (p) {
+        bpe_free(p->nodes_mem);
+        p->nodes_mem = NULL;
+        bpe_free(p);
+    }
 }
 
 unsigned long *bpe_encode(size_t *ids_len, const struct bpe_merges *merges, const char *bytes, size_t bytes_size) {
+    if (bytes_size > SIZE_MAX / sizeof(unsigned long)) {
+        *ids_len = 0;
+        return NULL;
+    }
     unsigned long *buf_ids = bpe_malloc(bytes_size * sizeof(unsigned long));
 
     // convert the bytes into a sequence of unsigned long .
@@ -64,8 +71,8 @@ unsigned long *bpe_encode(size_t *ids_len, const struct bpe_merges *merges, cons
     struct bpe_merges_node lookup;
     while (len > 1) {
         for (size_t i = 0; i < len - 1; i++) {
-            lookup.pair._1 = buf_ids[i];
-            lookup.pair._2 = buf_ids[i + 1];
+            lookup.pair.left = buf_ids[i];
+            lookup.pair.right = buf_ids[i + 1];
             stats[i].pair = lookup.pair;
 
             struct avl_node *_node = avl_search(&merges->tree, &lookup.node, merges_cmp_func);
@@ -91,7 +98,7 @@ unsigned long *bpe_encode(size_t *ids_len, const struct bpe_merges *merges, cons
         else {
             size_t new_ids_i = 0;
             for (size_t i = 0; i < len; i++) {
-                if (buf_ids[i] == _min->pair._1 && i < len - 1 && buf_ids[i + 1] == _min->pair._2) {
+                if (buf_ids[i] == _min->pair.left && i < len - 1 && buf_ids[i + 1] == _min->pair.right) {
                     buf_ids[new_ids_i++] = _min->merges_rank;
                     i++;
                 }
@@ -121,18 +128,18 @@ struct bpe_vocab *bpe_vocab_build(bpe_pair_t *pairs, size_t len) {
     // Calculate the total memory occupied by the vocabulary in bytes.
     for (size_t i = 0; i < len; i++) {
         size_t _size = 0;
-        if (pairs[i]._1 < 256) {
+        if (pairs[i].left < 256) {
             _size += 1;
         }
         else {
-            _size += id_bytes_size_buf[pairs[i]._1 - 256];
+            _size += id_bytes_size_buf[pairs[i].left - 256];
         }
 
-        if (pairs[i]._2 < 256) {
+        if (pairs[i].right < 256) {
             _size += 1;
         }
         else {
-            _size += id_bytes_size_buf[pairs[i]._2 - 256];
+            _size += id_bytes_size_buf[pairs[i].right - 256];
         }
 
         id_bytes_size_buf[i] = _size;
@@ -153,9 +160,9 @@ struct bpe_vocab *bpe_vocab_build(bpe_pair_t *pairs, size_t len) {
     unsigned char *bytes_mem_p = vocab->bytes_mem + 256;
     for (size_t i = 0; i < len; i++) {
 
-        memcpy(bytes_mem_p, vocab->tokens[pairs[i]._1].bytes, vocab->tokens[pairs[i]._1].size);
-        size_t _size = vocab->tokens[pairs[i]._1].size;
-        memcpy(bytes_mem_p + _size, vocab->tokens[pairs[i]._2].bytes, vocab->tokens[pairs[i]._2].size);
+        memcpy(bytes_mem_p, vocab->tokens[pairs[i].left].bytes, vocab->tokens[pairs[i].left].size);
+        size_t _size = vocab->tokens[pairs[i].left].size;
+        memcpy(bytes_mem_p + _size, vocab->tokens[pairs[i].right].bytes, vocab->tokens[pairs[i].right].size);
 
         vocab->tokens[i + 256].bytes = bytes_mem_p;
         vocab->tokens[i + 256].size = id_bytes_size_buf[i];
@@ -169,16 +176,22 @@ struct bpe_vocab *bpe_vocab_build(bpe_pair_t *pairs, size_t len) {
 }
 
 void bpe_vocab_free(struct bpe_vocab *p) {
-    bpe_free(p->tokens);
-    p->tokens = NULL;
-    bpe_free(p->bytes_mem);
-    p->bytes_mem = NULL;
-    bpe_free(p);
+    if (p) {
+        bpe_free(p->tokens);
+        p->tokens = NULL;
+        bpe_free(p->bytes_mem);
+        p->bytes_mem = NULL;
+        bpe_free(p);
+    }
 }
 
 char *bpe_decode(size_t *bytes_size, const struct bpe_vocab *vocab, const unsigned long *ids, size_t ids_len) {
     size_t buf_size = 0; // Calculate the length of bytes.
     for (size_t i = 0; i < ids_len; i++) {
+        if (ids[i] >= vocab->vocab_size) {
+            *bytes_size = 0;
+            return NULL;
+        }
         buf_size += vocab->tokens[ids[i]].size;
     }
 

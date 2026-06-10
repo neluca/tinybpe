@@ -1,5 +1,6 @@
 /*
- * Copyright Yinan Liao. and other contributors. All rights reserved.
+ * Copyright (c) 2025-2026 Yinan Liao and other contributors.
+ * SPDX-License-Identifier: MIT
  */
 
 #include "bpe_trainer.h"
@@ -19,7 +20,7 @@ static inline void merge_piece(bpe_piece_t *pieces, size_t pieces_len, const bpe
 
             size_t new_ids_i = 0;
             for (size_t j = 0; j < pieces[i].len; j++) {
-                if (p_ids[j] == pair->_1 && j < pieces[i].len - 1 && p_ids[j + 1] == pair->_2) {
+                if (p_ids[j] == pair->left && j < pieces[i].len - 1 && p_ids[j + 1] == pair->right) {
                     p_ids[new_ids_i++] = id;
                     j++;
                 }
@@ -51,6 +52,10 @@ unsigned long bpe_get_max_count_pair(bpe_pair_t *pair, bpe_train_ctx_t *ctx) {
         stats_len += ctx->pieces[i].len - 1;
     }
 
+    if (stats_len > SIZE_MAX / sizeof(struct bpe_pair_stats_node)) {
+        return 0;
+    }
+
     struct bpe_pair_stats_node *buf_nodes = bpe_malloc(stats_len * sizeof(struct bpe_pair_stats_node));
 
     size_t node_buf_i = 0;
@@ -59,8 +64,8 @@ unsigned long bpe_get_max_count_pair(bpe_pair_t *pair, bpe_train_ctx_t *ctx) {
     for (size_t i = 0; i < ctx->pieces_len; i++) {
 
         for (size_t j = 0; j < ctx->pieces[i].len - 1; j++) {
-            buf_nodes[node_buf_i].pair._1 = ctx->pieces[i].ids[j];
-            buf_nodes[node_buf_i].pair._2 = ctx->pieces[i].ids[j + 1];
+            buf_nodes[node_buf_i].pair.left = ctx->pieces[i].ids[j];
+            buf_nodes[node_buf_i].pair.right = ctx->pieces[i].ids[j + 1];
 
             struct avl_node *_node = avl_insert(&tree, &buf_nodes[node_buf_i].node, pair_stat_cmp_func);
             if (_node != &buf_nodes[node_buf_i].node) { // in
@@ -85,8 +90,8 @@ unsigned long bpe_get_max_count_pair(bpe_pair_t *pair, bpe_train_ctx_t *ctx) {
             }
         }
 
-        pair->_1 = p_max->pair._1;
-        pair->_2 = p_max->pair._2;
+        pair->left = p_max->pair.left;
+        pair->right = p_max->pair.right;
         unsigned long count = (unsigned long) p_max->count;
 
         bpe_free(buf_nodes);

@@ -33,7 +33,7 @@ class TestTinyBPE(unittest.TestCase):
         model = tb.load_bpe_model(file_simple)
         self.assertEqual(merges_1, model.merges)
         self.assertIsNone(model.bytes_maps)
-        self.assertEqual(trainer_1.merges_size, merges_size)
+        self.assertEqual(trainer_1.n_merges, merges_size)
 
         trainer_1.save(file_simple_t_model)
         file_simple_t_model_ = file_simple_t_model + ".tinymodel"
