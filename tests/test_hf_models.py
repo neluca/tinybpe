@@ -6,9 +6,14 @@ import json
 import sys
 
 import pytest
-from huggingface_hub import hf_hub_download  # type: ignore[import-untyped]
 
 from tinybpe import Tokenizer, load_model
+
+try:
+    from huggingface_hub import hf_hub_download  # type: ignore[import-untyped]
+    HAS_HF = True
+except ImportError:
+    HAS_HF = False
 
 # ---------------------------------------------------------------------------
 # Model metadata
@@ -59,6 +64,7 @@ MULTILINGUAL_TEXTS = [
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.skipif(not HAS_HF, reason="huggingface_hub not installed")
 class TestHFModels:
     """Test HuggingFace-converted tokenizers for correctness."""
 
@@ -145,6 +151,7 @@ class TestHFModels:
         assert decoded == text
 
 
+@pytest.mark.skipif(not HAS_HF, reason="huggingface_hub not installed")
 class TestQwen25Specific:
     """Qwen 2.5 specific tests."""
 
@@ -178,6 +185,7 @@ class TestQwen25Specific:
         assert decoded == code
 
 
+@pytest.mark.skipif(not HAS_HF, reason="huggingface_hub not installed")
 class TestPhi2Specific:
     """Phi-2 specific tests."""
 

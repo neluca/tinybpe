@@ -234,13 +234,14 @@ class TestModelIO:
         assert loaded_bm == bytes_maps
 
     def test_load_auto_append_extension(self, tmp_path):
-        """Loading should require .tbm extension."""
+        """Loading should auto-append .tbm extension."""
         from tinybpe import load_model, save_model
 
         save_model(str(tmp_path / "model"), [(104, 101)])
-        # load_model requires .tbm
-        with pytest.raises(ValueError):
-            load_model(str(tmp_path / "model"))
+        # load_model auto-appends .tbm
+        merges, bm = load_model(str(tmp_path / "model"))
+        assert merges == [(104, 101)]
+        assert bm is None
 
 
 # ---------------------------------------------------------------------------

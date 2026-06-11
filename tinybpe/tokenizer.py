@@ -71,11 +71,7 @@ class Tokenizer:
         if special_tokens is None:
             self._special_tokens: dict[str, int] | None = None
             self._special_pattern: str | None = None
-
-            if self._bytes_maps is None:
-                self._enc = bpe.Tokenizer(merges)
-            else:
-                self._enc = bpe.Tokenizer(merges)
+            _mapped: dict[bytes, int] | None = None
         else:
             self._special_tokens = special_tokens
             self._special_pattern = "(" + "|".join(re.escape(k) for k in special_tokens) + ")"
@@ -85,7 +81,7 @@ class Tokenizer:
             else:
                 assert self._map is not None
                 _mapped = {self._map(k.encode("utf-8")): v for k, v in special_tokens.items()}
-            self._enc = bpe.Tokenizer(merges, _mapped)
+        self._enc = bpe.Tokenizer(merges, _mapped)
 
         # ---- pre-tokenization pattern ----
         if pat_str is None:
@@ -230,6 +226,16 @@ class Tokenizer:
     # ------------------------------------------------------------------
     # Properties
     # ------------------------------------------------------------------
+
+    def __repr__(self) -> str:
+        """Return a concise string representation."""
+        has_remap = self._bytes_maps is not None
+        has_special = self._special_tokens is not None
+        n_special = len(self._special_tokens) if has_special else 0
+        return (
+            f"Tokenizer(n_vocab={self.n_vocab}, byte_remap={has_remap}, "
+            f"special_tokens={n_special})"
+        )
 
     @property
     def merges(self) -> list[tuple[int, int]]:

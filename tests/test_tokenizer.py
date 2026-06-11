@@ -176,7 +176,8 @@ class TestTokenizerLoadModel:
     """Tests for model loading edge cases."""
 
     def test_missing_extension(self):
-        with __import__("pytest").raises(ValueError):
+        # load_model now auto-appends .tbm — nonexistent file raises FileNotFoundError
+        with __import__("pytest").raises(FileNotFoundError):
             load_model("no_extension")
 
     def test_nonexistent_file(self):

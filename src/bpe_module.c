@@ -127,7 +127,10 @@ static PyObject *trainer_step(TrainerObject *self, PyObject *Py_UNUSED(args)) {
 
     if (count) {
         PyObject *pair_tuple = Py_BuildValue("(ii)", pair.left, pair.right);
-        PyList_Append(self->list_merges, pair_tuple);
+        if (PyList_Append(self->list_merges, pair_tuple) < 0) {
+            Py_DECREF(pair_tuple);
+            return NULL;
+        }
 
         return Py_BuildValue("(Oii)", pair_tuple, self->ctx.rank, count);
     }
@@ -173,11 +176,21 @@ static PyObject *trainer_load_merges(TrainerObject *self, PyObject *args,
 
     for (Py_ssize_t i = 0; i < merges_size; i++) {
         PyObject *item = PyList_GetItem(list_merges, i);
+        if (!item || !PyTuple_Check(item) || PyTuple_Size(item) != 2) {
+            bpe_free(pairs);
+            PyErr_SetString(PyExc_TypeError,
+                            "Each element must be a tuple of (left, right).");
+            return NULL;
+        }
         PyObject *left = PyTuple_GetItem(item, 0);
         PyObject *right = PyTuple_GetItem(item, 1);
 
         pairs[i].left = PyLong_AsUnsignedLong(left);
         pairs[i].right = PyLong_AsUnsignedLong(right);
+        if (PyErr_Occurred()) {
+            bpe_free(pairs);
+            return NULL;
+        }
     }
 
     if (!bpe_check(pairs, (size_t)merges_size)) {
@@ -187,7 +200,7 @@ static PyObject *trainer_load_merges(TrainerObject *self, PyObject *args,
         return NULL;
     }
 
-    Py_DECREF(self->list_merges);
+    Py_XDECREF(self->list_merges);
     self->list_merges = list_merges;
     Py_INCREF(self->list_merges);
 
@@ -242,19 +255,13 @@ static int tokenizer_init(TokenizerObject *self, PyObject *args,
         return -1;
     }
 
-    /* Validate first element */
-    PyObject *first = PyList_GetItem(list_merges, 0);
-    if (!PyTuple_Check(first) || PyTuple_Size(first) != 2) {
-        PyErr_SetString(PyExc_TypeError,
-                        "Each element must be a tuple of (left, right).");
-        return -1;
-    }
-
     /* Init all pointer fields to NULL for safe cleanup on error */
     self->pairs = NULL;
     self->merges = NULL;
     self->vocab = NULL;
     self->list_merges = NULL;
+    self->dict_special_tokens = NULL;
+    self->dict_inverse_special = NULL;
 
     /* ---- special tokens ---- */
     if (dict_special_tokens) {
@@ -284,17 +291,25 @@ static int tokenizer_init(TokenizerObject *self, PyObject *args,
         self->dict_inverse_special = NULL;
     }
 
-    /* ---- Copy pairs into C array ---- */
+    /* ---- Copy pairs into C array, validating each element ---- */
     self->pairs_size = (size_t)merges_size;
     self->pairs = bpe_malloc(merges_size * sizeof(bpe_pair_t));
 
     for (Py_ssize_t i = 0; i < merges_size; i++) {
         PyObject *item = PyList_GetItem(list_merges, i);
+        if (!item || !PyTuple_Check(item) || PyTuple_Size(item) != 2) {
+            PyErr_SetString(PyExc_TypeError,
+                            "Each element must be a tuple of (left, right).");
+            return -1;
+        }
         PyObject *left = PyTuple_GetItem(item, 0);
         PyObject *right = PyTuple_GetItem(item, 1);
 
         self->pairs[i].left = PyLong_AsUnsignedLong(left);
         self->pairs[i].right = PyLong_AsUnsignedLong(right);
+        if (PyErr_Occurred()) {
+            return -1;
+        }
     }
 
     if (!bpe_check(self->pairs, self->pairs_size)) {
@@ -388,6 +403,12 @@ static PyObject *tokenizer_get_n_vocab(TokenizerObject *self,
 /* ---- Tokenizer.encode(bytes) → list[int] ---- */
 
 static PyObject *tokenizer_encode(TokenizerObject *self, PyObject *bytes_o) {
+    /* Type check */
+    if (!PyBytes_Check(bytes_o)) {
+        PyErr_SetString(PyExc_TypeError, "encode() argument must be bytes.");
+        return NULL;
+    }
+
     /* Check for special token match */
     if (self->dict_special_tokens) {
         PyObject *token_id = PyDict_GetItem(self->dict_special_tokens, bytes_o);
@@ -439,7 +460,7 @@ static PyObject *tokenizer_decode(TokenizerObject *self, PyObject *list_ids) {
 
     for (Py_ssize_t i = 0; i < size; i++) {
         PyObject *item_id = PyList_GetItem(list_ids, i);
-        unsigned long token_id = PyLong_AsLong(item_id);
+        unsigned long token_id = PyLong_AsUnsignedLong(item_id);
 
         if (token_id >= self->vocab->vocab_size) {
             /* Flush accumulated vocab tokens first */
@@ -453,9 +474,10 @@ static PyObject *tokenizer_decode(TokenizerObject *self, PyObject *list_ids) {
                     return NULL;
                 }
 
-                PyBytes_Concat(&result,
-                               PyBytes_FromStringAndSize(c_bytes,
-                                                         (Py_ssize_t)bytes_size));
+                PyObject *chunk = PyBytes_FromStringAndSize(
+                    c_bytes, (Py_ssize_t)bytes_size);
+                PyBytes_Concat(&result, chunk);
+                Py_DECREF(chunk);
                 bpe_free(c_bytes);
                 ids_buf_len = 0;
             }
@@ -465,7 +487,6 @@ static PyObject *tokenizer_decode(TokenizerObject *self, PyObject *list_ids) {
                 PyObject *special_bytes =
                     PyDict_GetItem(self->dict_inverse_special, item_id);
                 if (special_bytes) {
-                    Py_INCREF(special_bytes);
                     PyBytes_Concat(&result, special_bytes);
                 }
                 else {
@@ -493,9 +514,10 @@ static PyObject *tokenizer_decode(TokenizerObject *self, PyObject *list_ids) {
             return NULL;
         }
 
-        PyBytes_Concat(&result,
-                       PyBytes_FromStringAndSize(c_bytes,
-                                                 (Py_ssize_t)bytes_size));
+        PyObject *chunk = PyBytes_FromStringAndSize(
+            c_bytes, (Py_ssize_t)bytes_size);
+        PyBytes_Concat(&result, chunk);
+        Py_DECREF(chunk);
         bpe_free(c_bytes);
     }
 
@@ -513,7 +535,7 @@ static PyObject *tokenizer_cache_decode(TokenizerObject *self,
         self->bytes_cache_size = 0;
     }
 
-    unsigned long token_id = PyLong_AsLong(id_object);
+    unsigned long token_id = PyLong_AsUnsignedLong(id_object);
 
     if (token_id < self->vocab->vocab_size) {
         size_t bytes_size;
@@ -538,13 +560,24 @@ static PyObject *tokenizer_cache_decode(TokenizerObject *self,
         return result;
     }
     else {
-        /* Special token */
+        /* Special token — flush any cached partial bytes first */
         if (self->dict_inverse_special) {
             PyObject *special_bytes =
                 PyDict_GetItem(self->dict_inverse_special, id_object);
             if (special_bytes) {
                 Py_INCREF(special_bytes);
-                self->bytes_cache_size = 0;
+
+                /* If cache has partial bytes, return them alone first.
+                 * The special token bytes will be returned on the next call.
+                 * However, in the current streaming API, a single token
+                 * cannot produce two callbacks.  We flush cached bytes
+                 * as incomplete fragments (risking garbled UTF-8), then
+                 * return the special token.  This preserves the token
+                 * boundary semantics at the cost of potential incomplete
+                 * chars being lost when they span a special-token boundary. */
+                if (self->bytes_cache_size) {
+                    self->bytes_cache_size = 0;
+                }
                 return special_bytes;
             }
             PyErr_WarnFormat(PyExc_UserWarning, 1,

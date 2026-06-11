@@ -19,6 +19,8 @@ Provides functions to save and load BPE model parameters to/from
 
 from __future__ import annotations
 
+from pathlib import Path
+
 MODEL_VERSION = 1
 
 
@@ -45,7 +47,7 @@ def save_model(
     bytes_maps : list[int] or None
         Optional byte remapping table of exactly 256 integers.
     """
-    if not path.endswith(".tbm"):
+    if Path(path).suffix != ".tbm":
         path += ".tbm"
 
     with open(path, "w", encoding="utf-8") as f:
@@ -83,7 +85,8 @@ def load_model(path: str) -> tuple[list[tuple[int, int]], list[int] | None]:
         If the file format is invalid or the version is unsupported.
     """
     if not path.endswith(".tbm"):
-        raise ValueError("Model file must end with .tbm")
+        if Path(path).suffix != ".tbm":
+            path += ".tbm"
 
     merges: list[tuple[int, int]] = []
     bytes_maps: list[int] | None = None
