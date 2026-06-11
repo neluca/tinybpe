@@ -1,52 +1,33 @@
-"""Benchmark: BPE decoding throughput across token list sizes."""
+#!/usr/bin/env python3
+"""Benchmark: BPE decoding speed."""
 
 import time
-import sys
-import os
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-
-from tinybpe import bpe
-
-
-def benchmark_decode(merges, ids: list[int], iterations: int = 10) -> float:
-    """Measure decode time per call in milliseconds."""
-    tokenizer = bpe.Tokenizer(merges)
-
-    # Warm up
-    tokenizer.decode(ids)
-
-    start = time.perf_counter()
-    for _ in range(iterations):
-        tokenizer.decode(ids)
-    elapsed = time.perf_counter() - start
-
-    return (elapsed / iterations) * 1000  # ms per call
+from tinybpe import Trainer, Tokenizer
 
 
 def main():
-    merges = [
-        (104, 101), (256, 108), (257, 108), (258, 111), (259, 32),
-        (119, 111), (261, 114), (262, 108), (263, 100),
+    text = "hello world the quick brown fox " * 2000
+    trainer = Trainer(text)
+    n = trainer.train(500)
+    print(f"Trained {n} merges")
+
+    tok = Tokenizer(trainer.merges)
+
+    test_texts = [
+        "hello world " * 100,
+        "the quick brown fox jumps over the lazy dog " * 50,
+        "hello " * 1000,
     ]
 
-    tokenizer = bpe.Tokenizer(merges)
+    for i, t in enumerate(test_texts):
+        ids = tok.encode(t)
 
-    sizes = [100, 1000, 10000, 100000]
-    print("Decode Benchmark")
-    print("=" * 60)
-    print(f"{'# Tokens':>12} | {'Time (ms)':>10} | {'Tokens/ms':>12}")
-    print("-" * 60)
-
-    for size in sizes:
-        # Generate text and encode to get realistic token sequence
-        text = b"hello world " * (max(size // 4, 1))
-        text = text[:size * 2]  # generous buffer
-        ids = tokenizer.encode(text)
-
-        ms = benchmark_decode(merges, ids)
-        tokens_per_ms = len(ids) / ms
-        print(f"{len(ids):>12,} | {ms:>10.3f} | {tokens_per_ms:>12.1f}")
+        t0 = time.perf_counter()
+        for _ in range(1000):
+            tok.decode(ids)
+        elapsed = time.perf_counter() - t0
+        print(f"  Test {i}: {len(ids)} ids × 1000 = {elapsed:.3f}s "
+              f"({elapsed / 1000 * 1e6:.1f} µs/decode)")
 
 
 if __name__ == "__main__":

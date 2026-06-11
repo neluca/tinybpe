@@ -1,30 +1,34 @@
-from tinybpe import Tokenizer, load_bpe_model
+#!/usr/bin/env python3
+"""Streaming decode example."""
 
-model = load_bpe_model("simple.tinymodel")
-tokenizer = Tokenizer(model)
-tokenizer_2 = Tokenizer(model)
-
-s1 = "hello world 你好世界"
+from tinybpe import Trainer, Tokenizer
 
 
-def cb_print(text):
-    print(text, end="")
+def main():
+    # Train a small model
+    trainer = Trainer("hello world " * 500)
+    trainer.train(50)
+    tok = Tokenizer(trainer.merges)
+
+    text = "hello world hello hello"
+    ids = tok.encode(text)
+
+    # Streaming decode: process one token at a time
+    print("Streaming decode:")
+    parts = []
+
+    def on_fragment(s: str) -> None:
+        print(f"  fragment: {s!r}")
+        parts.append(s)
+
+    decoder = tok.stream_decode(on_fragment)
+    for tid in ids:
+        decoder(tid)
+
+    result = "".join(parts)
+    print(f"\nResult: {result!r}")
+    print(f"Match: {result == text}")
 
 
-g_text = ""
-
-
-def cb(text):
-    global g_text
-    g_text += text
-
-
-decode_1 = tokenizer.stream_decode(cb_print)
-decode_2 = tokenizer_2.stream_decode(cb)
-ids = tokenizer.encode(s1)
-print(ids)
-for i in ids:
-    decode_1(i)
-    decode_2(i)
-print("")
-print(g_text)
+if __name__ == "__main__":
+    main()

@@ -1,50 +1,36 @@
-"""Benchmark: BPE encoding throughput across input sizes."""
+#!/usr/bin/env python3
+"""Benchmark: BPE encoding speed."""
 
 import time
-import sys
-import os
-
-# Add parent directory to path for local runs
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-
-from tinybpe import bpe
-
-
-def benchmark_encode(merges, text_bytes: bytes, iterations: int = 10) -> float:
-    """Measure encode time per call in milliseconds."""
-    tokenizer = bpe.Tokenizer(merges)
-
-    # Warm up
-    tokenizer.encode(text_bytes)
-
-    start = time.perf_counter()
-    for _ in range(iterations):
-        tokenizer.encode(text_bytes)
-    elapsed = time.perf_counter() - start
-
-    return (elapsed / iterations) * 1000  # ms per call
+from tinybpe import Trainer, Tokenizer
 
 
 def main():
-    # A realistic set of merges
-    merges = [
-        (104, 101), (256, 108), (257, 108), (258, 111), (259, 32),
-        (119, 111), (261, 114), (262, 108), (263, 100),
-        (116, 104), (264, 101), (265, 32), (266, 105), (267, 115),
+    # Train on moderate corpus
+    text = "hello world the quick brown fox " * 2000
+    print(f"Training on {len(text)} chars...")
+    t0 = time.perf_counter()
+    trainer = Trainer(text)
+    n = trainer.train(500)
+    train_time = time.perf_counter() - t0
+    print(f"  {n} merges in {train_time:.3f}s")
+
+    tok = Tokenizer(trainer.merges)
+
+    # Benchmark encode
+    test_texts = [
+        "hello world " * 100,
+        "the quick brown fox jumps over the lazy dog " * 50,
+        "hello " * 1000,
     ]
 
-    sizes = [1024, 10240, 102400, 1048576]
-    print("Encode Benchmark")
-    print("=" * 60)
-    print(f"{'Input Size':>12} | {'Time (ms)':>10} | {'Throughput':>15}")
-    print("-" * 60)
-
-    for size in sizes:
-        text = b"hello world this is a benchmark test. " * (size // 45)
-        text = text[:size]
-        ms = benchmark_encode(merges, text)
-        mb_per_sec = (size / 1024 / 1024) / (ms / 1000)
-        print(f"{size:>12,} | {ms:>10.2f} | {mb_per_sec:>12.2f} MB/s")
+    for i, t in enumerate(test_texts):
+        t0 = time.perf_counter()
+        for _ in range(100):
+            tok.encode(t)
+        elapsed = time.perf_counter() - t0
+        print(f"  Test {i}: {len(t)} chars × 100 = {elapsed:.3f}s "
+              f"({elapsed / 100 * 1000:.3f} ms/encode)")
 
 
 if __name__ == "__main__":

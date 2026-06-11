@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tinybpe"
 authors = [{ name = "E.T. Romani", email = "myneluca@gmail.com" }]
-description = "An ultra-fast, lightweight and clean CPython implementation of the Byte Pair Encoding (BPE) algorithm for language model tokenization."
+description = "An ultra-fast, lightweight BPE tokenizer and trainer with a pure-C core."
 dependencies = ["regex"]
 readme = "README.md"
 requires-python = ">=3.9"

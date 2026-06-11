@@ -1,20 +1,7 @@
-# Test
-tiktoken>=0.7.0
-pytest>=8.0
-pytest-cov>=5.0
-
-# Runtime (explicit for build requirements)
+# Development dependencies for TinyBPE
 regex
-
-# Build Packages
-build>=1.0
-setuptools>=68.0
-wheel>=0.40
-twine>=5.0
-
-# Lint & Type Checking
-ruff>=0.5.0
-mypy>=1.10
-
-# Pre-commit
-pre-commit>=3.5
+pytest
+pytest-cov
+ruff
+mypy
+types-regex

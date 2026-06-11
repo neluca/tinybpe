@@ -10,6 +10,7 @@ on:
       - "setup.py"
       - "pyproject.toml"
       - "requirements_dev.txt"
+      - "MANIFEST.in"
       - ".github/workflows/python-package.yml"
   pull_request:
     paths:
@@ -19,6 +20,7 @@ on:
       - "setup.py"
       - "pyproject.toml"
       - "requirements_dev.txt"
+      - "MANIFEST.in"
       - ".github/workflows/python-package.yml"
   schedule:
     - cron: '0 10 * * *'

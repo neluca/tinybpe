@@ -1,138 +1,167 @@
-[English] | [中文](README_zh.md)
+# TinyBPE
 
-# 🚀 TinyBPE
-
-[![build](https://github.com/neluca/tinybpe/workflows/build/badge.svg)](https://github.com/neluca/tinybpe/actions/workflows/python-package.yml)
-[![wheels](https://github.com/neluca/tinybpe/workflows/wheels/badge.svg)](https://github.com/neluca/tinybpe/actions/workflows/wheels.yml)
-[![lint](https://github.com/neluca/tinybpe/workflows/lint/badge.svg)](https://github.com/neluca/tinybpe/actions/workflows/lint.yml)
-[![codecov](https://codecov.io/gh/neluca/tinybpe/branch/main/graph/badge.svg)](https://codecov.io/gh/neluca/tinybpe)
 [![PyPI version](https://img.shields.io/pypi/v/tinybpe)](https://pypi.org/project/tinybpe/)
-[![Python versions](https://img.shields.io/pypi/pyversions/tinybpe)](https://pypi.org/project/tinybpe/)
-[![License](https://img.shields.io/github/license/neluca/tinybpe)](https://github.com/neluca/tinybpe/blob/main/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**TinyBPE** is an ultra-fast, lightweight, and clean **language model** tokenizer and BPE model trainer implemented as a **CPython** extension.
+**An ultra-fast, lightweight BPE tokenizer and trainer with a pure-C core.**
 
-## 📦 Installation
+TinyBPE implements the Byte Pair Encoding (BPE) algorithm as a CPython extension. The C core is extremely efficient — AVL-tree-based pair lookup, greedy encoding, and single-allocation vocabulary — while the Python layer adds regex pre-tokenization, special token handling, and streaming decode.
+
+## Features
+
+- **Blazing fast** — C-level AVL tree for O(log n) pair lookup
+- **Minimal dependencies** — only `regex`
+- **Streaming decode** — token-by-token UTF-8 reassembly
+- **TikToken compatible** — byte remapping for GPT tokenizer models
+- **Lightweight** — single `.tbm` model file
+- **Portable C core** — trainer and tokenizer are pure C, ready for embedded use
+
+## Installation
 
 ```bash
 pip install tinybpe
 ```
 
-Pre-built wheels are available for Linux (x86_64, aarch64), macOS (x86_64, arm64), and Windows (x86_64), for Python 3.9–3.13.
+## Quick Start
 
-## 🌟 Features
-
-- **C core** — Meticulously designed C implementation using AVL-tree indexing for fast pair lookup.
-- **Clean Python API** — Simple, elegant interface with type hints.
-- **BPE training** — Train from scratch or continue training on imported models.
-- **Byte-level tokenizer** — Fast encode/decode with streaming decode support.
-- **Regex pre-tokenization** — Split text before encoding using regex patterns.
-- **Special tokens** — Support for control tokens like `<|endoftext|>`.
-- **TikToken compatibility** — Convert tiktoken model parameters for use with tinybpe.
-- **Zero core dependencies** — The C extension has zero dependencies; only `regex` is needed for pre-tokenization.
-
-## ⚡️ Quick Start
-
-### 1. Basic Tokenization
+### Training
 
 ```python
-import tiktoken
-from tinybpe import Tokenizer, get_from_tiktoken
+from tinybpe import Trainer
 
-# Convert a tiktoken model
-tik_tokenizer = tiktoken.get_encoding("cl100k_base")
-model_param = get_from_tiktoken(tik_tokenizer._mergeable_ranks)
-tiny_tokenizer = Tokenizer(model_param)
-
-text = "👋 Hello, this is an example. 你好，这是一个例子。😁"
-tik_ids = tik_tokenizer.encode(text)
-tiny_ids = tiny_tokenizer.encode(text)
-assert tik_ids == tiny_ids  # Identical output
+# Train on text
+trainer = Trainer("hello world " * 500)
+trainer.train(100)          # learn 100 merges
+trainer.save("my_model")    # → my_model.tbm
 ```
 
-### 2. Training a BPE Model
+### Encoding / Decoding
 
 ```python
-from tinybpe import SimpleTrainer
+from tinybpe import Tokenizer
 
-text = open("corpus.txt", "r", encoding="utf-8").read()
-trainer = SimpleTrainer(text)
-vocab_size = 1000
-for _ in range(vocab_size - 256):
-    pair, rank, freq = trainer.step()
-    print(f"{pair} -> {rank} ({freq})")
+# Load a model
+tok = Tokenizer.from_file("my_model.tbm")
 
-print(f"Vocabulary size: {trainer.n_merges + 256}")
-trainer.save("my-model")  # Saves my-model.tinymodel
+# Encode text to token IDs
+ids = tok.encode("hello world")
+# [265, 267, 108, ...]
+
+# Decode back to text
+text = tok.decode(ids)
+assert text == "hello world"
 ```
 
-### 3. Loading a Model
+### Streaming Decode
 
 ```python
-from tinybpe import Tokenizer, load_bpe_model
-
-model = load_bpe_model("my-model.tinymodel")
-tokenizer = Tokenizer(model)
-
-ids = tokenizer.encode("hello world")
-print(ids)                      # [259, 32, 261, 263, 264]
-print(tokenizer.decode(ids))    # hello world
-print(tokenizer.n_vocab)        # 1000
-```
-
-### 4. Streaming Decode
-
-```python
-def on_text(text: str):
-    print(text, end="")
-
-decode = tokenizer.stream_decode(on_text)
+parts = []
+decoder = tok.stream_decode(lambda s: parts.append(s))
 for token_id in ids:
-    decode(token_id)  # Prints characters as soon as they're decodable
+    decoder(token_id)
+assert "".join(parts) == "hello world"
 ```
 
-### 5. Convert TikToken Models
+### With Regex Pre-tokenization
 
 ```python
-import tiktoken
-from tinybpe import save_from_tiktoken
+import regex as re
 
-enc = tiktoken.get_encoding("cl100k_base")
-save_from_tiktoken("cl100k_base", enc._mergeable_ranks)
-# Creates cl100k_base.tinymodel
+PAT = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""
+
+tok = Tokenizer.from_file("my_model.tbm", pat_str=PAT)
 ```
 
-**Note:** In commercial settings, be mindful of copyright when converting third-party tokenizer models. Training your own model is recommended.
+### With Special Tokens
 
-## 🧪 Development
+```python
+special_tokens = {"<eot>": 1000, "<fim_prefix>": 1001, "<fim_suffix>": 1002}
+tok = Tokenizer(merges, special_tokens=special_tokens)
+ids = tok.encode("<fim_prefix> hello world <eot>")
+```
+
+### With Byte Remapping (TikToken Compat)
+
+```python
+from tinybpe import load_model
+
+merges, bytes_maps = load_model("cl100k_base.tbm")
+tok = Tokenizer(merges, bytes_maps=bytes_maps)
+```
+
+## API Reference
+
+### `Tokenizer`
+
+```python
+class Tokenizer:
+    def __init__(self, merges, *, bytes_maps=None, pat_str=None, special_tokens=None)
+    def encode(self, text: str) -> list[int]
+    def encode_ordinary(self, text: str) -> list[int]
+    def decode(self, ids: list[int]) -> str
+    def stream_decode(self, callback: Callable[[str], None]) -> Callable[[int], None]
+    def stream_decode_reset(self) -> None
+    def save(self, path: str) -> None
+    def save_vocab(self, path: str) -> None
+
+    @classmethod
+    def from_file(cls, path: str, *, pat_str=None, special_tokens=None) -> Tokenizer
+
+    @property
+    def merges(self) -> list[tuple[int, int]]
+    @property
+    def vocab(self) -> dict[int, bytes]
+    @property
+    def n_vocab(self) -> int
+```
+
+### `Trainer`
+
+```python
+class Trainer(bpe.Trainer):
+    def __init__(self, text, *, preprocess=None, callback=None)
+    def step(self) -> tuple | None
+    def train(self, n: int) -> int
+    def save(self, path: str) -> None
+
+    @property
+    def merges(self) -> list[tuple[int, int]]
+    @property
+    def n_merges(self) -> int
+```
+
+### File I/O
+
+```python
+def load_model(path: str) -> tuple[list[tuple[int, int]], list[int] | None]
+def save_model(path: str, merges, bytes_maps=None) -> None
+def load_vocab(path: str) -> dict[int, bytes]
+def save_vocab(path: str, vocab: dict[int, bytes]) -> None
+```
+
+## Model Format
+
+`.tbm` (TinyBPE Model) is a text file:
+
+```
+TinyBPE Model v1
+0               # 0 = no remap, 256 = has remap
+[left] [right]  # merge pairs, one per line
+...
+```
+
+## Conversion Scripts
+
+Convert existing tokenizers to TinyBPE format:
 
 ```bash
-git clone https://github.com/neluca/tinybpe.git
-cd tinybpe
-pip install -r requirements_dev.txt
-pip install -e .
-python -m pytest
+# TikToken
+python scripts/convert_tiktoken.py cl100k_base -o models/cl100k_base.tbm
+
+# HuggingFace
+python scripts/convert_hf_tokenizer.py tokenizer.json -o output.tbm
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development setup and guidelines.
+## License
 
-## 📊 Benchmarks
-
-Run benchmarks with:
-```bash
-cd benchmarks
-python bench_encode.py
-python bench_decode.py
-python bench_train.py
-```
-
-TinyBPE's C implementation typically achieves **10–100x faster** encoding than pure-Python BPE implementations.
-
-## 🤝 Acknowledgements
-
-- [minbpe](https://github.com/karpathy/minbpe) — Excellent educational resource on BPE algorithm internals.
-- [tiktoken](https://github.com/openai/tiktoken) — Reference tokenizer models for validation and compatibility.
-
-## 📄 License
-
-MIT License. See [LICENSE](LICENSE) for details.
+MIT — see [LICENSE](LICENSE).

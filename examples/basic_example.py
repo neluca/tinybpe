@@ -1,26 +1,43 @@
-import tiktoken
-from tinybpe import Tokenizer, get_from_tiktoken
+#!/usr/bin/env python3
+"""Basic TinyBPE usage example."""
 
-tik_tokenizer = tiktoken.get_encoding("cl100k_base")
-model_param = get_from_tiktoken(tik_tokenizer._mergeable_ranks)
-tiny_tokenizer = Tokenizer(model_param)
+from tinybpe import Trainer, Tokenizer
 
-text = "👋 Hello, this is an example. 你好，这是一个例子。😁"
-tik_ids = tik_tokenizer.encode(text)
-tiny_ids = tiny_tokenizer.encode(text)
-assert tik_ids == tiny_ids
-print("tiktoken: ", tik_ids)
-print("tinybpe: ", tiny_ids)
 
-tik_text = tik_tokenizer.decode(tiny_ids)
-tiny_text = tiny_tokenizer.decode(tik_ids)
-assert tik_text == tiny_text
+def main():
+    # 1. Train a BPE model on some text
+    print("Training...")
+    trainer = Trainer("hello world " * 500)
+    n = trainer.train(100)
+    print(f"  Learned {n} merges")
 
-print("tiktoken: ", tik_text)
-print("tinybpe: ", tiny_text)
+    # 2. Save the model
+    trainer.save("example_model")
+    print("  Saved example_model.tbm")
 
-# output:
-# tiktoken:  [9468, 239, 233, 22691, 11, 420, 374, 459, 3187, 13, 220, 57668, 53901, 3922, 44388, 21043, 48044, 27452, 45829, 1811, 76460, 223]
-# tinybpe:  [9468, 239, 233, 22691, 11, 420, 374, 459, 3187, 13, 220, 57668, 53901, 3922, 44388, 21043, 48044, 27452, 45829, 1811, 76460, 223]
-# tiktoken:  👋 Hello, this is an example. 你好，这是一个例子。😁
-# tinybpe:  👋 Hello, this is an example. 你好，这是一个例子。😁
+    # 3. Create a tokenizer from the trained model
+    tok = Tokenizer(trainer.merges)
+
+    # 4. Encode text
+    text = "hello world hello"
+    ids = tok.encode(text)
+    print(f"\nEncode: {text!r}")
+    print(f"  → {ids}")
+
+    # 5. Decode back
+    decoded = tok.decode(ids)
+    print(f"Decode: {ids}")
+    print(f"  → {decoded!r}")
+
+    # 6. Verify round-trip
+    assert text == decoded, "Round-trip failed!"
+    print("\n✓ Round-trip OK")
+
+    # 7. Show some vocabulary
+    print(f"\nVocabulary size: {tok.n_vocab}")
+    for tid, token_bytes in sorted(tok.vocab.items())[256:260]:
+        print(f"  {tid}: {token_bytes!r}")
+
+
+if __name__ == "__main__":
+    main()

@@ -2,18 +2,23 @@
  * Copyright (c) 2025-2026 Yinan Liao and other contributors.
  * SPDX-License-Identifier: MIT
  *
- * Common types and utilities shared between the BPE trainer and tokenizer.
+ * Common utilities: merge pair validation and Python-aware memory management.
  *
- * Provides:
- *   - bpe_pair_t / bpe_piece_t type definitions (in bpe_common.h)
- *   - bpe_check() — validates a merge pair sequence for correctness
- *   - bpe_malloc() / bpe_free() — memory management with Python integration
+ * This is one of only two files (along with bpe_module.c) that include
+ * <Python.h>.  The memory allocator uses PyMem_Malloc / PyMem_Free so
+ * Python's garbage collector can account for C-level allocations.
+ *
+ * In an embedded / non-Python context, replace bpe_malloc / bpe_free
+ * with wrappers around the platform's malloc / free — all other C files
+ * (trainer, tokenizer, AVL tree) are pure standard C and need no changes.
  */
 
 #include <Python.h>
 #include "bpe_common.h"
 
-/* AVL tree node used by bpe_check() for duplicate detection. */
+/* --------------------------------------------------------------------------
+ * AVL tree node for duplicate detection in bpe_check().
+ * -------------------------------------------------------------------------- */
 struct bpe_pair_node {
     struct avl_node node;
     bpe_pair_t pair;
@@ -28,30 +33,30 @@ static int pair_cmp_func(struct avl_node *a, struct avl_node *b) {
     return bpe_pair_cmp(&n1->pair, &n2->pair);
 }
 
-/*
+/* --------------------------------------------------------------------------
  * Validate a BPE merge pair sequence.
  *
- * Checks two invariants:
- *   1. Each pair's left and right IDs must reference existing tokens
- *      (IDs 0-255 are base bytes; higher IDs are created by earlier merges).
- *   2. No duplicate merge pairs are present.
+ * Phase 1 — reachability check:
+ *   Each pair's (left, right) IDs must be < (256 + index), i.e. must
+ *   reference tokens that already exist at that point in the sequence.
  *
- * Returns 1 if the merges are valid, 0 otherwise.
- */
+ * Phase 2 — uniqueness check:
+ *   No duplicate pairs.  Uses an AVL tree with a single allocation for
+ *   all nodes (O(n) memory, O(n log n) time).
+ *
+ * Returns 1 if valid, 0 otherwise.
+ * -------------------------------------------------------------------------- */
 int bpe_check(const bpe_pair_t *pairs, size_t len) {
+    /* Phase 1: reachability */
     unsigned long max_id = 256;
     for (size_t i = 0; i < len; i++) {
-
-        // The pair IDs at the current position must reference tokens
-        // that already exist (i.e., are less than the current max_id).
         if (pairs[i].left >= max_id || pairs[i].right >= max_id) {
             return 0;
         }
-
         max_id++;
     }
 
-    // Second pass: check for duplicate pairs using an AVL tree.
+    /* Phase 2: duplicate detection via AVL tree */
     struct bpe_pair_node *buf_nodes = bpe_malloc(len * sizeof(struct bpe_pair_node));
     struct avl_tree tree;
     avl_init(&tree);
@@ -62,36 +67,37 @@ int bpe_check(const bpe_pair_t *pairs, size_t len) {
 
         struct avl_node *node = avl_insert(&tree, &buf_nodes[i].node, pair_cmp_func);
         if (node != &buf_nodes[i].node) {
+            /* duplicate found */
             bpe_free(buf_nodes);
-            return 0; // Duplicate pairs are not allowed.
+            return 0;
         }
     }
 
     bpe_free(buf_nodes);
-
     return 1;
 }
 
-/*
- * Allocate memory using Python's memory allocator (PyMem_Malloc).
+/* --------------------------------------------------------------------------
+ * Allocate memory via PyMem_Malloc.
  *
- * This ensures Python's garbage collector can track memory usage
- * and allows PyErr_NoMemory() to be raised on allocation failure.
- */
+ * PyMem_Malloc is a thin wrapper around the platform allocator that
+ * Python's GC can track.  On failure, PyErr_NoMemory() sets a Python
+ * MemoryError so the caller can simply return NULL.
+ * -------------------------------------------------------------------------- */
 void *bpe_malloc(size_t size) {
-    void *p = PyMem_Malloc(size); // fast allocator integrated with Python
+    void *p = PyMem_Malloc(size);
     if (p == NULL) {
-        PyErr_NoMemory(); // raises MemoryError in Python
+        PyErr_NoMemory();
     }
     return p;
 }
 
-/*
- * Free memory previously allocated by bpe_malloc().
- * No-op if p is NULL.
- */
-void bpe_free(void *p) {
-    if (p) {
-        PyMem_Free(p);
+/* --------------------------------------------------------------------------
+ * Free memory allocated by bpe_malloc().
+ * No-op on NULL.
+ * -------------------------------------------------------------------------- */
+void bpe_free(void *ptr) {
+    if (ptr) {
+        PyMem_Free(ptr);
     }
 }
