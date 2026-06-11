@@ -55,6 +55,16 @@ class Trainer(bpe.Trainer):
         >>> def on_step(step, total, pair, rank, freq):
         ...     print(f"Step {step}: {pair} -> {rank}")
         >>> trainer = Trainer("hello world", callback=on_step)
+
+    Continue training from an existing model::
+
+        >>> trainer = Trainer("new text")
+        >>> trainer.load_merges(existing_merges)  # inherit from bpe.Trainer
+        >>> trainer.train(50)
+
+    Note: ``save()`` saves only the merge pairs and (if applicable) byte
+    remapping.  The regex pattern, preprocess callback, special tokens,
+    and training state are NOT preserved.
     """
 
     def __init__(

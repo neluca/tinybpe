@@ -13,7 +13,7 @@ jobs:
   lint:
     strategy:
       matrix:
-        python-version: [ '3.9', '3.10', '3.11', '3.12', '3.13' ]
+        python-version: [ '3.13' ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,9 +26,9 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install ruff mypy regex types-regex
       - name: Run ruff (lint)
-        run: ruff check tinybpe/ --output-format=github
+        run: ruff check tinybpe/ tests/ scripts/ --output-format=github
       - name: Run ruff (format check)
-        run: ruff format --check tinybpe/
+        run: ruff format --check tinybpe/ tests/ scripts/
       - name: Run mypy
         run: mypy tinybpe/ --strict
 

@@ -2,18 +2,26 @@
 
 from __future__ import annotations
 
-import json
-import sys
-
 import pytest
 
 from tinybpe import Tokenizer, load_model
 
 try:
-    from huggingface_hub import hf_hub_download  # type: ignore[import-untyped]
+    from huggingface_hub import hf_hub_download  # noqa: F401
     HAS_HF = True
 except ImportError:
     HAS_HF = False
+
+# Regex patterns for ByteLevel BPE pre-tokenization
+PAT_GPT2 = (
+    r"(?i:'s|'t|'re|'ve|'m|'ll|'d)"
+    r"|[^\r\n\p{L}\p{N}]?\p{L}+"
+    r"|\p{N}"
+    r"| ?[^\s\p{L}\p{N}]+[\r\n]*"
+    r"|\s*[\r\n]+"
+    r"|\s+(?!\S)"
+    r"|\s+"
+)
 
 # ---------------------------------------------------------------------------
 # Model metadata
@@ -24,13 +32,13 @@ HF_MODELS = [
         "qwen25",
         "Qwen/Qwen2.5-0.5B",
         "Qwen 2.5",
-        r"(?i:'s|'t|'re|'ve|'m|'ll|'d)|[^\r\n\p{L}\p{N}]?\p{L}+|\p{N}| ?[^\s\p{L}\p{N}]+[\r\n]*|\s*[\r\n]+|\s+(?!\S)|\s+",
+        PAT_GPT2,
     ),
     (
         "phi2",
         "microsoft/phi-2",
         "Phi-2",
-        r"(?i:'s|'t|'re|'ve|'m|'ll|'d)|[^\r\n\p{L}\p{N}]?\p{L}+|\p{N}| ?[^\s\p{L}\p{N}]+[\r\n]*|\s*[\r\n]+|\s+(?!\S)|\s+",
+        PAT_GPT2,
     ),
 ]
 

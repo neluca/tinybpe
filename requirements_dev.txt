@@ -5,3 +5,6 @@ pytest-cov
 ruff
 mypy
 types-regex
+# Optional: for testing pre-built models
+tiktoken
+huggingface_hub

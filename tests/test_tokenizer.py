@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-import regex as re
 from tinybpe import Tokenizer, load_model, save_model, save_vocab, load_vocab
 
 TESTS_DIR = Path(__file__).parent

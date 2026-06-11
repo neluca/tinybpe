@@ -24,7 +24,7 @@ ext_modules = [
         ],
         extra_compile_args={
             "win32": [],
-        }.get(sys.platform, ["-Werror", "-std=c99"]),
+        }.get(sys.platform, ["-Wall", "-Wextra", "-std=c99"]),
     )
 ]
 
