@@ -1,15 +1,16 @@
 """Tests for pre-built .tbm models — verify correctness against tiktoken."""
 
 import pytest
+
 from tinybpe import Tokenizer
 
 # Try importing tiktoken — tests are skipped if not available
 try:
     import tiktoken
 
-    HAS_TIKTOKEN = True
+    HAS_TIKTOKEN = True  # noqa: F401
 except ImportError:
-    HAS_TIKTOKEN = False
+    HAS_TIKTOKEN = False  # noqa: F401
 
 
 # ---------------------------------------------------------------------------
@@ -149,7 +150,7 @@ class TestTikTokenModels:
                 continue
             ids = tok.encode(text)
             parts: list[str] = []
-            decoder = tok.stream_decode(lambda s: parts.append(s))
+            decoder = tok.stream_decode(parts.append)
             for tid in ids:
                 decoder(tid)
             assert "".join(parts) == text

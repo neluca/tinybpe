@@ -119,7 +119,7 @@ class TestHFModels:
                 continue
             ids = tok.encode(text)
             parts: list[str] = []
-            decoder = tok.stream_decode(lambda s: parts.append(s))
+            decoder = tok.stream_decode(parts.append)
             for tid in ids:
                 decoder(tid)
             assert "".join(parts) == text
@@ -165,8 +165,7 @@ class TestQwen25Specific:
 
     def test_chinese_text(self):
         """Chinese text should encode and decode correctly."""
-        pattern = r"(?i:'s|'t|'re|'ve|'m|'ll|'d)|[^\r\n\p{L}\p{N}]?\p{L}+|\p{N}| ?[^\s\p{L}\p{N}]+[\r\n]*|\s*[\r\n]+|\s+(?!\S)|\s+"
-        tok = Tokenizer.from_file("models/qwen25.tbm", pat_str=pattern)
+        tok = Tokenizer.from_file("models/qwen25.tbm", pat_str=PAT_GPT2)
 
         cn_texts = [
             "他是一个独自一人划着小船在墨西哥湾大海流打鱼的老人",
@@ -181,8 +180,7 @@ class TestQwen25Specific:
 
     def test_code_text(self):
         """Code snippets should round-trip."""
-        pattern = r"(?i:'s|'t|'re|'ve|'m|'ll|'d)|[^\r\n\p{L}\p{N}]?\p{L}+|\p{N}| ?[^\s\p{L}\p{N}]+[\r\n]*|\s*[\r\n]+|\s+(?!\S)|\s+"
-        tok = Tokenizer.from_file("models/qwen25.tbm", pat_str=pattern)
+        tok = Tokenizer.from_file("models/qwen25.tbm", pat_str=PAT_GPT2)
 
         code = '''def fibonacci(n):
     if n <= 1:
@@ -199,8 +197,7 @@ class TestPhi2Specific:
 
     def test_code_roundtrip(self):
         """Code snippets should round-trip with Phi-2."""
-        pattern = r"(?i:'s|'t|'re|'ve|'m|'ll|'d)|[^\r\n\p{L}\p{N}]?\p{L}+|\p{N}| ?[^\s\p{L}\p{N}]+[\r\n]*|\s*[\r\n]+|\s+(?!\S)|\s+"
-        tok = Tokenizer.from_file("models/phi2.tbm", pat_str=pattern)
+        tok = Tokenizer.from_file("models/phi2.tbm", pat_str=PAT_GPT2)
 
         code = "def hello(): return 'world'"
         ids = tok.encode(code)
@@ -209,8 +206,7 @@ class TestPhi2Specific:
 
     def test_english_text(self):
         """English text should round-trip accurately."""
-        pattern = r"(?i:'s|'t|'re|'ve|'m|'ll|'d)|[^\r\n\p{L}\p{N}]?\p{L}+|\p{N}| ?[^\s\p{L}\p{N}]+[\r\n]*|\s*[\r\n]+|\s+(?!\S)|\s+"
-        tok = Tokenizer.from_file("models/phi2.tbm", pat_str=pattern)
+        tok = Tokenizer.from_file("models/phi2.tbm", pat_str=PAT_GPT2)
 
         text = "The quick brown fox jumps over the lazy dog."
         ids = tok.encode(text)

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from tinybpe import Tokenizer, load_model, save_model, save_vocab, load_vocab
+from tinybpe import Tokenizer, load_model, load_vocab, save_model, save_vocab
 
 TESTS_DIR = Path(__file__).parent
 FILE_SIMPLE = str(TESTS_DIR / "simple")

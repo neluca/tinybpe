@@ -1,8 +1,8 @@
 """Tests for the TinyBPE Trainer."""
 
-import regex as re
-from tinybpe import Trainer, Tokenizer, save_model, load_model
 from pathlib import Path
+
+from tinybpe import Tokenizer, Trainer, load_model
 
 TESTS_DIR = Path(__file__).parent
 
@@ -112,7 +112,7 @@ class TestTrainerEdgeCases:
     def test_empty_text(self):
         """Empty text should produce a valid but idle trainer."""
         try:
-            trainer = Trainer("")
+            Trainer("")  # should raise ValueError
         except ValueError:
             # Expected: empty list not allowed
             pass

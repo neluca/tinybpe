@@ -21,7 +21,6 @@ import json
 import sys
 from pathlib import Path
 
-
 # ---------------------------------------------------------------------------
 # GPT-2 ByteLevel mapping: bytes (0-255) ↔ visible Unicode characters
 # ---------------------------------------------------------------------------
@@ -205,7 +204,7 @@ def _detect_byte_mapping(vocab: dict[str, int]) -> list[int] | None:
     still_missing = [b for b in range(256) if bytes_maps[b] < 0]
     if still_missing:
         # Collect all single-char tokens not yet assigned
-        assigned_ids = set(bytes_maps[b] for b in range(256) if bytes_maps[b] >= 0)
+        assigned_ids = {bytes_maps[b] for b in range(256) if bytes_maps[b] >= 0}
         unassigned = [
             (ord(c), tid)
             for c, tid in char_to_id.items()

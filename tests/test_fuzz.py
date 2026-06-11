@@ -93,7 +93,7 @@ class TestFuzz:
 
             # Streaming decode
             parts: list[str] = []
-            decoder = tok.stream_decode(lambda s: parts.append(s))
+            decoder = tok.stream_decode(parts.append)
             for tid in ids:
                 decoder(tid)
             streamed = "".join(parts)
