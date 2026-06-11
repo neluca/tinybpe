@@ -200,7 +200,8 @@ def _detect_byte_mapping(vocab: dict[str, int]) -> list[int] | None:
 
     # Second pass: for any missing bytes, try to find them among unused
     # single-char tokens. Some tokenizers (DeepSeek) omit rare byte
-    # mappings from the vocab. We assign the closest available tokens.
+    # mappings from the vocab because those bytes never appear in valid
+    # UTF-8 (0xC0-0xC1 overlong encoding, 0xF5-0xFF exceed RFC 3629).
     still_missing = [b for b in range(256) if bytes_maps[b] < 0]
     if still_missing:
         # Collect all single-char tokens not yet assigned
@@ -210,7 +211,6 @@ def _detect_byte_mapping(vocab: dict[str, int]) -> list[int] | None:
             for c, tid in char_to_id.items()
             if tid not in assigned_ids
         ]
-        # Sort by codepoint for deterministic assignment
         unassigned.sort()
 
         for byte_val in still_missing:
@@ -227,8 +227,30 @@ def _detect_byte_mapping(vocab: dict[str, int]) -> list[int] | None:
                 bytes_maps[byte_val] = best[1]
                 unassigned.remove(best)
 
-    if any(b < 0 for b in bytes_maps):
-        return None  # still incomplete after fallback
+    # Third pass: any bytes still unmapped are unreachable in valid UTF-8.
+    # 0xC0-0xC1 (overlong encoding) and 0xF5-0xFF (exceed RFC 3629)
+    # never appear in valid UTF-8 text.  Assign them to unused token IDs
+    # in the 0-255 range so bytes_maps remains a bijection (invertible).
+    still_missing = [b for b in range(256) if bytes_maps[b] < 0]
+    if still_missing:
+        for byte_val in still_missing:
+            if byte_val <= 0x7F or (0xC2 <= byte_val <= 0xF4):
+                # Valid UTF-8 lead byte is missing — real problem
+                return None
+
+        # Find unused token IDs in 0-255 (standard base-byte range)
+        assigned_ids = {bytes_maps[b] for b in range(256) if bytes_maps[b] >= 0}
+        free_ids = [i for i in range(256) if i not in assigned_ids]
+        # Sort to assign lowest free IDs to lowest missing bytes (deterministic)
+        free_ids.sort()
+        missing_sorted = sorted(still_missing)
+
+        if len(free_ids) < len(missing_sorted):
+            return None  # should not happen for valid tokenizers
+
+        for byte_val, free_id in zip(missing_sorted, free_ids):
+            bytes_maps[byte_val] = free_id
+
     return bytes_maps
 
 

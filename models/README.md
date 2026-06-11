@@ -19,6 +19,7 @@ Pre-built BPE tokenizer models for popular LLMs, converted to TinyBPE `.tbm` for
 |---|---|---|---|
 | `qwen25.tbm` | Qwen 2.5 (0.5B–72B) | 151,643 | `Qwen/Qwen2.5-0.5B` |
 | `phi2.tbm` | Phi-2 | 50,257 | `microsoft/phi-2` |
+| `deepseek-llm.tbm` | DeepSeek V2 (7B-Chat) | 100,013 | `deepseek-ai/deepseek-llm-7b-chat` |
 
 ## Usage
 
@@ -56,14 +57,14 @@ python scripts/convert_tiktoken.py r50k_base -o models/r50k_base.tbm
 | **Qwen 2.5/3** | ByteLevel BPE (151.9K) | ✅ Full |
 | **Phi-2** | ByteLevel BPE (50K) | ✅ Full |
 | **Llama 3/4** | ByteLevel BPE (128K) | ✅ Via `convert_hf_tokenizer.py`¹ |
-| **DeepSeek V2/V3** | ByteLevel BPE (~128K) | ⚠️ Partial² |
+| **DeepSeek V2/V3** | ByteLevel BPE (~100K) | ✅ Full³ |
 | **Mistral** | SentencePiece BPE / Tekken | ❌ Different format³ |
 | **Gemma 2/3** | SentencePiece Unigram (256K) | ❌ Different algorithm |
 | **Claude 3/4** | Proprietary BPE | ❌ No public tokenizer |
 | **Gemini** | Proprietary | ❌ No public tokenizer |
 
 ¹ Llama requires authentication to download the tokenizer from HuggingFace.
-² DeepSeek omits 13/256 byte tokens; uses `byte_fallback` in HuggingFace.
-³ SentencePiece uses Metaspace pre-tokenization, not ByteLevel.
+² SentencePiece uses Metaspace pre-tokenization, not ByteLevel.
+³ DeepSeek omits 13 single-char tokens for invalid UTF-8 bytes (0xC0-0xC1, 0xF5-0xFF). Converter assigns unused IDs in 0-255 range to maintain bijective mapping.
 
 See `scripts/README.md` for conversion instructions.
