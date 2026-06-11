@@ -23,7 +23,7 @@ class TestTrainer:
         assert freq >= 1
 
     def test_train_n_merges(self):
-        text = ("hello world " * 500)
+        text = "hello world " * 500
         trainer = Trainer(text)
         n = trainer.train(20)  # "hello world " * 500 can produce ~24 merges
         assert n == 20

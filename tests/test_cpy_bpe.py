@@ -50,6 +50,7 @@ class TestCTrainer:
 
     def test_non_bytes_raises(self):
         import pytest
+
         with pytest.raises(TypeError):
             bpe.Trainer(["not bytes"])  # type: ignore[list-item]
 

@@ -17,9 +17,7 @@ import argparse
 import sys
 
 
-def _decompose_token(
-    mergeable_ranks: dict[bytes, int], token: bytes
-) -> list[bytes]:
+def _decompose_token(mergeable_ranks: dict[bytes, int], token: bytes) -> list[bytes]:
     """Decompose a token into its constituent byte pair.
 
     Uses the merge ranks to greedily find the lowest-rank pair that
@@ -43,11 +41,7 @@ def _decompose_token(
         if min_idx is None:
             raise ValueError(f"Failed to find merge pair for token {token!r}")
 
-        parts = (
-            parts[:min_idx]
-            + [parts[min_idx] + parts[min_idx + 1]]
-            + parts[min_idx + 2 :]
-        )
+        parts = parts[:min_idx] + [parts[min_idx] + parts[min_idx + 1]] + parts[min_idx + 2 :]
 
     return parts
 
@@ -98,9 +92,7 @@ def tiktoken_to_tinybpe(
             continue
         pair = _decompose_token(mergeable_ranks, token)
         if len(pair) != 2:
-            raise ValueError(
-                f"Expected 2 parts for token {token!r}, got {len(pair)}"
-            )
+            raise ValueError(f"Expected 2 parts for token {token!r}, got {len(pair)}")
         # Use tiktoken's internal rank for the pair components
         i_0 = mergeable_ranks[pair[0]]
         i_1 = mergeable_ranks[pair[1]]
@@ -119,9 +111,7 @@ def tiktoken_to_tinybpe(
         left_id = rank_to_id.get(left_tiktok)
         right_id = rank_to_id.get(right_tiktok)
         if left_id is None or right_id is None:
-            raise ValueError(
-                f"Missing rank mapping: left={left_tiktok}, right={right_tiktok}"
-            )
+            raise ValueError(f"Missing rank mapping: left={left_tiktok}, right={right_tiktok}")
         merges.append((left_id, right_id))
 
     if has_remap:
@@ -130,15 +120,14 @@ def tiktoken_to_tinybpe(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Convert a tiktoken encoding to a TinyBPE .tbm model file."
-    )
+    parser = argparse.ArgumentParser(description="Convert a tiktoken encoding to a TinyBPE .tbm model file.")
     parser.add_argument(
         "encoding",
         help="Tiktoken encoding name (e.g. cl100k_base, o200k_base, p50k_base, r50k_base)",
     )
     parser.add_argument(
-        "-o", "--output",
+        "-o",
+        "--output",
         required=True,
         help="Output .tbm file path",
     )
@@ -168,6 +157,7 @@ def main() -> None:
 
     # Save via tinybpe's model I/O
     from tinybpe._model_io import save_model
+
     save_model(args.output, merges, bytes_maps)
     print(f"Saved: {args.output}")
 

@@ -25,6 +25,7 @@ from pathlib import Path
 # GPT-2 ByteLevel mapping: bytes (0-255) ↔ visible Unicode characters
 # ---------------------------------------------------------------------------
 
+
 def _bytes_to_unicode() -> dict[int, int]:
     """Build the standard GPT-2 byte-to-unicode mapping.
 
@@ -32,11 +33,7 @@ def _bytes_to_unicode() -> dict[int, int]:
     Printable bytes (! to ~, ¡ to ÿ) keep their identity;
     non-printable bytes are mapped to codepoints 256+.
     """
-    bs = (
-        list(range(ord("!"), ord("~") + 1))
-        + list(range(ord("¡"), ord("¬") + 1))
-        + list(range(ord("®"), ord("ÿ") + 1))
-    )
+    bs = list(range(ord("!"), ord("~") + 1)) + list(range(ord("¡"), ord("¬") + 1)) + list(range(ord("®"), ord("ÿ") + 1))
     cs = bs[:]  # copy
     n = 0
     for b in range(256):
@@ -56,6 +53,7 @@ _UNICODE_TO_BYTE: dict[int, int] = {v: k for k, v in _BYTE_TO_UNICODE.items()}
 # Loading
 # ---------------------------------------------------------------------------
 
+
 def load_tokenizer_json(source: str) -> dict:
     """Load a tokenizer.json from a local path or HuggingFace Hub model ID."""
     if Path(source).exists():
@@ -67,8 +65,7 @@ def load_tokenizer_json(source: str) -> dict:
         from huggingface_hub import hf_hub_download
     except ImportError:
         print(
-            "Error: huggingface_hub is required for Hub downloads.  "
-            "Install it with: pip install huggingface_hub",
+            "Error: huggingface_hub is required for Hub downloads.  Install it with: pip install huggingface_hub",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -81,6 +78,7 @@ def load_tokenizer_json(source: str) -> dict:
 # ---------------------------------------------------------------------------
 # Conversion: HuggingFace tokenizer.json → TinyBPE (merges, bytes_maps)
 # ---------------------------------------------------------------------------
+
 
 def hf_to_tinybpe(tokenizer_json: dict) -> tuple[list[tuple[int, int]], list[int] | None]:
     """Extract BPE merge pairs and byte remapping from a HF tokenizer.json.
@@ -103,9 +101,7 @@ def hf_to_tinybpe(tokenizer_json: dict) -> tuple[list[tuple[int, int]], list[int
     model_type = model.get("type", "")
 
     if model_type != "BPE":
-        raise ValueError(
-            f"Unsupported model type: {model_type!r}.  Only BPE is supported."
-        )
+        raise ValueError(f"Unsupported model type: {model_type!r}.  Only BPE is supported.")
 
     vocab: dict[str, int] = model.get("vocab", {})
     if not vocab:
@@ -134,9 +130,7 @@ def hf_to_tinybpe(tokenizer_json: dict) -> tuple[list[tuple[int, int]], list[int
         # Auto-detect the byte-to-unicode mapping from the vocab
         detected_mapping = _detect_byte_mapping(vocab)
         if detected_mapping is None:
-            raise ValueError(
-                "ByteLevel tokenizer has incomplete byte mapping in vocab"
-            )
+            raise ValueError("ByteLevel tokenizer has incomplete byte mapping in vocab")
         bytes_maps = detected_mapping
 
         # Check if remapping is actually identity
@@ -158,12 +152,10 @@ def hf_to_tinybpe(tokenizer_json: dict) -> tuple[list[tuple[int, int]], list[int
         left = vocab.get(a)
         right = vocab.get(b)
         if left is None:
-            print(f"  Warning: token {a!r} not in vocab, skipping merge {merge_str!r}",
-                  file=sys.stderr)
+            print(f"  Warning: token {a!r} not in vocab, skipping merge {merge_str!r}", file=sys.stderr)
             continue
         if right is None:
-            print(f"  Warning: token {b!r} not in vocab, skipping merge {merge_str!r}",
-                  file=sys.stderr)
+            print(f"  Warning: token {b!r} not in vocab, skipping merge {merge_str!r}", file=sys.stderr)
             continue
         merges.append((left, right))
 
@@ -206,11 +198,7 @@ def _detect_byte_mapping(vocab: dict[str, int]) -> list[int] | None:
     if still_missing:
         # Collect all single-char tokens not yet assigned
         assigned_ids = {bytes_maps[b] for b in range(256) if bytes_maps[b] >= 0}
-        unassigned = [
-            (ord(c), tid)
-            for c, tid in char_to_id.items()
-            if tid not in assigned_ids
-        ]
+        unassigned = [(ord(c), tid) for c, tid in char_to_id.items() if tid not in assigned_ids]
         unassigned.sort()
 
         for byte_val in still_missing:
@@ -274,16 +262,16 @@ def _detect_bytelevel(tokenizer_json: dict) -> bool:
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Convert a HuggingFace tokenizer.json to a TinyBPE .tbm file."
-    )
+    parser = argparse.ArgumentParser(description="Convert a HuggingFace tokenizer.json to a TinyBPE .tbm file.")
     parser.add_argument(
         "source",
         help="Path to tokenizer.json or HuggingFace model ID",
     )
     parser.add_argument(
-        "-o", "--output",
+        "-o",
+        "--output",
         required=True,
         help="Output .tbm file path",
     )
@@ -310,6 +298,7 @@ def main() -> None:
         print("  Byte remapping: no")
 
     from tinybpe._model_io import save_model
+
     save_model(args.output, merges, bytes_maps)
     print(f"Saved: {args.output}")
 

@@ -8,6 +8,7 @@ from tinybpe import Tokenizer, load_model
 
 try:
     from huggingface_hub import hf_hub_download  # noqa: F401
+
     HAS_HF = True
 except ImportError:
     HAS_HF = False
@@ -182,10 +183,10 @@ class TestQwen25Specific:
         """Code snippets should round-trip."""
         tok = Tokenizer.from_file("models/qwen25.tbm", pat_str=PAT_GPT2)
 
-        code = '''def fibonacci(n):
+        code = """def fibonacci(n):
     if n <= 1:
         return n
-    return fibonacci(n-1) + fibonacci(n-2)'''
+    return fibonacci(n-1) + fibonacci(n-2)"""
         ids = tok.encode(code)
         decoded = tok.decode(ids)
         assert decoded == code
@@ -257,7 +258,7 @@ class TestDeepSeekSpecific:
     def test_roundtrip_code(self):
         """Code snippets should round-trip."""
         tok = Tokenizer.from_file("models/deepseek-llm.tbm")
-        code = 'def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)'
+        code = "def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)"
         ids = tok.encode(code)
         decoded = tok.decode(ids)
         assert decoded == code
@@ -280,6 +281,7 @@ class TestDeepSeekSpecific:
     def test_bytes_maps_bijection(self):
         """Byte mapping should be bijective (256 unique IDs)."""
         from tinybpe import load_model
+
         _, bm = load_model("models/deepseek-llm.tbm")
         assert bm is not None
         assert len(bm) == 256

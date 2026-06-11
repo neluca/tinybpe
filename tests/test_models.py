@@ -72,6 +72,7 @@ CODE_TEXTS = [
 # TikToken model tests
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.skipif(not HAS_TIKTOKEN, reason="tiktoken not installed")
 class TestTikTokenModels:
     """Verify TinyBPE .tbm models produce identical output to tiktoken."""
@@ -160,6 +161,7 @@ class TestTikTokenModels:
 # TikToken-specific edge cases
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.skipif(not HAS_TIKTOKEN, reason="tiktoken not installed")
 class TestCl100kBase:
     """GPT-4 tokenizer specific tests."""
@@ -196,6 +198,7 @@ class TestCl100kBase:
 # ---------------------------------------------------------------------------
 # Model file I/O
 # ---------------------------------------------------------------------------
+
 
 class TestModelIO:
     """Tests for model file loading and saving."""
@@ -248,6 +251,7 @@ class TestModelIO:
 # ---------------------------------------------------------------------------
 # Byte remapping correctness
 # ---------------------------------------------------------------------------
+
 
 class TestByteRemapping:
     """Tests for byte remapping functionality."""

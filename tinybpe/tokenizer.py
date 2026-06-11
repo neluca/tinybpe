@@ -232,10 +232,7 @@ class Tokenizer:
         has_remap = self._bytes_maps is not None
         has_special = self._special_tokens is not None
         n_special = len(self._special_tokens) if has_special else 0
-        return (
-            f"Tokenizer(n_vocab={self.n_vocab}, byte_remap={has_remap}, "
-            f"special_tokens={n_special})"
-        )
+        return f"Tokenizer(n_vocab={self.n_vocab}, byte_remap={has_remap}, special_tokens={n_special})"
 
     @property
     def merges(self) -> list[tuple[int, int]]:
