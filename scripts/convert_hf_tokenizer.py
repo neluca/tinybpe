@@ -2,15 +2,16 @@
 """Convert a HuggingFace ``tokenizer.json`` to a TinyBPE ``.tbm`` model file.
 
 Supports:
+  - BPE tokenizers with ByteLevel pre-tokenizer (GPT-2 style)
   - Local ``tokenizer.json`` files
-  - HuggingFace Hub model IDs (e.g. ``meta-llama/Meta-Llama-3-8B``)
+  - HuggingFace Hub model IDs (e.g. ``Qwen/Qwen2.5-0.5B``)
 
 Usage::
 
-    python scripts/convert_hf_tokenizer.py path/to/tokenizer.json -o output.tbm
-    python scripts/convert_hf_tokenizer.py meta-llama/Meta-Llama-3-8B -o models/llama3.tbm
+    python scripts/convert_hf_tokenizer.py tokenizer.json -o output.tbm
+    python scripts/convert_hf_tokenizer.py Qwen/Qwen2.5-0.5B -o models/qwen25.tbm
 
-Dependencies: ``huggingface_hub`` (install with ``pip install huggingface_hub``).
+Dependencies: ``huggingface_hub`` (``pip install huggingface_hub``).
 """
 
 from __future__ import annotations
@@ -20,6 +21,41 @@ import json
 import sys
 from pathlib import Path
 
+
+# ---------------------------------------------------------------------------
+# GPT-2 ByteLevel mapping: bytes (0-255) ↔ visible Unicode characters
+# ---------------------------------------------------------------------------
+
+def _bytes_to_unicode() -> dict[int, int]:
+    """Build the standard GPT-2 byte-to-unicode mapping.
+
+    Returns a dict mapping byte value (0-255) → unicode codepoint.
+    Printable bytes (! to ~, ¡ to ÿ) keep their identity;
+    non-printable bytes are mapped to codepoints 256+.
+    """
+    bs = (
+        list(range(ord("!"), ord("~") + 1))
+        + list(range(ord("¡"), ord("¬") + 1))
+        + list(range(ord("®"), ord("ÿ") + 1))
+    )
+    cs = bs[:]  # copy
+    n = 0
+    for b in range(256):
+        if b not in bs:
+            bs.append(b)
+            cs.append(256 + n)
+            n += 1
+    return dict(zip(bs, cs))
+
+
+# Build once at module level
+_BYTE_TO_UNICODE = _bytes_to_unicode()
+_UNICODE_TO_BYTE: dict[int, int] = {v: k for k, v in _BYTE_TO_UNICODE.items()}
+
+
+# ---------------------------------------------------------------------------
+# Loading
+# ---------------------------------------------------------------------------
 
 def load_tokenizer_json(source: str) -> dict:
     """Load a tokenizer.json from a local path or HuggingFace Hub model ID."""
@@ -43,8 +79,15 @@ def load_tokenizer_json(source: str) -> dict:
         return json.load(f)  # type: ignore[no-any-return]
 
 
+# ---------------------------------------------------------------------------
+# Conversion: HuggingFace tokenizer.json → TinyBPE (merges, bytes_maps)
+# ---------------------------------------------------------------------------
+
 def hf_to_tinybpe(tokenizer_json: dict) -> tuple[list[tuple[int, int]], list[int] | None]:
-    """Extract BPE merge pairs from a HuggingFace tokenizer.json.
+    """Extract BPE merge pairs and byte remapping from a HF tokenizer.json.
+
+    Handles GPT-2-style ByteLevel pre-tokenizers where raw bytes are
+    mapped to visible Unicode characters before BPE encoding.
 
     Parameters
     ----------
@@ -54,68 +97,161 @@ def hf_to_tinybpe(tokenizer_json: dict) -> tuple[list[tuple[int, int]], list[int
     Returns
     -------
     tuple
-        ``(merges, bytes_maps)``.
+        ``(merges, bytes_maps)``.  ``bytes_maps`` is ``None`` if no
+        remapping is needed (identity).
     """
     model = tokenizer_json.get("model", {})
-    vocab: dict[str, int] = model.get("vocab", {})
+    model_type = model.get("type", "")
 
+    if model_type != "BPE":
+        raise ValueError(
+            f"Unsupported model type: {model_type!r}.  Only BPE is supported."
+        )
+
+    vocab: dict[str, int] = model.get("vocab", {})
     if not vocab:
         raise ValueError("No 'vocab' found in tokenizer.json model section")
 
-    # Build reverse mapping: id → token string
-    id_to_token: dict[int, str] = {v: k for k, v in vocab.items()}
-
-    # Extract merge lines from the model
-    merges_raw = model.get("merges", [])
+    merges_raw: list[str] = model.get("merges", [])
     if not merges_raw:
         raise ValueError("No 'merges' found in tokenizer.json model section")
 
-    # Parse merge strings like "h e" → individual tokens
-    merges: list[tuple[int, int]] = []
+    # ------------------------------------------------------------------
+    # Byte remapping for ByteLevel pre-tokenizers.
+    #
+    # ByteLevel maps raw bytes (0-255) to visible Unicode characters.
+    # Most tokenizers use the GPT-2 _bytes_to_unicode mapping, but some
+    # (like DeepSeek) use a slightly different set.  We auto-detect the
+    # mapping from the vocab by finding which single-char tokens
+    # represent which bytes.
+    #
+    # Our bytes_maps[i] = token ID that represents raw byte i.
+    # Input byte i is replaced by bytes_maps[i] before BPE encoding.
+    # ------------------------------------------------------------------
     bytes_maps: list[int] | None = None
+    is_bytelevel = _detect_bytelevel(tokenizer_json)
 
-    # First pass: determine if byte-level tokens are remapped
-    # Standard BPE uses single bytes as base; some tokenizers remap them
-    base_map: dict[str, int] = {}
-    for token_str, tid in vocab.items():
-        token_bytes = bytes(token_str, "utf-8") if isinstance(token_str, str) else token_str
-        if len(token_bytes) == 1:
-            base_map[token_str] = tid
+    if is_bytelevel:
+        # Auto-detect the byte-to-unicode mapping from the vocab
+        detected_mapping = _detect_byte_mapping(vocab)
+        if detected_mapping is None:
+            raise ValueError(
+                "ByteLevel tokenizer has incomplete byte mapping in vocab"
+            )
+        bytes_maps = detected_mapping
 
-    # Check if remapping is needed (base byte tokens not at IDs 0-255)
-    needs_remap = False
-    if len(base_map) >= 256:
-        # Sort by byte value
-        sorted_bytes = sorted(base_map.items(), key=lambda x: ord(x[0]) if isinstance(x[0], str) else x[0])
-        if len(sorted_bytes) == 256:
-            for i, (_, tid) in enumerate(sorted_bytes):
-                if tid != i:
-                    needs_remap = True
-                    break
+        # Check if remapping is actually identity
+        if all(bytes_maps[i] == i for i in range(256)):
+            bytes_maps = None
 
-    if needs_remap:
-        bytes_maps = [0] * 256
-        # Build the remap from byte value → token ID
-        for i in range(256):
-            byte_char = chr(i)
-            if byte_char in vocab:
-                bytes_maps[i] = vocab[byte_char]
-            else:
-                bytes_maps[i] = i  # identity fallback
-
-    # Build merges from merge strings
+    # ------------------------------------------------------------------
+    # Build merge pairs from merge strings.
+    #
+    # Merge strings look like "Ġ t" (space + t) or "i n" (i + n).
+    # We split on space and look up each token in the vocab.
+    # ------------------------------------------------------------------
+    merges: list[tuple[int, int]] = []
     for merge_str in merges_raw:
-        if isinstance(merge_str, str):
-            parts = merge_str.split(" ")
-            if len(parts) == 2:
-                a, b = parts
-                left = vocab.get(a)
-                right = vocab.get(b)
-                if left is not None and right is not None:
-                    merges.append((left, right))
+        parts = merge_str.split(" ")
+        if len(parts) != 2:
+            continue  # skip malformed entries
+        a, b = parts
+        left = vocab.get(a)
+        right = vocab.get(b)
+        if left is None:
+            print(f"  Warning: token {a!r} not in vocab, skipping merge {merge_str!r}",
+                  file=sys.stderr)
+            continue
+        if right is None:
+            print(f"  Warning: token {b!r} not in vocab, skipping merge {merge_str!r}",
+                  file=sys.stderr)
+            continue
+        merges.append((left, right))
 
     return merges, bytes_maps
 
+
+def _detect_byte_mapping(vocab: dict[str, int]) -> list[int] | None:
+    """Auto-detect byte-to-token-ID mapping from a ByteLevel vocab.
+
+    ByteLevel maps raw bytes (0-255) to visible Unicode characters.
+    Printable ASCII (33-126) and Latin-1 supplement (161-172, 174-255)
+    typically map to themselves.  Non-printable bytes map to codepoints
+    256+.
+
+    Returns a list of 256 token IDs, or None if not enough single-char
+    tokens are found.
+    """
+    # Collect all single-char tokens and their codepoints
+    char_to_id: dict[str, int] = {}
+    for tok, tid in vocab.items():
+        if len(tok) == 1:
+            char_to_id[tok] = tid
+
+    # Strategy: use the standard GPT-2 mapping as a starting point,
+    # but fall back to heuristic matching for tokenizers that deviate.
+    bytes_maps = [-1] * 256
+
+    # First pass: try GPT-2 mapping
+    for byte_val in range(256):
+        unicode_codepoint = _BYTE_TO_UNICODE[byte_val]
+        unicode_char = chr(unicode_codepoint)
+        if unicode_char in char_to_id:
+            bytes_maps[byte_val] = char_to_id[unicode_char]
+
+    # Second pass: for any missing bytes, try to find them among unused
+    # single-char tokens. Some tokenizers (DeepSeek) omit rare byte
+    # mappings from the vocab. We assign the closest available tokens.
+    still_missing = [b for b in range(256) if bytes_maps[b] < 0]
+    if still_missing:
+        # Collect all single-char tokens not yet assigned
+        assigned_ids = set(bytes_maps[b] for b in range(256) if bytes_maps[b] >= 0)
+        unassigned = [
+            (ord(c), tid)
+            for c, tid in char_to_id.items()
+            if tid not in assigned_ids
+        ]
+        # Sort by codepoint for deterministic assignment
+        unassigned.sort()
+
+        for byte_val in still_missing:
+            expected_uc = _BYTE_TO_UNICODE[byte_val]
+            # Find the closest unassigned token by codepoint
+            best = None
+            best_dist = 999999
+            for uc, tid in unassigned:
+                dist = abs(uc - expected_uc)
+                if dist < best_dist:
+                    best = (uc, tid)
+                    best_dist = dist
+            if best is not None:
+                bytes_maps[byte_val] = best[1]
+                unassigned.remove(best)
+
+    if any(b < 0 for b in bytes_maps):
+        return None  # still incomplete after fallback
+    return bytes_maps
+
+
+def _detect_bytelevel(tokenizer_json: dict) -> bool:
+    """Check if the tokenizer uses ByteLevel pre-tokenization."""
+    pre_tokenizer = tokenizer_json.get("pre_tokenizer", {})
+    if not pre_tokenizer:
+        # Check decoder as fallback
+        decoder = tokenizer_json.get("decoder", {})
+        return decoder.get("type") == "ByteLevel"
+
+    # Handle nested Sequence pre_tokenizer
+    pretoks = pre_tokenizer.get("pretokenizers", [pre_tokenizer])
+    for pt in pretoks:
+        if pt.get("type") == "ByteLevel":
+            return True
+    return False
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -134,6 +270,14 @@ def main() -> None:
 
     print(f"Loading tokenizer: {args.source}")
     tokenizer_json = load_tokenizer_json(args.source)
+
+    model_type = tokenizer_json.get("model", {}).get("type", "unknown")
+    vocab_size = len(tokenizer_json.get("model", {}).get("vocab", {}))
+    print(f"  Type: {model_type}")
+    print(f"  Vocab: {vocab_size}")
+
+    is_bytelevel = _detect_bytelevel(tokenizer_json)
+    print(f"  ByteLevel: {'yes' if is_bytelevel else 'no'}")
 
     print("Converting to TinyBPE format...")
     merges, bytes_maps = hf_to_tinybpe(tokenizer_json)
