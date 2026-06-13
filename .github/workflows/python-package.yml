@@ -81,7 +81,7 @@ jobs:
       - name: Install from sdist
         run: |
           pip install dist/*.tar.gz
-      - name: Verify import
+      - name: Verify import and model loading
         run: |
           cd /tmp
-          python -c "import tinybpe; print(tinybpe.__version__)"
+          python -c "import tinybpe; print(tinybpe.__version__); print(tinybpe.list_models()); from tinybpe import Tokenizer; tok = Tokenizer.from_pretrained('cl100k_base'); print(len(tok.encode('hello world')))"

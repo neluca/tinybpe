@@ -38,6 +38,7 @@ class ModelInfo(TypedDict):
 # Load registry from JSON
 # ---------------------------------------------------------------------------
 
+
 def _load_registry() -> tuple[dict[str, ModelInfo], dict[str, str | None]]:
     """Load model registry and pattern definitions from ``models/models.json``.
 

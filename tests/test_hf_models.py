@@ -186,8 +186,6 @@ class TestQwen35Specific:
         assert decoded == code
 
 
-
-
 @pytest.mark.skipif(not HAS_HF, reason="huggingface_hub not installed")
 class TestDeepSeekSpecific:
     """DeepSeek-V4 tokenizer specific tests.
