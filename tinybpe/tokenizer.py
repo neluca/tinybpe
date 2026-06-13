@@ -125,9 +125,9 @@ class Tokenizer:
             self._special_tokens = special_tokens
             # Sort by length descending so that longer tokens match before
             # shorter prefixes (e.g. "<ab>" before "<a>").
-            self._special_pattern = "(" + "|".join(
-                re.escape(k) for k in sorted(special_tokens, key=len, reverse=True)
-            ) + ")"
+            self._special_pattern = (
+                "(" + "|".join(re.escape(k) for k in sorted(special_tokens, key=len, reverse=True)) + ")"
+            )
 
             if self._bytes_maps is None:
                 _mapped = {k.encode("utf-8"): v for k, v in special_tokens.items()}
