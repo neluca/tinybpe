@@ -8,7 +8,7 @@
 
 **An ultra-fast, lightweight BPE tokenizer and trainer with a pure-C core.**
 
-Ever wished you could load a GPT-4 compatible tokenizer in **one line** without network calls? TinyBPE ships 8 pre-built tokenizer models directly in the package. The CPython C core runs BPE encoding/decoding at native speed — typically **10-50× faster** than pure-Python implementations while depending only on `regex`.
+Ever wished you could load a GPT-4 compatible tokenizer in **one line** without network calls? TinyBPE ships 8 pre-built ByteLevel BPE models directly in the package. The CPython C core runs BPE encoding/decoding at native speed — typically **10-50× faster** than pure-Python implementations while depending only on `regex`.
 
 ## Why TinyBPE?
 
@@ -75,7 +75,7 @@ tinybpe.list_models()
 | `qwen25` | Qwen 2.5 (0.5B–72B) | 151,643 |
 | `phi2` | Microsoft Phi-2 | 50,257 |
 | `deepseek-llm` | DeepSeek V2 (7B-Chat) | 100,013 |
-| `minicpm` | MiniCPM-2B (SentencePiece BPE) | 129,850 |
+| `minicpm5` | MiniCPM5-1B (ByteLevel BPE) | 130,050 |
 
 ### Training
 
@@ -206,8 +206,6 @@ python scripts/convert_tiktoken.py cl100k_base -o models/cl100k_base.tbm
 python scripts/convert_hf_tokenizer.py tokenizer.json -o output.tbm
 python scripts/convert_hf_tokenizer.py Qwen/Qwen2.5-0.5B -o models/qwen25.tbm
 
-# MiniCPM (SentencePiece BPE)
-python scripts/convert_minicpm.py -o models/minicpm.tbm
 ```
 
 See [`scripts/README.md`](scripts/README.md) for details.

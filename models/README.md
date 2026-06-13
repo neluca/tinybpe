@@ -34,12 +34,6 @@ ids = tok.encode("hello world")
 | `phi2` | Microsoft Phi-2 | 50,257 | GPT-2 regex | `microsoft/phi-2` |
 | `deepseek-llm` | DeepSeek V2 (7B-Chat) | 100,013 | None (raw) | `deepseek-ai/deepseek-llm-7b-chat` |
 
-### SentencePiece BPE (converted)
-
-| Model | LLM Compatibility | Vocab | Pre-tokenization | Notes |
-|---|---|---|---|---|
-| `minicpm` | MiniCPM-2B | 129,850 | None (SentencePiece) | Byte-level converted; needs manual SP normalization |
-
 ## Model Format
 
 All files use the `.tbm` (TinyBPE Model v1) text format:
@@ -63,9 +57,6 @@ python scripts/convert_tiktoken.py o200k_base -o models/o200k_base.tbm
 
 # HuggingFace tokenizer.json (local or Hub ID)
 python scripts/convert_hf_tokenizer.py Qwen/Qwen2.5-0.5B -o models/qwen25.tbm
-
-# MiniCPM / SentencePiece BPE
-python scripts/convert_minicpm.py -o models/minicpm.tbm
 ```
 
 After conversion, add the model to the registry in `tinybpe/_registry.py` so it becomes available via `Tokenizer.from_pretrained()`.
@@ -82,7 +73,7 @@ After conversion, add the model to the registry in `tinybpe/_registry.py` so it 
 | Phi-2 | ByteLevel BPE | Full support |
 | Llama 3 / 4 | ByteLevel BPE | Via `convert_hf_tokenizer.py` |
 | DeepSeek V2 / V3 | ByteLevel BPE | Full support |
-| MiniCPM | SentencePiece BPE | Converted (byte-level) |
+| MiniCPM5-1B | ByteLevel BPE | Full support |
 | Mistral | SentencePiece BPE / Tekken | Not supported |
 | Gemma 2 / 3 | SentencePiece Unigram | Not supported |
 | Claude 3 / 4 | Proprietary BPE | No public tokenizer |

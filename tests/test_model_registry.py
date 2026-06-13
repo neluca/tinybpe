@@ -32,7 +32,6 @@ class TestListModels:
             "qwen25",
             "phi2",
             "deepseek-llm",
-            "minicpm",
             "minicpm5",
         }
         assert expected.issubset(set(models))
@@ -128,13 +127,6 @@ class TestFromPretrained:
         ids = tok.encode("hello world")
         assert len(ids) > 0
         assert tok.decode(ids) == "hello world"
-
-    def test_minicpm_loads(self) -> None:
-        """minicpm model should load."""
-        tok = Tokenizer.from_pretrained("minicpm")
-        # MiniCPM uses SentencePiece — test preprocessed text
-        ids = tok.encode("hello world")
-        assert len(ids) > 0
 
     def test_minicpm5_loads(self) -> None:
         """minicpm5 model should load and roundtrip."""

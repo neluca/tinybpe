@@ -8,7 +8,7 @@
 
 **纯 C 内核的超轻量高性能 BPE 分词器与训练器。**
 
-只需**一行代码**即可加载 GPT-4 兼容分词器，无需联网。TinyBPE 内置 8 个预训练模型，开箱即用。CPython C 扩展以原生速度执行 BPE 编码/解码——通常比纯 Python 实现**快 10–50 倍**，且仅依赖 `regex` 一个第三方库。
+只需**一行代码**即可加载 GPT-4 兼容分词器，无需联网。TinyBPE 内置 8 个 ByteLevel BPE 预训练模型，开箱即用。CPython C 扩展以原生速度执行 BPE 编码/解码——通常比纯 Python 实现**快 10–50 倍**，且仅依赖 `regex` 一个第三方库。
 
 ## 为什么选择 TinyBPE？
 
@@ -75,7 +75,7 @@ tinybpe.list_models()
 | `qwen25` | Qwen 2.5（0.5B–72B） | 151,643 |
 | `phi2` | Microsoft Phi-2 | 50,257 |
 | `deepseek-llm` | DeepSeek V2（7B-Chat） | 100,013 |
-| `minicpm` | MiniCPM-2B（SentencePiece BPE） | 129,850 |
+| `minicpm5` | MiniCPM5-1B（ByteLevel BPE） | 130,050 |
 
 ### 训练分词器
 
@@ -206,8 +206,6 @@ python scripts/convert_tiktoken.py cl100k_base -o models/cl100k_base.tbm
 python scripts/convert_hf_tokenizer.py tokenizer.json -o output.tbm
 python scripts/convert_hf_tokenizer.py Qwen/Qwen2.5-0.5B -o models/qwen25.tbm
 
-# MiniCPM（SentencePiece BPE）
-python scripts/convert_minicpm.py -o models/minicpm.tbm
 ```
 
 详见 [`scripts/README.md`](scripts/README.md)。

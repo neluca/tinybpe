@@ -119,45 +119,6 @@ class TestConvertHFByteMapping:
         assert result is None
 
 
-class TestConvertMiniCPM:
-    """Smoke tests for convert_minicpm.py."""
-
-    def test_import_convert_minicpm(self) -> None:
-        """convert_minicpm.py should be importable."""
-        mod = _import_script("convert_minicpm.py")
-        assert hasattr(mod, "_bytes_to_unicode")
-        assert hasattr(mod, "_build_byte_trie")
-        assert hasattr(mod, "_trie_to_merges")
-
-    def test_trie_build_simple(self) -> None:
-        """Building a trie from a single multi-byte sequence should work."""
-        mod = _import_script("convert_minicpm.py")
-        # Simulate the SP marker (U+2581, bytes [226, 150, 129])
-        test_entries = [(1, b"\xe2\x96\x81")]
-        root = mod._build_byte_trie(test_entries)
-        assert 226 in root.children
-        assert 150 in root.children[226].children
-
-    def test_trie_to_merges(self) -> None:
-        """Trie conversion should produce valid merges."""
-        mod = _import_script("convert_minicpm.py")
-        test_entries = [(1, b"\xe2\x96\x81"), (2, b"\xe2\x96\x82")]
-        root = mod._build_byte_trie(test_entries)
-        merges, old_to_new, _id_to_bytes = mod._trie_to_merges(root)
-        # Should have 3 merges: (226,150), (256,129), (256,130)
-        assert len(merges) == 3
-        # First merge should build the shared prefix
-        assert merges[0] == (226, 150)
-        # Validation: each merge's operands must pre-exist
-        for idx, (left, right) in enumerate(merges):
-            max_valid = 256 + idx
-            assert left < max_valid, f"merge {idx}: left {left} >= {max_valid}"
-            assert right < max_valid, f"merge {idx}: right {right} >= {max_valid}"
-        # Old token IDs should map to new ones
-        assert old_to_new[1] == 257  # [226,150,129] = token after prefix
-        assert old_to_new[2] == 258  # [226,150,130]
-
-
 class TestConvertTikToken:
     """Smoke tests for convert_tiktoken.py."""
 

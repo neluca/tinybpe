@@ -168,17 +168,6 @@ _MODEL_REGISTRY: dict[str, ModelInfo] = {
         "special_tokens": None,
         "has_byte_remap": False,
     },
-    # ---- SentencePiece BPE (byte-level converted) ----
-    "minicpm": {
-        "name": "minicpm",
-        "path": "models/minicpm.tbm",
-        "vocab_size": 129850,
-        "description": "MiniCPM-2B (SentencePiece BPE, converted)",
-        "family": "MiniCPM",
-        "pat_str": None,
-        "special_tokens": None,
-        "has_byte_remap": False,
-    },
 }
 
 
