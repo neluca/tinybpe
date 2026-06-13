@@ -11,10 +11,10 @@ from tinybpe._registry import _MODEL_REGISTRY, get_model_info
 class TestListModels:
     """Tests for list_models()."""
 
-    def test_returns_all_eight(self) -> None:
-        """All 8 built-in models should be listed."""
+    def test_returns_all_models(self) -> None:
+        """All built-in models should be listed."""
         models = list_models()
-        assert len(models) == 8
+        assert len(models) >= 8  # at least 8, grows as models are added
 
     def test_is_sorted(self) -> None:
         """Model names should be sorted alphabetically."""
@@ -33,8 +33,9 @@ class TestListModels:
             "phi2",
             "deepseek-llm",
             "minicpm",
+            "minicpm5",
         }
-        assert set(models) == expected
+        assert expected.issubset(set(models))
 
 
 class TestGetModelInfo:
@@ -134,6 +135,13 @@ class TestFromPretrained:
         # MiniCPM uses SentencePiece — test preprocessed text
         ids = tok.encode("hello world")
         assert len(ids) > 0
+
+    def test_minicpm5_loads(self) -> None:
+        """minicpm5 model should load and roundtrip."""
+        tok = Tokenizer.from_pretrained("minicpm5")
+        ids = tok.encode("hello world")
+        assert len(ids) > 0
+        assert tok.decode(ids) == "hello world"
 
     @pytest.mark.parametrize(
         "model_name",

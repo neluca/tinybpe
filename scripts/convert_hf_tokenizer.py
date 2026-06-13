@@ -140,22 +140,33 @@ def hf_to_tinybpe(tokenizer_json: dict) -> tuple[list[tuple[int, int]], list[int
     # ------------------------------------------------------------------
     # Build merge pairs from merge strings.
     #
-    # Merge strings look like "Ġ t" (space + t) or "i n" (i + n).
-    # We split on space and look up each token in the vocab.
+    # Handles two formats:
+    #   - String format: ``"Ġ t"`` (space-separated)
+    #   - List format: ``["Ġ", "t"]`` (list of two strings)
     # ------------------------------------------------------------------
     merges: list[tuple[int, int]] = []
-    for merge_str in merges_raw:
-        parts = merge_str.split(" ")
-        if len(parts) != 2:
-            continue  # skip malformed entries
-        a, b = parts
+    for merge_entry in merges_raw:
+        if isinstance(merge_entry, list):
+            # Newer format: ["token_a", "token_b"]
+            if len(merge_entry) != 2:
+                continue
+            a, b = merge_entry
+        elif isinstance(merge_entry, str):
+            # Older format: "token_a token_b"
+            parts = merge_entry.split(" ")
+            if len(parts) != 2:
+                continue
+            a, b = parts
+        else:
+            continue
+
         left = vocab.get(a)
         right = vocab.get(b)
         if left is None:
-            print(f"  Warning: token {a!r} not in vocab, skipping merge {merge_str!r}", file=sys.stderr)
+            print(f"  Warning: token {a!r} not in vocab, skipping merge", file=sys.stderr)
             continue
         if right is None:
-            print(f"  Warning: token {b!r} not in vocab, skipping merge {merge_str!r}", file=sys.stderr)
+            print(f"  Warning: token {b!r} not in vocab, skipping merge", file=sys.stderr)
             continue
         merges.append((left, right))
 
@@ -265,6 +276,26 @@ def _detect_bytelevel(tokenizer_json: dict) -> bool:
 # ---------------------------------------------------------------------------
 
 
+def _save_model_inline(path: str, merges, bytes_maps=None) -> None:
+    """Inline .tbm save (no tinybpe import needed)."""
+    from pathlib import Path
+
+    if Path(path).suffix != ".tbm":
+        path += ".tbm"
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("TinyBPE Model v1\n")
+        if bytes_maps is not None:
+            if len(bytes_maps) != 256:
+                raise ValueError("bytes_maps must have exactly 256 elements")
+            f.write("256\n")
+            for v in bytes_maps:
+                f.write(f"{v}\n")
+        else:
+            f.write("0\n")
+        for left, right in merges:
+            f.write(f"{left} {right}\n")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Convert a HuggingFace tokenizer.json to a TinyBPE .tbm file.")
     parser.add_argument(
@@ -299,9 +330,13 @@ def main() -> None:
     else:
         print("  Byte remapping: no")
 
-    from tinybpe._model_io import save_model
-
-    save_model(args.output, merges, bytes_maps)
+    # Save via tinybpe's model I/O (with inline fallback)
+    try:
+        from tinybpe._model_io import save_model
+    except ImportError:
+        _save_model_inline(args.output, merges, bytes_maps)
+    else:
+        save_model(args.output, merges, bytes_maps)
     print(f"Saved: {args.output}")
 
 

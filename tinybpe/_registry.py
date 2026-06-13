@@ -157,6 +157,17 @@ _MODEL_REGISTRY: dict[str, ModelInfo] = {
         "special_tokens": None,
         "has_byte_remap": True,
     },
+    # ---- ByteLevel BPE (no regex) ----
+    "minicpm5": {
+        "name": "minicpm5",
+        "path": "models/minicpm5.tbm",
+        "vocab_size": 130050,
+        "description": "MiniCPM5-1B (ByteLevel BPE)",
+        "family": "MiniCPM",
+        "pat_str": None,
+        "special_tokens": None,
+        "has_byte_remap": False,
+    },
     # ---- SentencePiece BPE (byte-level converted) ----
     "minicpm": {
         "name": "minicpm",
