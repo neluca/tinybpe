@@ -31,7 +31,7 @@ class TestListModels:
             "r50k_base",
             "qwen35",
             "phi2",
-            "deepseek-llm",
+            "deepseek-v4",
             "minicpm5",
         }
         assert expected.issubset(set(models))
@@ -122,8 +122,8 @@ class TestFromPretrained:
         assert tok.decode(ids) == "hello world"
 
     def test_deepseek_llm_loads(self) -> None:
-        """deepseek-llm model should load."""
-        tok = Tokenizer.from_pretrained("deepseek-llm")
+        """deepseek-v4 model should load."""
+        tok = Tokenizer.from_pretrained("deepseek-v4")
         ids = tok.encode("hello world")
         assert len(ids) > 0
         assert tok.decode(ids) == "hello world"

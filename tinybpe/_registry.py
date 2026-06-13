@@ -147,15 +147,15 @@ _MODEL_REGISTRY: dict[str, ModelInfo] = {
         "special_tokens": None,
         "has_byte_remap": True,
     },
-    "deepseek-llm": {
-        "name": "deepseek-llm",
-        "path": "models/deepseek-llm.tbm",
-        "vocab_size": 100000,
-        "description": "DeepSeek V2 (7B-Chat)",
+    "deepseek-v4": {
+        "name": "deepseek-v4",
+        "path": "models/deepseek-v4.tbm",
+        "vocab_size": 127997,
+        "description": "DeepSeek-V4 Flash",
         "family": "DeepSeek",
         "pat_str": None,
         "special_tokens": None,
-        "has_byte_remap": True,
+        "has_byte_remap": False,
     },
     # ---- ByteLevel BPE (no regex) ----
     "minicpm5": {
@@ -190,7 +190,7 @@ def list_models() -> list[str]:
     --------
     >>> import tinybpe
     >>> tinybpe.list_models()
-    ['cl100k_base', 'deepseek-llm', 'minicpm5', 'o200k_base', 'p50k_base', 'phi2', 'qwen35', 'r50k_base']
+    ['cl100k_base', 'deepseek-v4', 'minicpm5', 'o200k_base', 'p50k_base', 'phi2', 'qwen35', 'r50k_base']
     """
     return sorted(_MODEL_REGISTRY.keys())
 

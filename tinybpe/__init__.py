@@ -40,7 +40,7 @@ List available models::
 
     >>> import tinybpe
     >>> tinybpe.list_models()
-    ['cl100k_base', 'deepseek-llm', 'minicpm5', 'o200k_base', 'p50k_base', 'phi2', 'qwen35', 'r50k_base']
+    ['cl100k_base', 'deepseek-v4', 'minicpm5', 'o200k_base', 'p50k_base', 'phi2', 'qwen35', 'r50k_base']
 """
 
 __all__ = [

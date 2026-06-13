@@ -219,18 +219,14 @@ class TestPhi2Specific:
 
 @pytest.mark.skipif(not HAS_HF, reason="huggingface_hub not installed")
 class TestDeepSeekSpecific:
-    """DeepSeek tokenizer specific tests.
+    """DeepSeek-V4 tokenizer specific tests.
 
-    DeepSeek uses a non-standard byte-to-unicode mapping that omits
-    13 Latin-1 supplement characters (accents).  These correspond to
-    byte values 0xC0-0xC1 and 0xF5-0xFF, all of which are invalid
-    in valid UTF-8 text.  The converter assigns unused token IDs in
-    the 0-255 range to maintain a bijective bytes_maps.
+    DeepSeek-V4 uses standard ByteLevel BPE with ID-remapped token IDs.
     """
 
     def test_roundtrip_ascii(self):
         """ASCII text should round-trip."""
-        tok = Tokenizer.from_file("models/deepseek-llm.tbm")
+        tok = Tokenizer.from_file("models/deepseek-v4.tbm")
         for text in [
             "hello world",
             "Hello World! How are you?",
@@ -244,7 +240,7 @@ class TestDeepSeekSpecific:
 
     def test_roundtrip_chinese(self):
         """Chinese text should round-trip."""
-        tok = Tokenizer.from_file("models/deepseek-llm.tbm")
+        tok = Tokenizer.from_file("models/deepseek-v4.tbm")
         cn_texts = [
             "他是一个独自一人划着小船在墨西哥湾大海流打鱼的老人",
             "人工智能正在改变世界",
@@ -257,7 +253,7 @@ class TestDeepSeekSpecific:
 
     def test_roundtrip_code(self):
         """Code snippets should round-trip."""
-        tok = Tokenizer.from_file("models/deepseek-llm.tbm")
+        tok = Tokenizer.from_file("models/deepseek-v4.tbm")
         code = "def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)"
         ids = tok.encode(code)
         decoded = tok.decode(ids)
@@ -265,7 +261,7 @@ class TestDeepSeekSpecific:
 
     def test_roundtrip_emoji(self):
         """Emoji should round-trip."""
-        tok = Tokenizer.from_file("models/deepseek-llm.tbm")
+        tok = Tokenizer.from_file("models/deepseek-v4.tbm")
         text = "👋😊🎉🔥💻"
         ids = tok.encode(text)
         decoded = tok.decode(ids)
@@ -273,23 +269,22 @@ class TestDeepSeekSpecific:
 
     def test_vocab_size(self):
         """Vocab size should be correct."""
-        tok = Tokenizer.from_file("models/deepseek-llm.tbm")
-        # DeepSeek-LLM has 100K total tokens
-        assert 99000 <= tok.n_vocab <= 101000
+        tok = Tokenizer.from_file("models/deepseek-v4.tbm")
+        # DeepSeek-V4 has ~128K total tokens
+        assert 127000 <= tok.n_vocab <= 129000
         assert tok.n_vocab == 256 + len(tok.merges)
 
     def test_bytes_maps_bijection(self):
-        """Byte mapping should be bijective (256 unique IDs)."""
+        """Bytes are identity-mapped (no remap needed after ID remapping)."""
         from tinybpe import load_model
 
-        _, bm = load_model("models/deepseek-llm.tbm")
-        assert bm is not None
-        assert len(bm) == 256
-        assert len(set(bm)) == 256, "bytes_maps must be bijective"
+        _, bm = load_model("models/deepseek-v4.tbm")
+        # ID-remapped models have bytes_maps=None
+        assert bm is None
 
     def test_streaming_decode(self):
         """Streaming decode should match batch decode."""
-        tok = Tokenizer.from_file("models/deepseek-llm.tbm")
+        tok = Tokenizer.from_file("models/deepseek-v4.tbm")
         text = "hello world 你好 世界"
         ids = tok.encode(text)
         parts: list[str] = []

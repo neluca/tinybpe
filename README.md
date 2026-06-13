@@ -60,7 +60,7 @@ tok.decode(ids)  # → 'hello world'
 import tinybpe
 
 tinybpe.list_models()
-# ['cl100k_base', 'deepseek-llm', 'minicpm', 'o200k_base',
+# ['cl100k_base', 'deepseek-v4', 'minicpm', 'o200k_base',
 #  'p50k_base', 'phi2', 'qwen35', 'r50k_base']
 ```
 
@@ -74,7 +74,7 @@ tinybpe.list_models()
 | `r50k_base` | GPT-2 | 50,256 |
 | `qwen35` | Qwen3.5 (0.8B-35B) | 247,843 |
 | `phi2` | Microsoft Phi-2 | 50,257 |
-| `deepseek-llm` | DeepSeek V2 (7B-Chat) | 100,013 |
+| `deepseek-v4` | DeepSeek-V4 Flash | 127,997 |
 | `minicpm5` | MiniCPM5-1B (ByteLevel BPE) | 130,050 |
 
 ### Training
