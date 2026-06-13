@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tinybpe"
-authors = [{ name = "E.T. Romani", email = "myneluca@gmail.com" }]
+authors = [{ name = "Romani Isa", email = "myneluca@gmail.com" }]
 description = "An ultra-fast, lightweight BPE tokenizer and trainer with a pure-C core."
 dependencies = ["regex>=2022.1.18"]
 readme = "README.md"
