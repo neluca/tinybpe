@@ -1,0 +1,134 @@
+{
+  "patterns": {
+    "bytelevel": "(?i:'s|'t|'re|'ve|'m|'ll|'d)|[^\\r\\n\\p{L}\\p{N}]?\\p{L}+|\\p{N}| ?[^\\s\\p{L}\\p{N}]+[\\r\\n]*|\\s*[\\r\\n]+|\\s+(?!\\S)|\\s+",
+    "none": null
+  },
+  "models": [
+    {
+      "name": "cl100k_base",
+      "path": "models/cl100k_base.tbm",
+      "vocab_size": 100277,
+      "description": "GPT-4 / GPT-3.5-turbo / text-embedding-ada-002",
+      "family": "GPT-4",
+      "pattern": "bytelevel",
+      "has_byte_remap": true,
+      "special_tokens": {
+        "<|endoftext|>": 100257,
+        "<|fim_prefix|>": 100258,
+        "<|fim_middle|>": 100259,
+        "<|fim_suffix|>": 100260,
+        "<|endofprompt|>": 100276
+      }
+    },
+    {
+      "name": "o200k_base",
+      "path": "models/o200k_base.tbm",
+      "vocab_size": 200019,
+      "description": "GPT-4o / GPT-4o-mini / GPT-5",
+      "family": "GPT-4o",
+      "pattern": "bytelevel",
+      "has_byte_remap": true,
+      "special_tokens": {
+        "<|endoftext|>": 199999,
+        "<|fim_prefix|>": 200000,
+        "<|fim_middle|>": 200001,
+        "<|fim_suffix|>": 200002,
+        "<|endofprompt|>": 200018
+      }
+    },
+    {
+      "name": "p50k_base",
+      "path": "models/p50k_base.tbm",
+      "vocab_size": 50281,
+      "description": "GPT-3 (davinci, curie, babbage, ada)",
+      "family": "GPT-3",
+      "pattern": "bytelevel",
+      "has_byte_remap": true,
+      "special_tokens": {
+        "<|endoftext|>": 50256
+      }
+    },
+    {
+      "name": "r50k_base",
+      "path": "models/r50k_base.tbm",
+      "vocab_size": 50257,
+      "description": "GPT-2",
+      "family": "GPT-2",
+      "pattern": "bytelevel",
+      "has_byte_remap": true,
+      "special_tokens": {
+        "<|endoftext|>": 50256
+      }
+    },
+    {
+      "name": "qwen35",
+      "path": "models/qwen35.tbm",
+      "vocab_size": 247843,
+      "description": "Qwen3.5 (0.8B-35B)",
+      "family": "Qwen",
+      "pattern": "bytelevel",
+      "has_byte_remap": false,
+      "special_tokens": {
+        "<|endoftext|>": 248044,
+        "<|im_start|>": 248045,
+        "<|im_end|>": 248046
+      }
+    },
+    {
+      "name": "deepseek-v4",
+      "path": "models/deepseek-v4.tbm",
+      "vocab_size": 127997,
+      "description": "DeepSeek-V4 Flash",
+      "family": "DeepSeek",
+      "pattern": "none",
+      "has_byte_remap": false,
+      "special_tokens": {
+        "<｜begin▁of▁sentence｜>": 0,
+        "<｜end▁of▁sentence｜>": 1,
+        "<｜pad▁｜>": 2
+      }
+    },
+    {
+      "name": "llama4",
+      "path": "models/llama4.tbm",
+      "vocab_size": 440058,
+      "description": "Llama 4 Scout (17B)",
+      "family": "Llama",
+      "pattern": "none",
+      "has_byte_remap": false,
+      "special_tokens": {
+        "<|begin_of_text|>": 200000,
+        "<|end_of_text|>": 200001,
+        "<|fim_prefix|>": 200002,
+        "<|fim_middle|>": 200003,
+        "<|fim_suffix|>": 200004,
+        "<|header_start|>": 200005,
+        "<|header_end|>": 200006,
+        "<|eom|>": 200007,
+        "<|eot|>": 200008,
+        "<|python_start|>": 200016,
+        "<|python_end|>": 200017
+      }
+    },
+    {
+      "name": "minicpm5",
+      "path": "models/minicpm5.tbm",
+      "vocab_size": 130050,
+      "description": "MiniCPM5-1B (ByteLevel BPE)",
+      "family": "MiniCPM",
+      "pattern": "none",
+      "has_byte_remap": false,
+      "special_tokens": {
+        "<s>": 0,
+        "</s>": 1,
+        "<tool_call>": 2,
+        "</tool_call>": 3,
+        "<|fim_prefix|>": 5,
+        "<|fim_middle|>": 6,
+        "<|fim_suffix|>": 7,
+        "<tool_response>": 10,
+        "</tool_response>": 11
+      }
+    }
+  ]
+}

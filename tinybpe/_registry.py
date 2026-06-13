@@ -1,13 +1,23 @@
 """Built-in model registry.
 
-Maps model names to metadata including file path, vocabulary size,
-regex pre-tokenization pattern, and special tokens.
+Loads model metadata from ``models/models.json``.  Each model entry
+specifies its ``.tbm`` file path, vocabulary size, regex pre-tokenization
+pattern, special tokens, and byte-remap status.
 
 All models ship with the package — no network required.
+
+Adding a new model:
+
+1. Place the ``.tbm`` file in ``models/``.
+2. Add a JSON entry to ``models/models.json``.
+3. Done — :func:`list_models` and :meth:`~tinybpe.Tokenizer.from_pretrained`
+   pick it up automatically.
 """
 
 from __future__ import annotations
 
+import json
+import os
 from typing import TypedDict
 
 
@@ -15,160 +25,82 @@ class ModelInfo(TypedDict):
     """Metadata for a built-in BPE model."""
 
     name: str
-    """Short identifier used with :meth:`~tinybpe.Tokenizer.from_pretrained`."""
-
     path: str
-    """Package-relative path to the ``.tbm`` file."""
-
     vocab_size: int
-    """Total vocabulary size (base bytes + merges + special tokens)."""
-
     description: str
-    """Human-readable description including LLM family."""
-
     family: str
-    """LLM family name for grouping."""
-
     pat_str: str | None
-    """Regex pattern for pre-tokenization.  ``None`` means no splitting."""
-
     special_tokens: dict[str, int] | None
-    """Special token strings mapped to their IDs.  ``None`` if none."""
-
     has_byte_remap: bool
-    """Whether the model uses byte remapping (tikToken ByteLevel encoding)."""
 
 
 # ---------------------------------------------------------------------------
-# Regex patterns for ByteLevel BPE pre-tokenization
+# Load registry from JSON
 # ---------------------------------------------------------------------------
 
-# GPT-2 ByteLevel pre-tokenization pattern.
-# Used by all TikToken and HuggingFace ByteLevel BPE models.
-_PAT_BYTELEVEL = (
-    r"(?i:'s|'t|'re|'ve|'m|'ll|'d)"
-    r"|[^\r\n\p{L}\p{N}]?\p{L}+"
-    r"|\p{N}"
-    r"| ?[^\s\p{L}\p{N}]+[\r\n]*"
-    r"|\s*[\r\n]+"
-    r"|\s+(?!\S)"
-    r"|\s+"
-)
+def _load_registry() -> tuple[dict[str, ModelInfo], dict[str, str | None]]:
+    """Load model registry and pattern definitions from ``models/models.json``.
 
-# No-split pattern (used by MiniCPM and DeepSeek)
-_PAT_NONE = None
+    Returns
+    -------
+    tuple
+        ``(registry, patterns)`` where *registry* maps model names to
+        ``ModelInfo``, and *patterns* maps pattern names to regex strings
+        (or ``None`` for no-split).
+    """
+    # Resolve the JSON path relative to the package
+    json_path = os.path.join(os.path.dirname(__file__), "..", "models", "models.json")
+    # Also try importlib.resources for wheel installs
+    if not os.path.isfile(json_path):
+        try:
+            from importlib.resources import files as _files
+            from pathlib import Path
 
-# ---------------------------------------------------------------------------
-# Special token sets
-# ---------------------------------------------------------------------------
+            pkg_root = _files("tinybpe")
+            json_path = str(Path(str(pkg_root)).parent / "models" / "models.json")
+        except Exception:
+            pass
 
-# GPT-4 / GPT-3.5 special tokens
-_SPECIAL_CL100K: dict[str, int] = {
-    "<|endoftext|>": 100257,
-    "<|fim_prefix|>": 100258,
-    "<|fim_middle|>": 100259,
-    "<|fim_suffix|>": 100260,
-    "<|endofprompt|>": 100276,
-}
+    with open(json_path, encoding="utf-8") as f:
+        data = json.load(f)
 
-# o200k special tokens
-_SPECIAL_O200K: dict[str, int] = {
-    "<|endoftext|>": 199999,
-    "<|fim_prefix|>": 200000,
-    "<|fim_middle|>": 200001,
-    "<|fim_suffix|>": 200002,
-    "<|endofprompt|>": 200018,
-}
+    # Resolve pattern references
+    pattern_map: dict[str, str | None] = data.get("patterns", {})
 
-# ---------------------------------------------------------------------------
-# Registry
-# ---------------------------------------------------------------------------
+    registry: dict[str, ModelInfo] = {}
+    for entry in data.get("models", []):
+        pat_ref: str = entry.get("pattern", "none")
+        pat_str = pattern_map.get(pat_ref)
 
-_MODEL_REGISTRY: dict[str, ModelInfo] = {
-    # ---- TikToken (OpenAI) ----
-    "cl100k_base": {
-        "name": "cl100k_base",
-        "path": "models/cl100k_base.tbm",
-        "vocab_size": 100277,
-        "description": "GPT-4 / GPT-3.5-turbo / text-embedding-ada-002",
-        "family": "GPT-4",
-        "pat_str": _PAT_BYTELEVEL,
-        "special_tokens": _SPECIAL_CL100K,
-        "has_byte_remap": True,
-    },
-    "o200k_base": {
-        "name": "o200k_base",
-        "path": "models/o200k_base.tbm",
-        "vocab_size": 200019,
-        "description": "GPT-4o / GPT-4o-mini / GPT-5",
-        "family": "GPT-4o",
-        "pat_str": _PAT_BYTELEVEL,
-        "special_tokens": _SPECIAL_O200K,
-        "has_byte_remap": True,
-    },
-    "p50k_base": {
-        "name": "p50k_base",
-        "path": "models/p50k_base.tbm",
-        "vocab_size": 50281,
-        "description": "GPT-3 (davinci, curie, babbage, ada)",
-        "family": "GPT-3",
-        "pat_str": _PAT_BYTELEVEL,
-        "special_tokens": {"<|endoftext|>": 50256},
-        "has_byte_remap": True,
-    },
-    "r50k_base": {
-        "name": "r50k_base",
-        "path": "models/r50k_base.tbm",
-        "vocab_size": 50257,
-        "description": "GPT-2",
-        "family": "GPT-2",
-        "pat_str": _PAT_BYTELEVEL,
-        "special_tokens": {"<|endoftext|>": 50256},
-        "has_byte_remap": True,
-    },
-    # ---- HuggingFace ByteLevel BPE ----
-    "qwen35": {
-        "name": "qwen35",
-        "path": "models/qwen35.tbm",
-        "vocab_size": 247843,
-        "description": "Qwen3.5 (0.8B-35B)",
-        "family": "Qwen",
-        "pat_str": _PAT_BYTELEVEL,
-        "special_tokens": None,
-        "has_byte_remap": False,
-    },
-    "deepseek-v4": {
-        "name": "deepseek-v4",
-        "path": "models/deepseek-v4.tbm",
-        "vocab_size": 127997,
-        "description": "DeepSeek-V4 Flash",
-        "family": "DeepSeek",
-        "pat_str": None,
-        "special_tokens": None,
-        "has_byte_remap": False,
-    },
-    # ---- ByteLevel BPE (no regex) ----
-    "llama4": {
-        "name": "llama4",
-        "path": "models/llama4.tbm",
-        "vocab_size": 440058,
-        "description": "Llama 4 Scout (17B)",
-        "family": "Llama",
-        "pat_str": None,
-        "special_tokens": None,
-        "has_byte_remap": False,
-    },
-    "minicpm5": {
-        "name": "minicpm5",
-        "path": "models/minicpm5.tbm",
-        "vocab_size": 130050,
-        "description": "MiniCPM5-1B (ByteLevel BPE)",
-        "family": "MiniCPM",
-        "pat_str": None,
-        "special_tokens": None,
-        "has_byte_remap": False,
-    },
-}
+        # Special tokens are only valid for byte-remap models (tiktoken)
+        # where token IDs are preserved.  For ID-remapped models, the
+        # remapped IDs differ from the originals.
+        raw_special: dict[str, int] | None = entry.get("special_tokens")
+        special_tokens: dict[str, int] | None
+        if entry.get("has_byte_remap", False) and raw_special:
+            special_tokens = raw_special
+        elif raw_special:
+            # ID-remapped: store for reference but don't apply
+            special_tokens = None
+        else:
+            special_tokens = None
+
+        info: ModelInfo = {
+            "name": entry["name"],
+            "path": entry["path"],
+            "vocab_size": entry["vocab_size"],
+            "description": entry["description"],
+            "family": entry["family"],
+            "pat_str": pat_str,
+            "special_tokens": special_tokens,
+            "has_byte_remap": entry.get("has_byte_remap", False),
+        }
+        registry[info["name"]] = info
+
+    return registry, pattern_map
+
+
+_MODEL_REGISTRY, _PATTERNS = _load_registry()
 
 
 # ---------------------------------------------------------------------------
