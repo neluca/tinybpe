@@ -30,7 +30,7 @@ ids = tok.encode("hello world")
 
 | Model | LLM Compatibility | Vocab | Pre-tokenization | Source |
 |---|---|---|---|---|
-| `qwen25` | Qwen 2.5 (0.5B-72B) | 151,643 | GPT-2 regex | `Qwen/Qwen2.5-0.5B` |
+| `qwen35` | Qwen3.5 (0.8B-35B) | 247,843 | GPT-2 regex | `Qwen/Qwen3.5-0.8B` |
 | `phi2` | Microsoft Phi-2 | 50,257 | GPT-2 regex | `microsoft/phi-2` |
 | `deepseek-llm` | DeepSeek V2 (7B-Chat) | 100,013 | None (raw) | `deepseek-ai/deepseek-llm-7b-chat` |
 
@@ -56,7 +56,7 @@ Convert external tokenizers using the scripts in `scripts/`:
 python scripts/convert_tiktoken.py o200k_base -o models/o200k_base.tbm
 
 # HuggingFace tokenizer.json (local or Hub ID)
-python scripts/convert_hf_tokenizer.py Qwen/Qwen2.5-0.5B -o models/qwen25.tbm
+python scripts/convert_hf_tokenizer.py Qwen/Qwen3.5-0.8B -o models/qwen35.tbm
 ```
 
 After conversion, add the model to the registry in `tinybpe/_registry.py` so it becomes available via `Tokenizer.from_pretrained()`.
@@ -69,7 +69,7 @@ After conversion, add the model to the registry in `tinybpe/_registry.py` so it 
 | GPT-4o / GPT-5 | `o200k_base` BPE | Full support |
 | GPT-3 | `p50k_base` BPE | Full support |
 | GPT-2 | `r50k_base` BPE | Full support |
-| Qwen 2.5 / 3 | ByteLevel BPE | Full support |
+| Qwen3.5 | ByteLevel BPE | Full support |
 | Phi-2 | ByteLevel BPE | Full support |
 | Llama 3 / 4 | ByteLevel BPE | Via `convert_hf_tokenizer.py` |
 | DeepSeek V2 / V3 | ByteLevel BPE | Full support |

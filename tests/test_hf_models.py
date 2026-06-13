@@ -30,9 +30,9 @@ PAT_GPT2 = (
 
 HF_MODELS = [
     (
-        "qwen25",
-        "Qwen/Qwen2.5-0.5B",
-        "Qwen 2.5",
+        "qwen35",
+        "Qwen/Qwen3.5-0.8B",
+        "Qwen 3.5",
         PAT_GPT2,
     ),
     (
@@ -83,9 +83,9 @@ class TestHFModels:
         path = f"models/{model_key}.tbm"
         merges, bm = load_model(path)
         assert len(merges) > 0
-        # ByteLevel tokenizers always have byte remapping
-        assert bm is not None
-        assert len(bm) == 256
+        # Byte remapping: either None (ID-remapped) or a list of 256
+        if bm is not None:
+            assert len(bm) == 256
 
     @pytest.mark.parametrize(("model_key", "hf_id", "desc", "pattern"), HF_MODELS)
     def test_ascii_roundtrip(self, model_key, hf_id, desc, pattern):
@@ -161,12 +161,12 @@ class TestHFModels:
 
 
 @pytest.mark.skipif(not HAS_HF, reason="huggingface_hub not installed")
-class TestQwen25Specific:
-    """Qwen 2.5 specific tests."""
+class TestQwen35Specific:
+    """Qwen 3.5 specific tests."""
 
     def test_chinese_text(self):
         """Chinese text should encode and decode correctly."""
-        tok = Tokenizer.from_file("models/qwen25.tbm", pat_str=PAT_GPT2)
+        tok = Tokenizer.from_file("models/qwen35.tbm", pat_str=PAT_GPT2)
 
         cn_texts = [
             "他是一个独自一人划着小船在墨西哥湾大海流打鱼的老人",
@@ -181,7 +181,7 @@ class TestQwen25Specific:
 
     def test_code_text(self):
         """Code snippets should round-trip."""
-        tok = Tokenizer.from_file("models/qwen25.tbm", pat_str=PAT_GPT2)
+        tok = Tokenizer.from_file("models/qwen35.tbm", pat_str=PAT_GPT2)
 
         code = """def fibonacci(n):
     if n <= 1:

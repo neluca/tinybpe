@@ -112,7 +112,7 @@ class TestModelStreaming:
             decoder(tid)
         assert "".join(parts) == text
 
-    @pytest.mark.parametrize("model_name", ["cl100k_base", "qwen25"])
+    @pytest.mark.parametrize("model_name", ["cl100k_base", "qwen35"])
     def test_model_streaming_cjk(self, model_name: str) -> None:
         """Streaming decode should work for CJK with built-in models."""
         tok = Tokenizer.from_pretrained(model_name)

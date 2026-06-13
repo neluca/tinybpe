@@ -377,7 +377,7 @@ class Tokenizer:
         Parameters
         ----------
         name : str
-            Model name (e.g. ``"cl100k_base"``, ``"qwen25"``, ``"minicpm"``).
+            Model name (e.g. ``"cl100k_base"``, ``"qwen35"``, ``"minicpm5"``).
 
         Returns
         -------

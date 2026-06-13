@@ -29,7 +29,7 @@ class TestListModels:
             "o200k_base",
             "p50k_base",
             "r50k_base",
-            "qwen25",
+            "qwen35",
             "phi2",
             "deepseek-llm",
             "minicpm5",
@@ -107,9 +107,9 @@ class TestFromPretrained:
         assert len(ids) > 0
         assert tok.decode(ids) == "hello world"
 
-    def test_qwen25_loads(self) -> None:
-        """qwen25 model should load."""
-        tok = Tokenizer.from_pretrained("qwen25")
+    def test_qwen35_loads(self) -> None:
+        """qwen35 model should load."""
+        tok = Tokenizer.from_pretrained("qwen35")
         ids = tok.encode("hello world")
         assert len(ids) > 0
         assert tok.decode(ids) == "hello world"

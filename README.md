@@ -61,7 +61,7 @@ import tinybpe
 
 tinybpe.list_models()
 # ['cl100k_base', 'deepseek-llm', 'minicpm', 'o200k_base',
-#  'p50k_base', 'phi2', 'qwen25', 'r50k_base']
+#  'p50k_base', 'phi2', 'qwen35', 'r50k_base']
 ```
 
 ### Built-in Model Catalog
@@ -72,7 +72,7 @@ tinybpe.list_models()
 | `o200k_base` | GPT-4o, GPT-4o-mini, GPT-5 | 199,998 |
 | `p50k_base` | GPT-3 (davinci, curie, babbage, ada) | 50,280 |
 | `r50k_base` | GPT-2 | 50,256 |
-| `qwen25` | Qwen 2.5 (0.5B–72B) | 151,643 |
+| `qwen35` | Qwen3.5 (0.8B-35B) | 247,843 |
 | `phi2` | Microsoft Phi-2 | 50,257 |
 | `deepseek-llm` | DeepSeek V2 (7B-Chat) | 100,013 |
 | `minicpm5` | MiniCPM5-1B (ByteLevel BPE) | 130,050 |
@@ -204,7 +204,7 @@ python scripts/convert_tiktoken.py cl100k_base -o models/cl100k_base.tbm
 
 # HuggingFace
 python scripts/convert_hf_tokenizer.py tokenizer.json -o output.tbm
-python scripts/convert_hf_tokenizer.py Qwen/Qwen2.5-0.5B -o models/qwen25.tbm
+python scripts/convert_hf_tokenizer.py Qwen/Qwen3.5-0.8B -o models/qwen35.tbm
 
 ```
 

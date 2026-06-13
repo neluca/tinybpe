@@ -127,15 +127,15 @@ _MODEL_REGISTRY: dict[str, ModelInfo] = {
         "has_byte_remap": True,
     },
     # ---- HuggingFace ByteLevel BPE ----
-    "qwen25": {
-        "name": "qwen25",
-        "path": "models/qwen25.tbm",
-        "vocab_size": 152064,  # 256 + 151643 + special tokens
-        "description": "Qwen 2.5 (0.5B-72B)",
-        "family": "Qwen 2.5",
+    "qwen35": {
+        "name": "qwen35",
+        "path": "models/qwen35.tbm",
+        "vocab_size": 247843,
+        "description": "Qwen3.5 (0.8B-35B)",
+        "family": "Qwen",
         "pat_str": _PAT_BYTELEVEL,
         "special_tokens": None,
-        "has_byte_remap": True,
+        "has_byte_remap": False,
     },
     "phi2": {
         "name": "phi2",
@@ -190,7 +190,7 @@ def list_models() -> list[str]:
     --------
     >>> import tinybpe
     >>> tinybpe.list_models()
-    ['cl100k_base', 'deepseek-llm', 'minicpm', 'o200k_base', 'p50k_base', 'phi2', 'qwen25', 'r50k_base']
+    ['cl100k_base', 'deepseek-llm', 'minicpm5', 'o200k_base', 'p50k_base', 'phi2', 'qwen35', 'r50k_base']
     """
     return sorted(_MODEL_REGISTRY.keys())
 
