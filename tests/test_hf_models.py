@@ -35,12 +35,6 @@ HF_MODELS = [
         "Qwen 3.5",
         PAT_GPT2,
     ),
-    (
-        "phi2",
-        "microsoft/phi-2",
-        "Phi-2",
-        PAT_GPT2,
-    ),
 ]
 
 # ---------------------------------------------------------------------------
@@ -192,29 +186,6 @@ class TestQwen35Specific:
         assert decoded == code
 
 
-@pytest.mark.skipif(not HAS_HF, reason="huggingface_hub not installed")
-class TestPhi2Specific:
-    """Phi-2 specific tests."""
-
-    def test_code_roundtrip(self):
-        """Code snippets should round-trip with Phi-2."""
-        tok = Tokenizer.from_file("models/phi2.tbm", pat_str=PAT_GPT2)
-
-        code = "def hello(): return 'world'"
-        ids = tok.encode(code)
-        decoded = tok.decode(ids)
-        assert decoded == code
-
-    def test_english_text(self):
-        """English text should round-trip accurately."""
-        tok = Tokenizer.from_file("models/phi2.tbm", pat_str=PAT_GPT2)
-
-        text = "The quick brown fox jumps over the lazy dog."
-        ids = tok.encode(text)
-        decoded = tok.decode(ids)
-        assert decoded == text
-        # Phi-2 is GPT-2 based, should produce ~9 tokens for this sentence
-        assert 7 <= len(ids) <= 12
 
 
 @pytest.mark.skipif(not HAS_HF, reason="huggingface_hub not installed")

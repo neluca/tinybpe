@@ -31,7 +31,6 @@ ids = tok.encode("hello world")
 | Model | LLM Compatibility | Vocab | Pre-tokenization | Source |
 |---|---|---|---|---|
 | `qwen35` | Qwen3.5 (0.8B-35B) | 247,843 | GPT-2 regex | `Qwen/Qwen3.5-0.8B` |
-| `phi2` | Microsoft Phi-2 | 50,257 | GPT-2 regex | `microsoft/phi-2` |
 | `deepseek-v4` | DeepSeek-V4 Flash | 127,997 | None (raw) | `deepseek-ai/DeepSeek-V4-Flash` |
 
 ## Model Format
@@ -70,7 +69,6 @@ After conversion, add the model to the registry in `tinybpe/_registry.py` so it 
 | GPT-3 | `p50k_base` BPE | Full support |
 | GPT-2 | `r50k_base` BPE | Full support |
 | Qwen3.5 | ByteLevel BPE | Full support |
-| Phi-2 | ByteLevel BPE | Full support |
 | Llama 3 / 4 | ByteLevel BPE | Via `convert_hf_tokenizer.py` |
 | DeepSeek V2 / V3 | ByteLevel BPE | Full support |
 | MiniCPM5-1B | ByteLevel BPE | Full support |

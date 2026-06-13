@@ -137,16 +137,6 @@ _MODEL_REGISTRY: dict[str, ModelInfo] = {
         "special_tokens": None,
         "has_byte_remap": False,
     },
-    "phi2": {
-        "name": "phi2",
-        "path": "models/phi2.tbm",
-        "vocab_size": 51200,
-        "description": "Microsoft Phi-2",
-        "family": "Phi-2",
-        "pat_str": _PAT_BYTELEVEL,
-        "special_tokens": None,
-        "has_byte_remap": True,
-    },
     "deepseek-v4": {
         "name": "deepseek-v4",
         "path": "models/deepseek-v4.tbm",
@@ -190,7 +180,7 @@ def list_models() -> list[str]:
     --------
     >>> import tinybpe
     >>> tinybpe.list_models()
-    ['cl100k_base', 'deepseek-v4', 'minicpm5', 'o200k_base', 'p50k_base', 'phi2', 'qwen35', 'r50k_base']
+    ['cl100k_base', 'deepseek-v4', 'minicpm5', 'o200k_base', 'p50k_base', 'qwen35', 'r50k_base']
     """
     return sorted(_MODEL_REGISTRY.keys())
 

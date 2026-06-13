@@ -8,7 +8,7 @@
 
 **纯 C 内核的超轻量高性能 BPE 分词器与训练器。**
 
-只需**一行代码**即可加载 GPT-4 兼容分词器，无需联网。TinyBPE 内置 8 个 ByteLevel BPE 预训练模型，开箱即用。CPython C 扩展以原生速度执行 BPE 编码/解码——通常比纯 Python 实现**快 10–50 倍**，且仅依赖 `regex` 一个第三方库。
+只需**一行代码**即可加载 GPT-4 兼容分词器，无需联网。TinyBPE 内置 7 个 ByteLevel BPE 预训练模型，开箱即用。CPython C 扩展以原生速度执行 BPE 编码/解码——通常比纯 Python 实现**快 10–50 倍**，且仅依赖 `regex` 一个第三方库。
 
 ## 为什么选择 TinyBPE？
 
@@ -16,7 +16,7 @@
 |---|---|---|---|
 | **核心引擎** | 纯 C（CPython 扩展） | 纯 Rust（PyO3） | 纯 Rust（PyO3） |
 | **依赖** | 仅 `regex` | `tiktoken` + Rust 工具链 | `tokenizers` + Rust 工具链 |
-| **内置模型** | 8 个模型随包分发 | 首次使用时下载 | 首次使用时下载 |
+| **内置模型** | 7 个模型随包分发 | 首次使用时下载 | 首次使用时下载 |
 | **离线可用** | ✅ 完全离线 | ❌ 需要下载 | ❌ 需要下载 |
 | **模型格式** | 可读文本 `.tbm` 文件 | 二进制 blob | JSON / 二进制 |
 | **一行加载** | `Tokenizer.from_pretrained("cl100k_base")` | `tiktoken.get_encoding("cl100k_base")` | `AutoTokenizer.from_pretrained(...)` |
@@ -60,8 +60,8 @@ tok.decode(ids)  # → 'hello world'
 import tinybpe
 
 tinybpe.list_models()
-# ['cl100k_base', 'deepseek-v4', 'minicpm', 'o200k_base',
-#  'p50k_base', 'phi2', 'qwen35', 'r50k_base']
+# ['cl100k_base', 'deepseek-v4', 'minicpm5', 'o200k_base',
+#  'p50k_base', 'qwen35', 'r50k_base']
 ```
 
 ### 内置模型目录
@@ -73,7 +73,6 @@ tinybpe.list_models()
 | `p50k_base` | GPT-3（davinci、curie、babbage、ada） | 50,280 |
 | `r50k_base` | GPT-2 | 50,256 |
 | `qwen35` | Qwen3.5（0.8B-35B） | 247,843 |
-| `phi2` | Microsoft Phi-2 | 50,257 |
 | `deepseek-v4` | DeepSeek-V4 Flash | 127,997 |
 | `minicpm5` | MiniCPM5-1B（ByteLevel BPE） | 130,050 |
 

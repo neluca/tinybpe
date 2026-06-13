@@ -14,7 +14,7 @@ class TestListModels:
     def test_returns_all_models(self) -> None:
         """All built-in models should be listed."""
         models = list_models()
-        assert len(models) >= 8  # at least 8, grows as models are added
+        assert len(models) >= 7  # at least 7, grows as models are added
 
     def test_is_sorted(self) -> None:
         """Model names should be sorted alphabetically."""
@@ -30,7 +30,6 @@ class TestListModels:
             "p50k_base",
             "r50k_base",
             "qwen35",
-            "phi2",
             "deepseek-v4",
             "minicpm5",
         }
@@ -110,13 +109,6 @@ class TestFromPretrained:
     def test_qwen35_loads(self) -> None:
         """qwen35 model should load."""
         tok = Tokenizer.from_pretrained("qwen35")
-        ids = tok.encode("hello world")
-        assert len(ids) > 0
-        assert tok.decode(ids) == "hello world"
-
-    def test_phi2_loads(self) -> None:
-        """phi2 model should load."""
-        tok = Tokenizer.from_pretrained("phi2")
         ids = tok.encode("hello world")
         assert len(ids) > 0
         assert tok.decode(ids) == "hello world"

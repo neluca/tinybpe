@@ -8,7 +8,7 @@
 
 **An ultra-fast, lightweight BPE tokenizer and trainer with a pure-C core.**
 
-Ever wished you could load a GPT-4 compatible tokenizer in **one line** without network calls? TinyBPE ships 8 pre-built ByteLevel BPE models directly in the package. The CPython C core runs BPE encoding/decoding at native speed — typically **10-50× faster** than pure-Python implementations while depending only on `regex`.
+Ever wished you could load a GPT-4 compatible tokenizer in **one line** without network calls? TinyBPE ships 7 pre-built ByteLevel BPE models directly in the package. The CPython C core runs BPE encoding/decoding at native speed — typically **10-50× faster** than pure-Python implementations while depending only on `regex`.
 
 ## Why TinyBPE?
 
@@ -16,7 +16,7 @@ Ever wished you could load a GPT-4 compatible tokenizer in **one line** without 
 |---|---|---|---|
 | **Core engine** | Pure C (CPython) | Pure Rust (PyO3) | Pure Rust (PyO3) |
 | **Dependencies** | `regex` only | `tiktoken` + Rust toolchain | `tokenizers` + Rust toolchain |
-| **Built-in models** | 8 models ship in package | Downloads on first use | Downloads on first use |
+| **Built-in models** | 7 models ship in package | Downloads on first use | Downloads on first use |
 | **Offline ready** | ✅ Fully offline | ❌ Requires download | ❌ Requires download |
 | **Model format** | Human-readable `.tbm` text | Binary blob | JSON / binary |
 | **One-liner load** | `Tokenizer.from_pretrained("cl100k_base")` | `tiktoken.get_encoding("cl100k_base")` | `AutoTokenizer.from_pretrained(...)` |
@@ -60,8 +60,8 @@ tok.decode(ids)  # → 'hello world'
 import tinybpe
 
 tinybpe.list_models()
-# ['cl100k_base', 'deepseek-v4', 'minicpm', 'o200k_base',
-#  'p50k_base', 'phi2', 'qwen35', 'r50k_base']
+# ['cl100k_base', 'deepseek-v4', 'minicpm5', 'o200k_base',
+#  'p50k_base', 'qwen35', 'r50k_base']
 ```
 
 ### Built-in Model Catalog
@@ -73,7 +73,6 @@ tinybpe.list_models()
 | `p50k_base` | GPT-3 (davinci, curie, babbage, ada) | 50,280 |
 | `r50k_base` | GPT-2 | 50,256 |
 | `qwen35` | Qwen3.5 (0.8B-35B) | 247,843 |
-| `phi2` | Microsoft Phi-2 | 50,257 |
 | `deepseek-v4` | DeepSeek-V4 Flash | 127,997 |
 | `minicpm5` | MiniCPM5-1B (ByteLevel BPE) | 130,050 |
 
