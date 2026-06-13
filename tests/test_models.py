@@ -89,7 +89,7 @@ class TestTikTokenModels:
         """Simple ASCII texts should match tiktoken exactly."""
         pat = PAT_GPT2 if name in ("r50k_base", "p50k_base") else PAT_GPT4
         enc = tiktoken.get_encoding(name)
-        tok = Tokenizer.from_file(f"models/{name}.tbm", pat_str=pat)
+        tok = Tokenizer.from_file(f"tinybpe/models/{name}.tbm", pat_str=pat)
         for text in SIMPLE_TEXTS:
             assert tok.encode(text) == enc.encode(text)
 
@@ -98,7 +98,7 @@ class TestTikTokenModels:
         """Multilingual texts should match tiktoken."""
         pat = PAT_GPT2 if name in ("r50k_base", "p50k_base") else PAT_GPT4
         enc = tiktoken.get_encoding(name)
-        tok = Tokenizer.from_file(f"models/{name}.tbm", pat_str=pat)
+        tok = Tokenizer.from_file(f"tinybpe/models/{name}.tbm", pat_str=pat)
         for text in MULTILINGUAL_TEXTS:
             assert tok.encode(text) == enc.encode(text)
 
@@ -107,7 +107,7 @@ class TestTikTokenModels:
         """Emoji texts should match tiktoken."""
         pat = PAT_GPT2 if name in ("r50k_base", "p50k_base") else PAT_GPT4
         enc = tiktoken.get_encoding(name)
-        tok = Tokenizer.from_file(f"models/{name}.tbm", pat_str=pat)
+        tok = Tokenizer.from_file(f"tinybpe/models/{name}.tbm", pat_str=pat)
         for text in EMOJI_TEXTS:
             if name in ("r50k_base", "p50k_base") and len(text) > 2:
                 continue
@@ -118,14 +118,14 @@ class TestTikTokenModels:
         """Code snippets should match tiktoken."""
         pat = PAT_GPT2 if name in ("r50k_base", "p50k_base") else PAT_GPT4
         enc = tiktoken.get_encoding(name)
-        tok = Tokenizer.from_file(f"models/{name}.tbm", pat_str=pat)
+        tok = Tokenizer.from_file(f"tinybpe/models/{name}.tbm", pat_str=pat)
         for text in CODE_TEXTS:
             assert tok.encode(text) == enc.encode(text)
 
     @pytest.mark.parametrize(("name", "desc"), MODELS)
     def test_roundtrip(self, name, desc):
         """All texts should round-trip through encode→decode."""
-        tok = Tokenizer.from_file(f"models/{name}.tbm")
+        tok = Tokenizer.from_file(f"tinybpe/models/{name}.tbm")
         all_texts = SIMPLE_TEXTS + MULTILINGUAL_TEXTS + EMOJI_TEXTS + CODE_TEXTS
         for text in all_texts:
             if not text:
@@ -137,7 +137,7 @@ class TestTikTokenModels:
     @pytest.mark.parametrize(("name", "desc"), MODELS)
     def test_vocab_size(self, name, desc):
         """Vocab size should be reasonable."""
-        tok = Tokenizer.from_file(f"models/{name}.tbm")
+        tok = Tokenizer.from_file(f"tinybpe/models/{name}.tbm")
         # Vocab = 256 base bytes + n_merges
         assert tok.n_vocab > 256
         assert tok.n_vocab == 256 + len(tok.merges)
@@ -145,7 +145,7 @@ class TestTikTokenModels:
     @pytest.mark.parametrize(("name", "desc"), MODELS)
     def test_streaming_decode(self, name, desc):
         """Streaming decode should match batch decode."""
-        tok = Tokenizer.from_file(f"models/{name}.tbm")
+        tok = Tokenizer.from_file(f"tinybpe/models/{name}.tbm")
         for text in SIMPLE_TEXTS + MULTILINGUAL_TEXTS[:3]:
             if not text:
                 continue
@@ -176,7 +176,7 @@ class TestCl100kBase:
             "<|endofprompt|>": 100276,
         }
         tok = Tokenizer.from_file(
-            "models/cl100k_base.tbm",
+            "tinybpe/models/cl100k_base.tbm",
             pat_str=PAT_GPT4,
             special_tokens=special_tokens,
         )
@@ -282,7 +282,7 @@ class TestByteRemapping:
 
     def test_cl100k_remap_roundtrip(self):
         """cl100k_base with byte remapping should round-trip all texts."""
-        tok = Tokenizer.from_file("models/cl100k_base.tbm")
+        tok = Tokenizer.from_file("tinybpe/models/cl100k_base.tbm")
         for text in SIMPLE_TEXTS + MULTILINGUAL_TEXTS:
             if not text:
                 continue

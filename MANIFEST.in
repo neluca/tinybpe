@@ -10,8 +10,8 @@ include src/*.c
 include src/*.h
 include tinybpe/py.typed
 include tinybpe/bpe.pyi
-include models/*.tbm
-include models/*.json
+include tinybpe/models/*.tbm
+include tinybpe/models/*.json
 include scripts/*.py
 include docs/*.md
 recursive-include tests *.py *.tbm *.vocab *.txt

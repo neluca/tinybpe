@@ -48,8 +48,8 @@ def _find_package_file(rel_path: str) -> str:
         from importlib.resources import files as _files
 
         pkg_root = _files("tinybpe")
-        # Navigate up from tinybpe/ to project root, then down to rel_path
-        candidate: str = str(_Path(str(pkg_root)).parent / rel_path)
+        # Models live inside the package: tinybpe/models/
+        candidate: str = str(_Path(str(pkg_root)) / rel_path)
         if os.path.isfile(candidate):
             return candidate
     except Exception:
@@ -57,7 +57,7 @@ def _find_package_file(rel_path: str) -> str:
 
     # Fallback: look relative to the package directory (works for editable installs)
     package_dir = os.path.dirname(os.path.abspath(__file__))
-    candidate = os.path.normpath(os.path.join(package_dir, "..", rel_path))
+    candidate = os.path.normpath(os.path.join(package_dir, rel_path))
     if os.path.isfile(candidate):
         return candidate
 

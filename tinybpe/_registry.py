@@ -48,16 +48,15 @@ def _load_registry() -> tuple[dict[str, ModelInfo], dict[str, str | None]]:
         ``ModelInfo``, and *patterns* maps pattern names to regex strings
         (or ``None`` for no-split).
     """
-    # Resolve the JSON path relative to the package
-    json_path = os.path.join(os.path.dirname(__file__), "..", "models", "models.json")
+    # Resolve the JSON path.  Models live inside the package: tinybpe/models/
+    json_path = os.path.join(os.path.dirname(__file__), "models", "models.json")
     # Also try importlib.resources for wheel installs
     if not os.path.isfile(json_path):
         try:
             from importlib.resources import files as _files
             from pathlib import Path
 
-            pkg_root = _files("tinybpe")
-            json_path = str(Path(str(pkg_root)).parent / "models" / "models.json")
+            json_path = str(Path(str(_files("tinybpe"))) / "models" / "models.json")
         except Exception:
             pass
 

@@ -174,8 +174,8 @@ cython_debug/
 .pypirc
 t_*
 
-# Model artifacts — only .tbm files are tracked
-models/*.vocab
+# Model artifacts
+tinybpe/models/*.vocab
 
 # Downloaded model cache
 model_cache/

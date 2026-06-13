@@ -53,6 +53,9 @@ Documentation = "https://github.com/neluca/tinybpe#readme"
 [tool.setuptools]
 packages = ["tinybpe"]
 
+[tool.setuptools.package-data]
+tinybpe = ["models/*.tbm", "models/*.json"]
+
 [tool.setuptools.dynamic]
 version = { attr = "tinybpe._version.__version__" }
 
