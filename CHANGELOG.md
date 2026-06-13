@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.1.0] — 2026-06-13
+
+### Added
+
+- **Model registry with `from_pretrained`**: `Tokenizer.from_pretrained("cl100k_base")` loads any built-in model in one line
+- **`list_models()`**: programmatic model discovery
+- **JSON-based model config** (`tinybpe/models/models.json`): add models without code changes
+- **8 built-in ByteLevel BPE models**: GPT-4, GPT-4o, GPT-3, GPT-2, Qwen3.5, DeepSeek-V4, Llama 4 Scout, MiniCPM5-1B
+- **Special token support**: TikToken models now include FIM tokens, end-of-text markers, etc.
+- **Chinese README** (`README_zh.md`)
+
+### Changed
+
+- **Models moved inside package**: `tinybpe/models/` so `pip install` includes them in the wheel
+- **`convert_hf_tokenizer.py`**: supports both list-format and string-format merges
+- **Upgraded models**: Qwen2.5 → Qwen3.5, DeepSeek V2 → DeepSeek-V4
+
+### Fixed
+
+- Special token regex ordering (longer tokens now match before shorter prefixes)
+- `_find_package_file` type error (mypy strict compliance)
+- No-op `test_empty_text` replaced with proper assertions
+- Dead code and duplicate regex patterns removed
+- `encode_ordinary` docstring corrected
+- Author name updated to Romani Isa
+
+### Developer Experience
+
+- Makefile with `install`, `test`, `lint`, `format`, `typecheck`, `clean` targets
+- `.pre-commit-config.yaml` with ruff + mypy hooks
+- Optional dependencies: `[dev]`, `[tiktoken]`, `[hf]`, `[all]`
+- CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md
+- Issue and PR templates
+- Enhanced CI sdist verification (tests `from_pretrained` after install)
+
 ## [1.0.0] — 2026-06-12
 
 ### Added
