@@ -32,6 +32,7 @@ ids = tok.encode("hello world")
 |---|---|---|---|---|
 | `qwen35` | Qwen3.5 (0.8B-35B) | 247,843 | GPT-2 regex | `Qwen/Qwen3.5-0.8B` |
 | `deepseek-v4` | DeepSeek-V4 Flash | 127,997 | None (raw) | `deepseek-ai/DeepSeek-V4-Flash` |
+| `llama4` | Llama 4 Scout (17B) | 440,058 | None (raw) | `meta-llama/Llama-4-Scout-17B-16E-Instruct` |
 
 ## Model Format
 

@@ -14,7 +14,7 @@ class TestListModels:
     def test_returns_all_models(self) -> None:
         """All built-in models should be listed."""
         models = list_models()
-        assert len(models) >= 7  # at least 7, grows as models are added
+        assert len(models) >= 8  # at least 8, grows as models are added
 
     def test_is_sorted(self) -> None:
         """Model names should be sorted alphabetically."""
@@ -31,6 +31,7 @@ class TestListModels:
             "r50k_base",
             "qwen35",
             "deepseek-v4",
+            "llama4",
             "minicpm5",
         }
         assert expected.issubset(set(models))
@@ -123,6 +124,13 @@ class TestFromPretrained:
     def test_minicpm5_loads(self) -> None:
         """minicpm5 model should load and roundtrip."""
         tok = Tokenizer.from_pretrained("minicpm5")
+        ids = tok.encode("hello world")
+        assert len(ids) > 0
+        assert tok.decode(ids) == "hello world"
+
+    def test_llama4_loads(self) -> None:
+        """llama4 model should load and roundtrip."""
+        tok = Tokenizer.from_pretrained("llama4")
         ids = tok.encode("hello world")
         assert len(ids) > 0
         assert tok.decode(ids) == "hello world"

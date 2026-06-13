@@ -148,6 +148,16 @@ _MODEL_REGISTRY: dict[str, ModelInfo] = {
         "has_byte_remap": False,
     },
     # ---- ByteLevel BPE (no regex) ----
+    "llama4": {
+        "name": "llama4",
+        "path": "models/llama4.tbm",
+        "vocab_size": 440058,
+        "description": "Llama 4 Scout (17B)",
+        "family": "Llama",
+        "pat_str": None,
+        "special_tokens": None,
+        "has_byte_remap": False,
+    },
     "minicpm5": {
         "name": "minicpm5",
         "path": "models/minicpm5.tbm",
@@ -180,7 +190,7 @@ def list_models() -> list[str]:
     --------
     >>> import tinybpe
     >>> tinybpe.list_models()
-    ['cl100k_base', 'deepseek-v4', 'minicpm5', 'o200k_base', 'p50k_base', 'qwen35', 'r50k_base']
+    ['cl100k_base', 'deepseek-v4', 'llama4', 'minicpm5', 'o200k_base', 'p50k_base', 'qwen35', 'r50k_base']
     """
     return sorted(_MODEL_REGISTRY.keys())
 
