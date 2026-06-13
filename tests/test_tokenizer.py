@@ -182,3 +182,136 @@ class TestTokenizerLoadModel:
     def test_nonexistent_file(self):
         with __import__("pytest").raises(FileNotFoundError):
             load_model("nonexistent.tbm")
+
+
+class TestTokenizerRepr:
+    """Tests for __repr__()."""
+
+    def test_repr_no_remap_no_special(self):
+        """__repr__ should show vocab size and remap=False when no remap."""
+        tok = Tokenizer.from_file(FILE_SIMPLE + ".tbm")
+        r = repr(tok)
+        assert "n_vocab=" in r
+        assert "byte_remap=False" in r
+        assert "special_tokens=0" in r
+
+    def test_repr_with_remap(self):
+        """__repr__ should show byte_remap=True when bytes_maps is set."""
+        tok = Tokenizer([(104, 101)], bytes_maps=list(range(256)))
+        r = repr(tok)
+        assert "byte_remap=True" in r
+
+    def test_repr_with_special(self):
+        """__repr__ should show special_tokens count."""
+        tok = Tokenizer([(104, 101)], special_tokens={"<eot>": 1000})
+        r = repr(tok)
+        assert "special_tokens=1" in r
+
+    def test_repr_multiple_special(self):
+        """__repr__ should show correct special token count."""
+        special = {"<a>": 1000, "<b>": 1001, "<c>": 1002}
+        tok = Tokenizer([(104, 101)], special_tokens=special)
+        r = repr(tok)
+        assert "special_tokens=3" in r
+
+
+class TestTokenizerSave:
+    """Tests for Tokenizer.save() and save_vocab() instance methods."""
+
+    def test_save_auto_append_extension(self, tmp_path):
+        """Tokenizer.save() should auto-append .tbm."""
+        tok = Tokenizer.from_file(FILE_SIMPLE + ".tbm")
+        out = str(tmp_path / "out_no_ext")
+        tok.save(out)
+        assert (tmp_path / "out_no_ext.tbm").exists()
+
+    def test_save_vocab_auto_append_extension(self, tmp_path):
+        """Tokenizer.save_vocab() should auto-append .vocab."""
+        tok = Tokenizer.from_file(FILE_SIMPLE + ".tbm")
+        out = str(tmp_path / "v_no_ext")
+        tok.save_vocab(out)
+        assert (tmp_path / "v_no_ext.vocab").exists()
+
+    def test_save_with_existing_extension(self, tmp_path):
+        """Tokenizer.save() should work with explicit .tbm extension."""
+        tok = Tokenizer.from_file(FILE_SIMPLE + ".tbm")
+        out = str(tmp_path / "out.tbm")
+        tok.save(out)
+        assert (tmp_path / "out.tbm").exists()
+        # Should not create double extension
+        assert not (tmp_path / "out.tbm.tbm").exists()
+
+    def test_save_vocab_with_existing_extension(self, tmp_path):
+        """Tokenizer.save_vocab() should work with explicit .vocab."""
+        tok = Tokenizer.from_file(FILE_SIMPLE + ".tbm")
+        out = str(tmp_path / "v.vocab")
+        tok.save_vocab(out)
+        assert (tmp_path / "v.vocab").exists()
+
+
+class TestTokenizerSpecialEdgeCases:
+    """Edge case tests for special token handling."""
+
+    def test_encode_only_special(self):
+        """Text consisting entirely of a special token should encode as that ID."""
+        tok = Tokenizer([(104, 101)], special_tokens={"<eot>": 1000})
+        assert tok.encode("<eot>") == [1000]
+
+    def test_encode_special_overlap(self):
+        """When one special is a prefix of another, the longer should match."""
+        special = {"<a>": 1000, "<ab>": 1001}
+        tok = Tokenizer([(104, 101)], special_tokens=special)
+        ids = tok.encode("<ab>")
+        assert ids == [1001]
+
+    def test_encode_mixed_special_and_text(self):
+        """Special tokens interspersed with text should encode correctly."""
+        special = {"<eot>": 1000, "<bos>": 1001}
+        tok = Tokenizer([(104, 101)], special_tokens=special)
+        ids = tok.encode("<bos>hello<eot>")
+        assert ids[0] == 1001  # bos
+        assert ids[-1] == 1000  # eot
+
+    def test_special_tokens_with_encode_and_encode_ordinary(self):
+        """Both encode and encode_ordinary should handle special tokens correctly."""
+        special = {"<eot>": 1000}
+        tok = Tokenizer([(104, 101)], special_tokens=special)
+        # encode with special tokens
+        regular_ids = tok.encode("<eot>")
+        assert regular_ids == [1000]
+        assert tok.decode(regular_ids) == "<eot>"
+        # encode_ordinary also passes special tokens to C engine
+        ordinary_ids = tok.encode_ordinary("<eot>")
+        # Both should produce the same result for token-only text
+        assert ordinary_ids == [1000]
+
+    def test_special_with_byte_remap(self):
+        """Special tokens should work with bytes_maps enabled."""
+        special = {"<eot>": 1000}
+        tok = Tokenizer([(104, 101)], bytes_maps=list(range(256)), special_tokens=special)
+        ids = tok.encode("<eot>")
+        assert ids == [1000]
+        assert tok.decode(ids) == "<eot>"
+
+
+class TestTokenizerFromFile:
+    """Additional tests for Tokenizer.from_file()."""
+
+    def test_from_file_auto_append_tbm(self):
+        """from_file should auto-append .tbm when path has no extension."""
+        tok = Tokenizer.from_file(FILE_SIMPLE)  # no .tbm
+        assert tok.n_vocab > 0
+
+    def test_from_file_with_pat_str(self):
+        """from_file with pat_str should apply the pattern."""
+        tok = Tokenizer.from_file(FILE_SIMPLE + ".tbm", pat_str=r"\w+|\s+")
+        text = "hello world hi"
+        ids = tok.encode(text)
+        assert tok.decode(ids) == text
+
+    def test_from_file_with_special_tokens(self):
+        """from_file with special_tokens should work correctly."""
+        special = {"<eot>": 2000}
+        tok = Tokenizer.from_file(FILE_SIMPLE + ".tbm", special_tokens=special)
+        ids = tok.encode("<eot>")
+        assert ids == [2000]

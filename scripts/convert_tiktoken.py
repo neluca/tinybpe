@@ -41,7 +41,7 @@ def _decompose_token(mergeable_ranks: dict[bytes, int], token: bytes) -> list[by
         if min_idx is None:
             raise ValueError(f"Failed to find merge pair for token {token!r}")
 
-        parts = parts[:min_idx] + [parts[min_idx] + parts[min_idx + 1]] + parts[min_idx + 2 :]
+        parts = [*parts[:min_idx], parts[min_idx] + parts[min_idx + 1], *parts[min_idx + 2:]]
 
     return parts
 

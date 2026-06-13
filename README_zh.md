@@ -6,55 +6,55 @@
 [![Ruff](https://img.shields.io/badge/code%20style-ruff-261230)](https://github.com/astral-sh/ruff)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
-**An ultra-fast, lightweight BPE tokenizer and trainer with a pure-C core.**
+**纯 C 内核的超轻量高性能 BPE 分词器与训练器。**
 
-Ever wished you could load a GPT-4 compatible tokenizer in **one line** without network calls? TinyBPE ships 8 pre-built tokenizer models directly in the package. The CPython C core runs BPE encoding/decoding at native speed — typically **10-50× faster** than pure-Python implementations while depending only on `regex`.
+只需**一行代码**即可加载 GPT-4 兼容分词器，无需联网。TinyBPE 内置 8 个预训练模型，开箱即用。CPython C 扩展以原生速度执行 BPE 编码/解码——通常比纯 Python 实现**快 10–50 倍**，且仅依赖 `regex` 一个第三方库。
 
-## Why TinyBPE?
+## 为什么选择 TinyBPE？
 
-| Feature | TinyBPE | tiktoken | HuggingFace tokenizers |
+| 特性 | TinyBPE | tiktoken | HuggingFace tokenizers |
 |---|---|---|---|
-| **Core engine** | Pure C (CPython) | Pure Rust (PyO3) | Pure Rust (PyO3) |
-| **Dependencies** | `regex` only | `tiktoken` + Rust toolchain | `tokenizers` + Rust toolchain |
-| **Built-in models** | 8 models ship in package | Downloads on first use | Downloads on first use |
-| **Offline ready** | ✅ Fully offline | ❌ Requires download | ❌ Requires download |
-| **Model format** | Human-readable `.tbm` text | Binary blob | JSON / binary |
-| **One-liner load** | `Tokenizer.from_pretrained("cl100k_base")` | `tiktoken.get_encoding("cl100k_base")` | `AutoTokenizer.from_pretrained(...)` |
-| **Train new models** | ✅ Pure-C trainer | ❌ | ✅ (requires Rust build) |
-| **Streaming decode** | ✅ UTF-8 boundary caching | ❌ | ❌ |
-| **Portable C core** | ✅ Embeddable | ❌ | ❌ |
-| **Install size** | ~3 MB compressed | ~2 MB + cached models | ~4 MB + cached models |
+| **核心引擎** | 纯 C（CPython 扩展） | 纯 Rust（PyO3） | 纯 Rust（PyO3） |
+| **依赖** | 仅 `regex` | `tiktoken` + Rust 工具链 | `tokenizers` + Rust 工具链 |
+| **内置模型** | 8 个模型随包分发 | 首次使用时下载 | 首次使用时下载 |
+| **离线可用** | ✅ 完全离线 | ❌ 需要下载 | ❌ 需要下载 |
+| **模型格式** | 可读文本 `.tbm` 文件 | 二进制 blob | JSON / 二进制 |
+| **一行加载** | `Tokenizer.from_pretrained("cl100k_base")` | `tiktoken.get_encoding("cl100k_base")` | `AutoTokenizer.from_pretrained(...)` |
+| **训练新模型** | ✅ 纯 C 训练器 | ❌ | ✅（需要 Rust 编译） |
+| **流式解码** | ✅ UTF-8 边界缓存 | ❌ | ❌ |
+| **可移植 C 内核** | ✅ 可嵌入式部署 | ❌ | ❌ |
+| **安装体积** | 约 3 MB（压缩后） | 约 2 MB + 缓存模型 | 约 4 MB + 缓存模型 |
 
-## Installation
+## 安装
 
 ```bash
 pip install tinybpe
 ```
 
-Optional extras:
+可选扩展：
 
 ```bash
-pip install tinybpe[dev]       # Development tools (pytest, ruff, mypy)
-pip install tinybpe[tiktoken]  # For tiktoken comparison testing
-pip install tinybpe[hf]        # For HuggingFace model conversion
-pip install tinybpe[all]       # Everything
+pip install tinybpe[dev]       # 开发工具（pytest、ruff、mypy）
+pip install tinybpe[tiktoken]  # 用于与 tiktoken 对比测试
+pip install tinybpe[hf]        # 用于 HuggingFace 模型转换
+pip install tinybpe[all]       # 安装全部可选依赖
 ```
 
-## Quick Start
+## 快速开始
 
-### One-Line Model Loading
+### 一行代码加载模型
 
 ```python
 from tinybpe import Tokenizer
 
-# Load any built-in model in one line — no network, no download
+# 加载任意内置模型——无需联网，无需下载
 tok = Tokenizer.from_pretrained("cl100k_base")
 
 ids = tok.encode("hello world")
 tok.decode(ids)  # → 'hello world'
 ```
 
-### List Available Models
+### 查看可用模型
 
 ```python
 import tinybpe
@@ -64,40 +64,40 @@ tinybpe.list_models()
 #  'p50k_base', 'phi2', 'qwen25', 'r50k_base']
 ```
 
-### Built-in Model Catalog
+### 内置模型目录
 
-| Model | LLM Compatibility | Vocab Size |
+| 模型名称 | 兼容模型 | 词表大小 |
 |---|---|---|
-| `cl100k_base` | GPT-4, GPT-3.5-turbo, text-embedding-ada-002 | 100,256 |
-| `o200k_base` | GPT-4o, GPT-4o-mini, GPT-5 | 199,998 |
-| `p50k_base` | GPT-3 (davinci, curie, babbage, ada) | 50,280 |
+| `cl100k_base` | GPT-4、GPT-3.5-turbo、text-embedding-ada-002 | 100,256 |
+| `o200k_base` | GPT-4o、GPT-4o-mini、GPT-5 | 199,998 |
+| `p50k_base` | GPT-3（davinci、curie、babbage、ada） | 50,280 |
 | `r50k_base` | GPT-2 | 50,256 |
-| `qwen25` | Qwen 2.5 (0.5B–72B) | 151,643 |
+| `qwen25` | Qwen 2.5（0.5B–72B） | 151,643 |
 | `phi2` | Microsoft Phi-2 | 50,257 |
-| `deepseek-llm` | DeepSeek V2 (7B-Chat) | 100,013 |
-| `minicpm` | MiniCPM-2B (SentencePiece BPE) | 129,850 |
+| `deepseek-llm` | DeepSeek V2（7B-Chat） | 100,013 |
+| `minicpm` | MiniCPM-2B（SentencePiece BPE） | 129,850 |
 
-### Training
+### 训练分词器
 
 ```python
 from tinybpe import Trainer
 
 trainer = Trainer("hello world " * 500)
-trainer.train(100)          # learn 100 merges
+trainer.train(100)          # 学习 100 个合并规则
 trainer.save("my_model")    # → my_model.tbm
 ```
 
-### Streaming Decode
+### 流式解码
 
 ```python
 parts = []
 decoder = tok.stream_decode(lambda s: parts.append(s))
-for token_id in ids:
+for tid in ids:
     decoder(tid)
 assert "".join(parts) == "hello world"
 ```
 
-### With Regex Pre-tokenization
+### 正则预分词
 
 ```python
 PAT = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""
@@ -105,7 +105,7 @@ PAT = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,3}| ?[^\s\p{L}
 tok = Tokenizer.from_file("my_model.tbm", pat_str=PAT)
 ```
 
-### With Special Tokens
+### 特殊 Token
 
 ```python
 special_tokens = {"<eot>": 1000, "<fim_prefix>": 1001, "<fim_suffix>": 1002}
@@ -113,7 +113,7 @@ tok = Tokenizer(merges, special_tokens=special_tokens)
 ids = tok.encode("<fim_prefix> hello world <eot>")
 ```
 
-### With Byte Remapping (TikToken Compat)
+### 字节重映射（兼容 TikToken）
 
 ```python
 from tinybpe import load_model
@@ -122,7 +122,7 @@ merges, bytes_maps = load_model("cl100k_base.tbm")
 tok = Tokenizer(merges, bytes_maps=bytes_maps)
 ```
 
-## API Reference
+## API 参考
 
 ### `Tokenizer`
 
@@ -165,13 +165,13 @@ class Trainer(bpe.Trainer):
     def n_merges(self) -> int
 ```
 
-### Model Discovery
+### 模型发现
 
 ```python
 def list_models() -> list[str]
 ```
 
-### File I/O
+### 文件 I/O
 
 ```python
 def load_model(path: str) -> tuple[list[tuple[int, int]], list[int] | None]
@@ -180,23 +180,23 @@ def load_vocab(path: str) -> dict[int, bytes]
 def save_vocab(path: str, vocab: dict[int, bytes]) -> None
 ```
 
-## Model Format
+## 模型格式
 
-`.tbm` (TinyBPE Model) is a human-readable text file:
+`.tbm`（TinyBPE Model）是可读文本文件：
 
 ```
 TinyBPE Model v1
-0               # 0 = no remap, 256 = has remap
-104 101         # merge pairs, one per line
+0               # 0 = 无字节重映射，256 = 有字节重映射
+104 101         # 合并规则，每行一对
 256 108
 ...
 ```
 
-See [`docs/file-formats.md`](docs/file-formats.md) for the full specification.
+详见 [`docs/file-formats.md`](docs/file-formats.md)。
 
-## Conversion Scripts
+## 转换脚本
 
-Convert existing tokenizers to TinyBPE format:
+将其他分词器格式转换为 TinyBPE 格式：
 
 ```bash
 # TikToken
@@ -206,23 +206,23 @@ python scripts/convert_tiktoken.py cl100k_base -o models/cl100k_base.tbm
 python scripts/convert_hf_tokenizer.py tokenizer.json -o output.tbm
 python scripts/convert_hf_tokenizer.py Qwen/Qwen2.5-0.5B -o models/qwen25.tbm
 
-# MiniCPM (SentencePiece BPE)
+# MiniCPM（SentencePiece BPE）
 python scripts/convert_minicpm.py -o models/minicpm.tbm
 ```
 
-See [`scripts/README.md`](scripts/README.md) for details.
+详见 [`scripts/README.md`](scripts/README.md)。
 
-## Performance
+## 性能
 
-The C core uses an AVL tree for O(log n) pair lookup during training and greedy lowest-rank-first merging during encoding. Typical throughput on a modern CPU:
+C 内核使用 AVL 树实现 O(log n) 的合并对查找，编码时采用贪心最低秩优先合并策略。在现代 CPU 上的典型吞吐量：
 
-| Operation | Tokens/sec |
+| 操作 | 吞吐量 |
 |---|---|
-| Training (C core) | ~5-10M chars/sec |
-| Encoding (C core) | ~2-5M tokens/sec |
-| Decoding (C core) | ~10-20M tokens/sec |
+| 训练（C 内核） | 约 500–1000 万字符/秒 |
+| 编码（C 内核） | 约 200–500 万 token/秒 |
+| 解码（C 内核） | 约 1000–2000 万 token/秒 |
 
-Run benchmarks locally:
+运行本地基准测试：
 
 ```bash
 python benchmarks/bench_train.py
@@ -230,7 +230,16 @@ python benchmarks/bench_encode.py
 python benchmarks/bench_decode.py
 ```
 
-## Development
+## 项目优势
+
+- **零网络依赖** —— 所有模型随包分发，离线可用
+- **极简依赖** —— 仅需 `regex`，无需 Rust 工具链
+- **纯 C 高性能** —— C 扩展内核，编译为本地机器码
+- **可嵌入部署** —— C 训练器和分词器可脱离 Python 独立使用
+- **可读模型文件** —— `.tbm` 纯文本格式，可直接检视和调试
+- **生产就绪** —— 95%+ 测试覆盖率、严格 mypy 类型检查、跨平台 CI/CD
+
+## 开发
 
 ```bash
 git clone https://github.com/neluca/tinybpe.git
@@ -239,8 +248,8 @@ pip install -e ".[dev]"
 make test && make lint && make typecheck
 ```
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for full development setup and PR guidelines.
+详见 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
 
-## License
+## 许可证
 
-MIT — see [LICENSE](LICENSE).
+MIT — 详见 [LICENSE](LICENSE)。

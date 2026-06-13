@@ -19,6 +19,55 @@ import tinybpe.bpe as bpe
 from tinybpe._model_io import load_model, save_model, save_vocab
 
 
+def _find_package_file(rel_path: str) -> str:
+    """Resolve a package-relative path to an absolute filesystem path.
+
+    Handles both wheel installs (via ``importlib.resources``) and
+    editable installs (``pip install -e``).
+
+    Parameters
+    ----------
+    rel_path : str
+        Path relative to the package root (e.g. ``"models/cl100k_base.tbm"``).
+
+    Returns
+    -------
+    str
+        Absolute filesystem path to the file.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the file cannot be found in any expected location.
+    """
+    import os
+    from pathlib import Path as _Path
+
+    # Try importlib.resources first (Python 3.9+)
+    try:
+        from importlib.resources import files as _files
+
+        pkg_root = _files("tinybpe")
+        # Navigate up from tinybpe/ to project root, then down to rel_path
+        candidate: str = str(_Path(str(pkg_root)).parent / rel_path)
+        if os.path.isfile(candidate):
+            return candidate
+    except Exception:
+        pass
+
+    # Fallback: look relative to the package directory (works for editable installs)
+    package_dir = os.path.dirname(os.path.abspath(__file__))
+    candidate = os.path.normpath(os.path.join(package_dir, "..", rel_path))
+    if os.path.isfile(candidate):
+        return candidate
+
+    # Last resort: check if rel_path itself exists (absolute or cwd-relative)
+    if os.path.isfile(rel_path):
+        return os.path.abspath(rel_path)
+
+    raise FileNotFoundError(f"Model file not found: {rel_path}")
+
+
 class Tokenizer:
     """A byte-level BPE tokenizer.
 
@@ -74,7 +123,11 @@ class Tokenizer:
             _mapped: dict[bytes, int] | None = None
         else:
             self._special_tokens = special_tokens
-            self._special_pattern = "(" + "|".join(re.escape(k) for k in special_tokens) + ")"
+            # Sort by length descending so that longer tokens match before
+            # shorter prefixes (e.g. "<ab>" before "<a>").
+            self._special_pattern = "(" + "|".join(
+                re.escape(k) for k in sorted(special_tokens, key=len, reverse=True)
+            ) + ")"
 
             if self._bytes_maps is None:
                 _mapped = {k.encode("utf-8"): v for k, v in special_tokens.items()}
@@ -97,7 +150,11 @@ class Tokenizer:
     # ------------------------------------------------------------------
 
     def encode_ordinary(self, text: str) -> list[int]:
-        """Encode text, ignoring special tokens.
+        """Encode text without pre-splitting on special tokens.
+
+        Unlike :meth:`encode`, this method does not use the special token
+        regex pattern to split text before encoding.  Note that special
+        tokens may still be produced if the BPE merges produce them.
 
         Parameters
         ----------
@@ -308,4 +365,54 @@ class Tokenizer:
             bytes_maps=bytes_maps,
             pat_str=pat_str,
             special_tokens=special_tokens,
+        )
+
+    @classmethod
+    def from_pretrained(cls, name: str) -> Tokenizer:
+        """Load a built-in model by name.
+
+        Models ship with the package — no network download required.
+        Call :func:`tinybpe.list_models` to see available names.
+
+        Parameters
+        ----------
+        name : str
+            Model name (e.g. ``"cl100k_base"``, ``"qwen25"``, ``"minicpm"``).
+
+        Returns
+        -------
+        Tokenizer
+            Fully configured tokenizer with the model's regex pattern
+            and special tokens (when applicable).
+
+        Raises
+        ------
+        ValueError
+            If *name* is not a known built-in model.
+
+        Examples
+        --------
+        >>> from tinybpe import Tokenizer
+        >>> tok = Tokenizer.from_pretrained("cl100k_base")
+        >>> ids = tok.encode("hello world")
+        >>> tok.decode(ids)
+        'hello world'
+        """
+        from tinybpe._registry import _MODEL_REGISTRY, ModelInfo
+
+        if name not in _MODEL_REGISTRY:
+            from tinybpe._registry import list_models as _list_models
+
+            available = _list_models()
+            raise ValueError(f"Unknown model {name!r}. Available models: {available}")
+
+        info: ModelInfo = _MODEL_REGISTRY[name]
+        model_path = _find_package_file(info["path"])
+
+        merges, bytes_maps = load_model(model_path)
+        return cls(
+            merges,
+            bytes_maps=bytes_maps,
+            pat_str=info.get("pat_str"),
+            special_tokens=info.get("special_tokens"),
         )

@@ -110,12 +110,12 @@ class TestTrainerEdgeCases:
     """Edge case tests for the Trainer."""
 
     def test_empty_text(self):
-        """Empty text should produce a valid but idle trainer."""
-        try:
-            Trainer("")  # should raise ValueError
-        except ValueError:
-            # Expected: empty list not allowed
-            pass
+        """Empty text should produce a trainer with no available merges."""
+        trainer = Trainer("")
+        assert trainer.n_merges == 0
+        assert trainer.merges == []
+        # step() should return None — no merges available
+        assert trainer.step() is None
 
     def test_single_char(self):
         """Single character training should find merges."""
@@ -136,5 +136,79 @@ class TestTrainerEdgeCases:
         """Preprocess that returns raw bytes."""
         text = "hello world"
         trainer = Trainer(text, preprocess=lambda t: [b"hello", b"world"])
+        result = trainer.step()
+        assert result is not None
+
+
+class TestTrainerSave:
+    """Tests for Trainer.save()."""
+
+    def test_save_auto_append_extension(self, tmp_path):
+        """Trainer.save() should auto-append .tbm."""
+        text = "hello world " * 100
+        trainer = Trainer(text)
+        trainer.train(10)
+        out = str(tmp_path / "trainer_out")
+        trainer.save(out)
+        assert (tmp_path / "trainer_out.tbm").exists()
+
+    def test_save_existing_extension(self, tmp_path):
+        """Trainer.save() with explicit .tbm should not double-append."""
+        text = "hello world " * 100
+        trainer = Trainer(text)
+        trainer.train(10)
+        out = str(tmp_path / "trainer.tbm")
+        trainer.save(out)
+        assert (tmp_path / "trainer.tbm").exists()
+        assert not (tmp_path / "trainer.tbm.tbm").exists()
+
+
+class TestTrainerProperties:
+    """Tests for Trainer properties."""
+
+    def test_n_merges_initial(self):
+        """n_merges should be 0 before training."""
+        trainer = Trainer("hello world " * 10)
+        assert trainer.n_merges == 0
+
+    def test_n_merges_after_training(self):
+        """n_merges should match the number of trained merges."""
+        trainer = Trainer("hello world " * 100)
+        n = trainer.train(15)
+        assert trainer.n_merges == n
+
+    def test_merges_before_training(self):
+        """merges should be empty before training."""
+        trainer = Trainer("hello world " * 10)
+        assert trainer.merges == []
+
+    def test_callback_total_zero(self):
+        """Callback should receive total=0 (placeholder value)."""
+        totals: list[int] = []
+
+        def on_step(step, total, pair, rank, freq):
+            totals.append(total)
+
+        trainer = Trainer("hello world " * 100, callback=on_step)
+        trainer.train(5)
+        assert all(t == 0 for t in totals)
+
+    def test_step_after_exhaustion(self):
+        """step() should return None when no more pairs exist."""
+        trainer = Trainer("ab")  # Only one possible pair
+        # Train all possible merges
+        trainer.train(1000)
+        # Now step should return None
+        result = trainer.step()
+        assert result is None
+
+    def test_preprocess_bytearray(self):
+        """Preprocess that returns bytearray chunks should work."""
+        text = "hello world"
+
+        def preprocess(t: str) -> list[bytearray]:
+            return [bytearray(t.encode("utf-8"))]
+
+        trainer = Trainer(text, preprocess=preprocess)
         result = trainer.step()
         assert result is not None

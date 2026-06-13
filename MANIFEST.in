@@ -1,12 +1,19 @@
 include LICENSE
 include README.md
 include CHANGELOG.md
+include CONTRIBUTING.md
+include SECURITY.md
+include CODE_OF_CONDUCT.md
+include Makefile
+include .pre-commit-config.yaml
 include src/*.c
 include src/*.h
 include tinybpe/py.typed
 include tinybpe/bpe.pyi
 include models/*.tbm
 include scripts/*.py
+include docs/*.md
 recursive-include tests *.py *.tbm *.vocab *.txt
 recursive-include examples *.py *.txt *.tbm *.vocab
 recursive-include benchmarks *.py
+recursive-include .github *.md *.yml

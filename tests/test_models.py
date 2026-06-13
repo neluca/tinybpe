@@ -8,9 +8,9 @@ from tinybpe import Tokenizer
 try:
     import tiktoken
 
-    HAS_TIKTOKEN = True  # noqa: F401
+    HAS_TIKTOKEN = True
 except ImportError:
-    HAS_TIKTOKEN = False  # noqa: F401
+    HAS_TIKTOKEN = False
 
 
 # ---------------------------------------------------------------------------
@@ -84,7 +84,7 @@ class TestTikTokenModels:
         ("r50k_base", "GPT-2"),
     ]
 
-    @pytest.mark.parametrize("name,desc", MODELS)
+    @pytest.mark.parametrize(("name", "desc"), MODELS)
     def test_simple_texts(self, name, desc):
         """Simple ASCII texts should match tiktoken exactly."""
         pat = PAT_GPT2 if name in ("r50k_base", "p50k_base") else PAT_GPT4
@@ -93,7 +93,7 @@ class TestTikTokenModels:
         for text in SIMPLE_TEXTS:
             assert tok.encode(text) == enc.encode(text)
 
-    @pytest.mark.parametrize("name,desc", MODELS)
+    @pytest.mark.parametrize(("name", "desc"), MODELS)
     def test_multilingual(self, name, desc):
         """Multilingual texts should match tiktoken."""
         pat = PAT_GPT2 if name in ("r50k_base", "p50k_base") else PAT_GPT4
@@ -102,7 +102,7 @@ class TestTikTokenModels:
         for text in MULTILINGUAL_TEXTS:
             assert tok.encode(text) == enc.encode(text)
 
-    @pytest.mark.parametrize("name,desc", MODELS)
+    @pytest.mark.parametrize(("name", "desc"), MODELS)
     def test_emoji(self, name, desc):
         """Emoji texts should match tiktoken."""
         pat = PAT_GPT2 if name in ("r50k_base", "p50k_base") else PAT_GPT4
@@ -113,7 +113,7 @@ class TestTikTokenModels:
                 continue
             assert tok.encode(text) == enc.encode(text)
 
-    @pytest.mark.parametrize("name,desc", MODELS)
+    @pytest.mark.parametrize(("name", "desc"), MODELS)
     def test_code(self, name, desc):
         """Code snippets should match tiktoken."""
         pat = PAT_GPT2 if name in ("r50k_base", "p50k_base") else PAT_GPT4
@@ -122,7 +122,7 @@ class TestTikTokenModels:
         for text in CODE_TEXTS:
             assert tok.encode(text) == enc.encode(text)
 
-    @pytest.mark.parametrize("name,desc", MODELS)
+    @pytest.mark.parametrize(("name", "desc"), MODELS)
     def test_roundtrip(self, name, desc):
         """All texts should round-trip through encode→decode."""
         tok = Tokenizer.from_file(f"models/{name}.tbm")
@@ -134,7 +134,7 @@ class TestTikTokenModels:
             decoded = tok.decode(ids)
             assert decoded == text, f"Round-trip failed for {text!r}"
 
-    @pytest.mark.parametrize("name,desc", MODELS)
+    @pytest.mark.parametrize(("name", "desc"), MODELS)
     def test_vocab_size(self, name, desc):
         """Vocab size should be reasonable."""
         tok = Tokenizer.from_file(f"models/{name}.tbm")
@@ -142,7 +142,7 @@ class TestTikTokenModels:
         assert tok.n_vocab > 256
         assert tok.n_vocab == 256 + len(tok.merges)
 
-    @pytest.mark.parametrize("name,desc", MODELS)
+    @pytest.mark.parametrize(("name", "desc"), MODELS)
     def test_streaming_decode(self, name, desc):
         """Streaming decode should match batch decode."""
         tok = Tokenizer.from_file(f"models/{name}.tbm")
@@ -289,3 +289,203 @@ class TestByteRemapping:
             ids = tok.encode(text)
             decoded = tok.decode(ids)
             assert decoded == text
+
+
+# ---------------------------------------------------------------------------
+# Model I/O error paths (targeting _model_io.py)
+# ---------------------------------------------------------------------------
+
+
+class TestModelIOErrors:
+    """Tests for error handling in _model_io.py."""
+
+    def test_load_invalid_header(self, tmp_path):
+        """Load with non-matching header should raise ValueError."""
+        from tinybpe._model_io import load_model
+
+        p = tmp_path / "bad.tbm"
+        p.write_text("Not a TinyBPE file\n0\n", encoding="utf-8")
+        with pytest.raises(ValueError, match="Invalid model file header"):
+            load_model(str(p))
+
+    def test_load_future_version(self, tmp_path):
+        """Load with version newer than supported should raise ValueError."""
+        from tinybpe._model_io import MODEL_VERSION, load_model
+
+        p = tmp_path / "future.tbm"
+        p.write_text(f"TinyBPE Model v{MODEL_VERSION + 10}\n0\n", encoding="utf-8")
+        with pytest.raises(ValueError, match="newer"):
+            load_model(str(p))
+
+    def test_load_unexpected_remap_count(self, tmp_path):
+        """Load with remap count other than 0 or 256 should raise ValueError."""
+        from tinybpe._model_io import load_model
+
+        p = tmp_path / "bad_remap.tbm"
+        p.write_text("TinyBPE Model v1\n999\n", encoding="utf-8")
+        with pytest.raises(ValueError, match="Unexpected remap count"):
+            load_model(str(p))
+
+    def test_save_invalid_bytes_maps_size(self, tmp_path):
+        """save_model with wrong-sized bytes_maps should raise ValueError."""
+        from tinybpe._model_io import save_model
+
+        with pytest.raises(ValueError, match="exactly 256"):
+            save_model(str(tmp_path / "bad"), [(1, 2)], bytes_maps=[0, 1, 2])
+
+    def test_load_vocab_invalid_header(self, tmp_path):
+        """load_vocab with wrong header should raise ValueError."""
+        from tinybpe._model_io import load_vocab
+
+        p = tmp_path / "bad.vocab"
+        p.write_text("Not a vocab file\nAA== 1\n", encoding="utf-8")
+        with pytest.raises(ValueError, match="Invalid vocabulary file"):
+            load_vocab(str(p))
+
+    def test_load_vocab_invalid_line(self, tmp_path):
+        """load_vocab with malformed line should raise ValueError."""
+        from tinybpe._model_io import load_vocab
+
+        p = tmp_path / "bad_line.vocab"
+        p.write_text("TinyBPE Vocabulary v1\ntoo many parts here\n", encoding="utf-8")
+        with pytest.raises(ValueError, match="Invalid vocabulary line"):
+            load_vocab(str(p))
+
+    def test_save_model_auto_append_tbm(self, tmp_path):
+        """save_model should auto-append .tbm."""
+        from tinybpe._model_io import save_model
+
+        save_model(str(tmp_path / "model"), [(104, 101)])
+        assert (tmp_path / "model.tbm").exists()
+
+    def test_save_vocab_auto_append_vocab(self, tmp_path):
+        """save_vocab should auto-append .vocab."""
+        from tinybpe._model_io import save_vocab
+
+        v = {1: b"a", 2: b"bc"}
+        save_vocab(str(tmp_path / "v"), v)
+        assert (tmp_path / "v.vocab").exists()
+
+    def test_save_vocab_sorted_by_rank(self, tmp_path):
+        """Vocab entries should be sorted by token ID (rank)."""
+        from tinybpe._model_io import save_vocab
+
+        v = {3: b"c", 1: b"a", 2: b"b"}
+        save_vocab(str(tmp_path / "sorted"), v)
+        content = (tmp_path / "sorted.vocab").read_text(encoding="utf-8")
+        lines = [line.strip() for line in content.splitlines() if line.strip()]
+        # Skip header line
+        ranks = [int(line.split()[1]) for line in lines[1:]]
+        assert ranks == sorted(ranks)
+
+    def test_load_vocab_save_vocab_roundtrip(self, tmp_path):
+        """save_vocab and load_vocab should round-trip correctly."""
+        from tinybpe._model_io import load_vocab, save_vocab
+
+        v = {1: b"a", 256: b"hello"}
+        save_vocab(str(tmp_path / "v"), v)
+        loaded = load_vocab(str(tmp_path / "v") + ".vocab")
+        assert loaded == v
+
+    def test_save_load_model_roundtrip(self, tmp_path):
+        """save_model and load_model should round-trip correctly."""
+        from tinybpe._model_io import load_model, save_model
+
+        merges = [(104, 101), (256, 108)]
+        save_model(str(tmp_path / "m"), merges)
+        loaded_merges, bm = load_model(str(tmp_path / "m"))
+        assert loaded_merges == merges
+        assert bm is None
+
+    def test_save_model_existing_extension(self, tmp_path):
+        """save_model with explicit .tbm extension should not double-append."""
+        from tinybpe._model_io import save_model
+
+        save_model(str(tmp_path / "m.tbm"), [(1, 2)])
+        assert (tmp_path / "m.tbm").exists()
+        assert not (tmp_path / "m.tbm.tbm").exists()
+
+    def test_load_model_missing_file_raises(self):
+        """load_model with nonexistent file should raise FileNotFoundError."""
+        from tinybpe._model_io import load_model
+
+        with pytest.raises(FileNotFoundError):
+            load_model("__nonexistent_file_12345__")
+
+    def test_load_legacy_version(self, tmp_path):
+        """Load a .tbm file without explicit version header (version 0)."""
+        from tinybpe._model_io import load_model
+
+        p = tmp_path / "legacy.tbm"
+        # Old format: "TinyBPE Model" without version
+        p.write_text("TinyBPE Model\n0\n104 101\n", encoding="utf-8")
+        merges, bm = load_model(str(p))
+        assert merges == [(104, 101)]
+        assert bm is None
+
+    def test_remap_identity_detection(self, tmp_path):
+        """Identity bytes_maps should be detected as None when saving."""
+        from tinybpe._model_io import load_model, save_model
+
+        # Identity remap
+        identity = list(range(256))
+        save_model(str(tmp_path / "id"), [(1, 2)], bytes_maps=identity)
+        _, bm = load_model(str(tmp_path / "id"))
+        assert bm == identity
+
+    def test_load_invalid_version_format(self, tmp_path):
+        """Load with 'v' in header but non-integer version should raise ValueError."""
+        from tinybpe._model_io import load_model
+
+        p = tmp_path / "badver.tbm"
+        p.write_text("TinyBPE Model vABC\n0\n", encoding="utf-8")
+        with pytest.raises(ValueError, match="Invalid model file header"):
+            load_model(str(p))
+
+    def test_model_with_blank_lines(self, tmp_path):
+        """Model file with blank lines should parse correctly."""
+        from tinybpe._model_io import load_model, save_model
+
+        save_model(str(tmp_path / "m"), [(1, 2), (3, 4)])
+        content = (tmp_path / "m.tbm").read_text(encoding="utf-8")
+        # Add blank lines
+        lines = content.splitlines()
+        lines.insert(3, "")  # blank after header+remap
+        lines.insert(-1, "")  # blank before end
+        (tmp_path / "m_blank.tbm").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        merges, _ = load_model(str(tmp_path / "m_blank.tbm"))
+        assert merges == [(1, 2), (3, 4)]
+
+    def test_vocab_with_blank_lines(self, tmp_path):
+        """Vocab file with blank lines should parse correctly."""
+        from tinybpe._model_io import load_vocab, save_vocab
+
+        v = {1: b"a", 2: b"bc"}
+        save_vocab(str(tmp_path / "v"), v)
+        content = (tmp_path / "v.vocab").read_text(encoding="utf-8")
+        lines = content.splitlines()
+        lines.insert(2, "")  # blank line
+        (tmp_path / "v_blank.vocab").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        loaded = load_vocab(str(tmp_path / "v_blank.vocab"))
+        assert loaded == v
+
+    def test_vocab_with_bytes_maps(self):
+        """Tokenizer.vocab should return remapped bytes when bytes_maps is set."""
+        from tinybpe import Tokenizer
+
+        tok = Tokenizer([(104, 101)], bytes_maps=list(range(256)))
+        v = tok.vocab
+        assert isinstance(v, dict)
+        assert len(v) > 0
+        # Vocab should contain valid byte sequences
+        for tb in v.values():
+            assert isinstance(tb, bytes)
+
+    def test_tokenizer_init_with_bytes_maps_and_special(self):
+        """Tokenizer init with both bytes_maps and special_tokens should work."""
+        from tinybpe import Tokenizer
+
+        special = {"<eot>": 1000}
+        tok = Tokenizer([(104, 101)], bytes_maps=list(range(256)), special_tokens=special)
+        ids = tok.encode("<eot>")
+        assert ids == [1000]

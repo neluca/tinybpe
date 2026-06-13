@@ -77,7 +77,7 @@ MULTILINGUAL_TEXTS = [
 class TestHFModels:
     """Test HuggingFace-converted tokenizers for correctness."""
 
-    @pytest.mark.parametrize("model_key,hf_id,desc,pattern", HF_MODELS)
+    @pytest.mark.parametrize(("model_key", "hf_id", "desc", "pattern"), HF_MODELS)
     def test_model_file_exists(self, model_key, hf_id, desc, pattern):
         """Model .tbm file should exist and be loadable."""
         path = f"models/{model_key}.tbm"
@@ -87,7 +87,7 @@ class TestHFModels:
         assert bm is not None
         assert len(bm) == 256
 
-    @pytest.mark.parametrize("model_key,hf_id,desc,pattern", HF_MODELS)
+    @pytest.mark.parametrize(("model_key", "hf_id", "desc", "pattern"), HF_MODELS)
     def test_ascii_roundtrip(self, model_key, hf_id, desc, pattern):
         """ASCII texts should round-trip correctly."""
         tok = Tokenizer.from_file(f"models/{model_key}.tbm", pat_str=pattern)
@@ -96,7 +96,7 @@ class TestHFModels:
             decoded = tok.decode(ids)
             assert decoded == text, f"Round-trip failed for {text!r}"
 
-    @pytest.mark.parametrize("model_key,hf_id,desc,pattern", HF_MODELS)
+    @pytest.mark.parametrize(("model_key", "hf_id", "desc", "pattern"), HF_MODELS)
     def test_multilingual_roundtrip(self, model_key, hf_id, desc, pattern):
         """Multilingual texts should round-trip correctly."""
         tok = Tokenizer.from_file(f"models/{model_key}.tbm", pat_str=pattern)
@@ -105,13 +105,13 @@ class TestHFModels:
             decoded = tok.decode(ids)
             assert decoded == text
 
-    @pytest.mark.parametrize("model_key,hf_id,desc,pattern", HF_MODELS)
+    @pytest.mark.parametrize(("model_key", "hf_id", "desc", "pattern"), HF_MODELS)
     def test_vocab_size(self, model_key, hf_id, desc, pattern):
         """Vocab size should match the original tokenizer."""
         tok = Tokenizer.from_file(f"models/{model_key}.tbm", pat_str=pattern)
         assert tok.n_vocab == 256 + len(tok.merges)
 
-    @pytest.mark.parametrize("model_key,hf_id,desc,pattern", HF_MODELS)
+    @pytest.mark.parametrize(("model_key", "hf_id", "desc", "pattern"), HF_MODELS)
     def test_streaming_decode(self, model_key, hf_id, desc, pattern):
         """Streaming decode should match batch decode."""
         tok = Tokenizer.from_file(f"models/{model_key}.tbm", pat_str=pattern)
@@ -125,14 +125,14 @@ class TestHFModels:
                 decoder(tid)
             assert "".join(parts) == text
 
-    @pytest.mark.parametrize("model_key,hf_id,desc,pattern", HF_MODELS)
+    @pytest.mark.parametrize(("model_key", "hf_id", "desc", "pattern"), HF_MODELS)
     def test_empty_string(self, model_key, hf_id, desc, pattern):
         """Empty string should produce empty token list."""
         tok = Tokenizer.from_file(f"models/{model_key}.tbm", pat_str=pattern)
         assert tok.encode("") == []
         assert tok.decode([]) == ""
 
-    @pytest.mark.parametrize("model_key,hf_id,desc,pattern", HF_MODELS)
+    @pytest.mark.parametrize(("model_key", "hf_id", "desc", "pattern"), HF_MODELS)
     def test_single_char(self, model_key, hf_id, desc, pattern):
         """Single characters should round-trip."""
         tok = Tokenizer.from_file(f"models/{model_key}.tbm", pat_str=pattern)
@@ -141,7 +141,7 @@ class TestHFModels:
             decoded = tok.decode(ids)
             assert decoded == c
 
-    @pytest.mark.parametrize("model_key,hf_id,desc,pattern", HF_MODELS)
+    @pytest.mark.parametrize(("model_key", "hf_id", "desc", "pattern"), HF_MODELS)
     def test_special_chars(self, model_key, hf_id, desc, pattern):
         """Special characters (newlines, tabs) should round-trip."""
         tok = Tokenizer.from_file(f"models/{model_key}.tbm", pat_str=pattern)
@@ -150,7 +150,7 @@ class TestHFModels:
         decoded = tok.decode(ids)
         assert decoded == text
 
-    @pytest.mark.parametrize("model_key,hf_id,desc,pattern", HF_MODELS)
+    @pytest.mark.parametrize(("model_key", "hf_id", "desc", "pattern"), HF_MODELS)
     def test_long_text(self, model_key, hf_id, desc, pattern):
         """Long text should round-trip correctly."""
         tok = Tokenizer.from_file(f"models/{model_key}.tbm", pat_str=pattern)

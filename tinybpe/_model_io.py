@@ -84,9 +84,8 @@ def load_model(path: str) -> tuple[list[tuple[int, int]], list[int] | None]:
     ValueError
         If the file format is invalid or the version is unsupported.
     """
-    if not path.endswith(".tbm"):
-        if Path(path).suffix != ".tbm":
-            path += ".tbm"
+    if not path.endswith(".tbm") and Path(path).suffix != ".tbm":
+        path += ".tbm"
 
     merges: list[tuple[int, int]] = []
     bytes_maps: list[int] | None = None
@@ -141,7 +140,7 @@ def load_model(path: str) -> tuple[list[tuple[int, int]], list[int] | None]:
 def save_vocab(path: str, vocab: dict[int, bytes]) -> None:
     """Save vocabulary to a ``.vocab`` file.
 
-    Format: tab-separated ``base64_encoded_bytes<TAB>rank``,
+    Format: space-separated ``base64_encoded_bytes rank``,
     compatible with the tiktoken .tiktoken file format.
 
     Parameters

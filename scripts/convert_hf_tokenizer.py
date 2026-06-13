@@ -222,8 +222,13 @@ def _detect_byte_mapping(vocab: dict[str, int]) -> list[int] | None:
     still_missing = [b for b in range(256) if bytes_maps[b] < 0]
     if still_missing:
         for byte_val in still_missing:
-            if byte_val <= 0x7F or (0xC2 <= byte_val <= 0xF4):
-                # Valid UTF-8 lead byte is missing — real problem
+            # 0x00-0x7F: ASCII
+            # 0x80-0xBF: UTF-8 continuation bytes
+            # 0xC2-0xF4: UTF-8 lead bytes
+            # 0xC0-0xC1: overlong encoding (never valid UTF-8)
+            # 0xF5-0xFF: exceed RFC 3629 (never valid UTF-8)
+            if byte_val <= 0x7F or 0x80 <= byte_val <= 0xBF or (0xC2 <= byte_val <= 0xF4):
+                # Valid UTF-8 byte is missing — real problem
                 return None
 
         # Find unused token IDs in 0-255 (standard base-byte range)
@@ -252,10 +257,7 @@ def _detect_bytelevel(tokenizer_json: dict) -> bool:
 
     # Handle nested Sequence pre_tokenizer
     pretoks = pre_tokenizer.get("pretokenizers", [pre_tokenizer])
-    for pt in pretoks:
-        if pt.get("type") == "ByteLevel":
-            return True
-    return False
+    return any(pt.get("type") == "ByteLevel" for pt in pretoks)
 
 
 # ---------------------------------------------------------------------------

@@ -1,70 +1,89 @@
-# TinyBPE Models
+# Built-in Models
 
-Pre-built BPE tokenizer models for popular LLMs, converted to TinyBPE `.tbm` format.
+Pre-built BPE tokenizer models in `.tbm` format, shipped directly with the package — no network required.
 
-## Available Models
-
-### TikToken (OpenAI)
-
-| Model File | LLM Compatibility | Vocab Size | Source |
-|---|---|---|---|
-| `cl100k_base.tbm` | GPT-4, GPT-3.5-turbo, text-embedding-ada-002 | 100,256 | tiktoken |
-| `o200k_base.tbm` | GPT-4o, GPT-4o-mini, GPT-5 | 199,998 | tiktoken |
-| `p50k_base.tbm` | GPT-3 (davinci, curie, babbage, ada) | 50,280 | tiktoken |
-| `r50k_base.tbm` | GPT-2 | 50,256 | tiktoken |
-
-### HuggingFace (ByteLevel BPE)
-
-| Model File | LLM Compatibility | Vocab Size | Source |
-|---|---|---|---|
-| `qwen25.tbm` | Qwen 2.5 (0.5B–72B) | 151,643 | `Qwen/Qwen2.5-0.5B` |
-| `phi2.tbm` | Phi-2 | 50,257 | `microsoft/phi-2` |
-| `deepseek-llm.tbm` | DeepSeek V2 (7B-Chat) | 100,013 | `deepseek-ai/deepseek-llm-7b-chat` |
-
-## Usage
+## Quick Start
 
 ```python
-from tinybpe import Tokenizer
+from tinybpe import Tokenizer, list_models
 
-# Load a pre-built model
-tok = Tokenizer.from_file("models/cl100k_base.tbm")
+# See what's available
+print(list_models())
 
-# Encode / decode
-ids = tok.encode("Hello world")
-text = tok.decode(ids)
+# Load in one line
+tok = Tokenizer.from_pretrained("cl100k_base")
+ids = tok.encode("hello world")
 ```
 
-## Model Conversion
+## Model Catalog
 
-Models are generated using the conversion scripts:
+### OpenAI / TikToken
+
+| Model | LLM Compatibility | Vocab | Pre-tokenization | Special Tokens |
+|---|---|---|---|---|
+| `cl100k_base` | GPT-4, GPT-3.5-turbo, text-embedding-ada-002 | 100,256 | GPT-2 regex | `<\|endoftext\|>`, FIM tokens |
+| `o200k_base` | GPT-4o, GPT-4o-mini, GPT-5 | 199,998 | GPT-2 regex | `<\|endoftext\|>`, FIM tokens |
+| `p50k_base` | GPT-3 (davinci, curie, babbage, ada) | 50,280 | GPT-2 regex | `<\|endoftext\|>` |
+| `r50k_base` | GPT-2 | 50,256 | GPT-2 regex | `<\|endoftext\|>` |
+
+### HuggingFace ByteLevel BPE
+
+| Model | LLM Compatibility | Vocab | Pre-tokenization | Source |
+|---|---|---|---|---|
+| `qwen25` | Qwen 2.5 (0.5B-72B) | 151,643 | GPT-2 regex | `Qwen/Qwen2.5-0.5B` |
+| `phi2` | Microsoft Phi-2 | 50,257 | GPT-2 regex | `microsoft/phi-2` |
+| `deepseek-llm` | DeepSeek V2 (7B-Chat) | 100,013 | None (raw) | `deepseek-ai/deepseek-llm-7b-chat` |
+
+### SentencePiece BPE (converted)
+
+| Model | LLM Compatibility | Vocab | Pre-tokenization | Notes |
+|---|---|---|---|---|
+| `minicpm` | MiniCPM-2B | 129,850 | None (SentencePiece) | Byte-level converted; needs manual SP normalization |
+
+## Model Format
+
+All files use the `.tbm` (TinyBPE Model v1) text format:
+
+```
+TinyBPE Model v1
+<remap_flag>        # 0 = no byte remap, 256 = has remap
+[256 remap lines if flag=256]
+<left> <right>      # merge pairs, one per line
+```
+
+See [`docs/file-formats.md`](../docs/file-formats.md) for the full specification.
+
+## Adding New Models
+
+Convert external tokenizers using the scripts in `scripts/`:
 
 ```bash
-# Convert all tiktoken encodings
-python scripts/convert_tiktoken.py cl100k_base -o models/cl100k_base.tbm
+# TikToken encodings
 python scripts/convert_tiktoken.py o200k_base -o models/o200k_base.tbm
-python scripts/convert_tiktoken.py p50k_base -o models/p50k_base.tbm
-python scripts/convert_tiktoken.py r50k_base -o models/r50k_base.tbm
+
+# HuggingFace tokenizer.json (local or Hub ID)
+python scripts/convert_hf_tokenizer.py Qwen/Qwen2.5-0.5B -o models/qwen25.tbm
+
+# MiniCPM / SentencePiece BPE
+python scripts/convert_minicpm.py -o models/minicpm.tbm
 ```
 
-## Other Mainstream LLM Tokenizers
+After conversion, add the model to the registry in `tinybpe/_registry.py` so it becomes available via `Tokenizer.from_pretrained()`.
 
-| LLM Family | Tokenizer Type | `.tbm` Support |
+## Supported LLM Tokenizers
+
+| LLM Family | Tokenizer Type | Status |
 |---|---|---|
-| **GPT-4 / GPT-3.5** | tiktoken `cl100k_base` BPE | ✅ Full |
-| **GPT-4o / GPT-5** | tiktoken `o200k_base` BPE | ✅ Full |
-| **GPT-3** | tiktoken `p50k_base` BPE | ✅ Full |
-| **GPT-2** | tiktoken `r50k_base` BPE | ✅ Full |
-| **Qwen 2.5/3** | ByteLevel BPE (151.9K) | ✅ Full |
-| **Phi-2** | ByteLevel BPE (50K) | ✅ Full |
-| **Llama 3/4** | ByteLevel BPE (128K) | ✅ Via `convert_hf_tokenizer.py`¹ |
-| **DeepSeek V2/V3** | ByteLevel BPE (~100K) | ✅ Full³ |
-| **Mistral** | SentencePiece BPE / Tekken | ❌ Different format³ |
-| **Gemma 2/3** | SentencePiece Unigram (256K) | ❌ Different algorithm |
-| **Claude 3/4** | Proprietary BPE | ❌ No public tokenizer |
-| **Gemini** | Proprietary | ❌ No public tokenizer |
-
-¹ Llama requires authentication to download the tokenizer from HuggingFace.
-² SentencePiece uses Metaspace pre-tokenization, not ByteLevel.
-³ DeepSeek omits 13 single-char tokens for invalid UTF-8 bytes (0xC0-0xC1, 0xF5-0xFF). Converter assigns unused IDs in 0-255 range to maintain bijective mapping.
-
-See `scripts/README.md` for conversion instructions.
+| GPT-4 / GPT-3.5 | `cl100k_base` BPE | Full support |
+| GPT-4o / GPT-5 | `o200k_base` BPE | Full support |
+| GPT-3 | `p50k_base` BPE | Full support |
+| GPT-2 | `r50k_base` BPE | Full support |
+| Qwen 2.5 / 3 | ByteLevel BPE | Full support |
+| Phi-2 | ByteLevel BPE | Full support |
+| Llama 3 / 4 | ByteLevel BPE | Via `convert_hf_tokenizer.py` |
+| DeepSeek V2 / V3 | ByteLevel BPE | Full support |
+| MiniCPM | SentencePiece BPE | Converted (byte-level) |
+| Mistral | SentencePiece BPE / Tekken | Not supported |
+| Gemma 2 / 3 | SentencePiece Unigram | Not supported |
+| Claude 3 / 4 | Proprietary BPE | No public tokenizer |
+| Gemini | Proprietary | No public tokenizer |
