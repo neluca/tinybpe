@@ -93,6 +93,8 @@ class Tokenizer:
     >>> tok = Tokenizer(merges, pat_str=r"\\w+|\\s+")
     >>> ids = tok.encode("hello world")
     >>> text = tok.decode(ids)
+    >>> tok.count_tokens("hello world")
+    2
     """
 
     def __init__(
@@ -145,16 +147,41 @@ class Tokenizer:
         # ---- streaming decode state ----
         self._stream_cache: bytes = b""
 
+        # ---- cached inverse-remapped vocab for fast streaming decode ----
+        # When bytes_maps is set, _decode_remap needs O(1) single-token
+        # lookup.  self._enc.vocab rebuilds the dict on every access,
+        # so we build it once here and cache the inverse-remapped result.
+        self._vocab_cache: dict[int, bytes] | None = None
+        if bytes_maps is not None:
+            self._vocab_cache = {
+                k: self._inv_map(v) for k, v in self._enc.vocab.items()  # type: ignore[union-attr]
+            }
+
     # ------------------------------------------------------------------
     # Encoding
     # ------------------------------------------------------------------
 
     def encode_ordinary(self, text: str) -> list[int]:
-        """Encode text without pre-splitting on special tokens.
+        """Encode text without regex-splitting on special token patterns.
 
-        Unlike :meth:`encode`, this method does not use the special token
-        regex pattern to split text before encoding.  Note that special
-        tokens may still be produced if the BPE merges produce them.
+        Unlike :meth:`encode`, this method does **not** scan the input for
+        special token strings (e.g. ``"<|endoftext|>"``) before encoding.
+        Instead, the entire text is split into chunks via the pre-tokenizer
+        regex pattern and each chunk is BPE-encoded directly.
+
+        .. note::
+
+           The underlying C tokenizer is still configured with the same
+           vocabulary and special tokens.  If a pre-tokenizer chunk happens
+           to consist entirely of bytes that match a special token, that
+           chunk will still be encoded as the special token ID.  In
+           practice this is rare — special token strings like
+           ``"<|endoftext|>"`` span multiple pre-tokenizer chunks and are
+           only matched as a whole by :meth:`encode`.
+
+        This method is named after the ``encode_ordinary`` convention in
+        tiktoken and is useful when you want consistent encoding behaviour
+        regardless of whether the tokenizer has special tokens configured.
 
         Parameters
         ----------
@@ -165,6 +192,11 @@ class Tokenizer:
         -------
         list[int]
             Token ID sequence.
+
+        See Also
+        --------
+        encode : Encode with special-token-aware regex splitting.
+        count_tokens : Count tokens without building the full ID list.
         """
         chunks = re.findall(self._compiled_pattern, text)
         chunk_bytes = [ch.encode("utf-8") for ch in chunks]
@@ -201,6 +233,24 @@ class Tokenizer:
             else:
                 ids.extend(self.encode_ordinary(part))
         return ids
+
+    def count_tokens(self, text: str) -> int:
+        """Return the number of tokens ``text`` would produce when encoded.
+
+        This is a convenience method equivalent to ``len(self.encode(text))``
+        but communicates intent more clearly.
+
+        Parameters
+        ----------
+        text : str
+            The input text to measure.
+
+        Returns
+        -------
+        int
+            Number of BPE tokens (including any special tokens).
+        """
+        return len(self.encode(text))
 
     # ------------------------------------------------------------------
     # Decoding
@@ -262,10 +312,17 @@ class Tokenizer:
         self._stream_cache = b""
 
         def _decode_remap(token_id: int) -> None:
-            assert self._inv_map is not None
-            text_bytes = self._enc.decode([token_id])
-            text_bytes = self._inv_map(text_bytes)
-            text_bytes = self._stream_cache + text_bytes
+            assert self._vocab_cache is not None
+            # Fast path: O(1) lookup in cached inverse-remapped vocab.
+            # Falls back to batch decode only for special token IDs
+            # (which sit outside the normal vocab range).
+            token_bytes = self._vocab_cache.get(token_id)
+            if token_bytes is None:
+                # Special token (or unknown ID) — use batch decode
+                assert self._inv_map is not None
+                token_bytes = self._enc.decode([token_id])
+                token_bytes = self._inv_map(token_bytes)
+            text_bytes = self._stream_cache + token_bytes
             try:
                 text = text_bytes.decode("utf-8")
                 self._stream_cache = b""

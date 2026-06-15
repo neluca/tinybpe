@@ -6,6 +6,8 @@ Provides:
   special token handling, byte remapping, and streaming decode.
 - :func:`list_models` — list built-in models available via
   :meth:`Tokenizer.from_pretrained`.
+- :func:`get_model_info` — get detailed metadata for a built-in model
+  (vocab size, description, family, regex pattern, special tokens).
 - :class:`Trainer` — train BPE models from text corpora.
 - :func:`load_model` / :func:`save_model` — ``.tbm`` model file I/O.
 - :func:`load_vocab` / :func:`save_vocab` — ``.vocab`` vocabulary file I/O.
@@ -41,12 +43,21 @@ List available models::
     >>> import tinybpe
     >>> tinybpe.list_models()
     ['cl100k_base', 'deepseek-v4', 'llama4', 'minicpm5', 'o200k_base', 'p50k_base', 'qwen35', 'r50k_base']
+
+Get model metadata::
+
+    >>> info = tinybpe.get_model_info("cl100k_base")
+    >>> info["vocab_size"]
+    100277
+    >>> info["family"]
+    'GPT-4'
 """
 
 __all__ = [
     "Tokenizer",
     "Trainer",
     "__version__",
+    "get_model_info",
     "list_models",
     "load_model",
     "load_vocab",
@@ -58,6 +69,7 @@ from tinybpe._model_io import load_model as load_model
 from tinybpe._model_io import load_vocab as load_vocab
 from tinybpe._model_io import save_model as save_model
 from tinybpe._model_io import save_vocab as save_vocab
+from tinybpe._registry import get_model_info as get_model_info
 from tinybpe._registry import list_models as list_models
 from tinybpe._version import __version__ as __version__
 from tinybpe.tokenizer import Tokenizer as Tokenizer

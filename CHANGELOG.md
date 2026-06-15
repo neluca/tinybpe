@@ -1,5 +1,22 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **`count_tokens()`**: new convenience method on `Tokenizer` for counting tokens without the ergonomic overhead of `len(encode(...))`
+- **`get_model_info()`**: promoted to public API — returns vocab size, family, description, regex pattern, and special token metadata for any built-in model
+
+### Fixed
+
+- **Version string**: `__version__` corrected from `1.0.0` to `1.1.0` (was missed in the v1.1.0 release)
+- **Special tokens for qwen35**: `from_pretrained("qwen35")` now correctly applies special tokens (`<|endoftext|>`, `<|im_start|>`, `<|im_end|>`). Models whose special token IDs overlap with byte or merge IDs (deepseek-v4, llama4, minicpm5) now emit a clear warning explaining why special tokens cannot be applied
+- **Streaming decode performance**: byte-remap models (cl100k_base, o200k_base, p50k_base, r50k_base) now use a cached O(1) vocab lookup instead of a full batch decode per token, making streaming decode ~100× faster for GPT-family models
+
+### Changed
+
+- **`encode_ordinary` docs**: improved docstring to clearly explain the difference from `encode()` and the behaviour with special tokens
+
 ## [1.1.0] — 2026-06-13
 
 ### Added

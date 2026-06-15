@@ -131,6 +131,7 @@ class Tokenizer:
     def __init__(self, merges, *, bytes_maps=None, pat_str=None, special_tokens=None)
     def encode(self, text: str) -> list[int]
     def encode_ordinary(self, text: str) -> list[int]
+    def count_tokens(self, text: str) -> int
     def decode(self, ids: list[int]) -> str
     def stream_decode(self, callback: Callable[[str], None]) -> Callable[[int], None]
     def stream_decode_reset(self) -> None
@@ -169,6 +170,7 @@ class Trainer(bpe.Trainer):
 
 ```python
 def list_models() -> list[str]
+def get_model_info(name: str) -> dict  # 返回 vocab_size、family、description、pat_str、special_tokens、has_byte_remap
 ```
 
 ### 文件 I/O
