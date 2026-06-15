@@ -153,10 +153,8 @@ class Tokenizer:
         # so we build it once here and cache the inverse-remapped result.
         self._vocab_cache: dict[int, bytes] | None = None
         if bytes_maps is not None:
-            self._vocab_cache = {
-                k: self._inv_map(v)
-                for k, v in self._enc.vocab.items()  # type: ignore[union-attr]
-            }
+            assert self._inv_map is not None  # guaranteed when bytes_maps is set
+            self._vocab_cache = {k: self._inv_map(v) for k, v in self._enc.vocab.items()}
 
     # ------------------------------------------------------------------
     # Encoding
