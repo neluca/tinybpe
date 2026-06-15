@@ -88,15 +88,11 @@ def _load_registry() -> tuple[dict[str, ModelInfo], dict[str, str | None]]:
             # decoding would be ambiguous — the C tokenizer cannot tell
             # whether that ID means a vocab token or a special token.
             max_vocab_id = entry["vocab_size"] - 1
-            conflicting = [
-                (tok, tid) for tok, tid in raw_special.items() if tid <= max_vocab_id
-            ]
+            conflicting = [(tok, tid) for tok, tid in raw_special.items() if tid <= max_vocab_id]
             if conflicting:
                 import warnings
 
-                conflicting_repr = ", ".join(
-                    f"{tok!r}→{tid}" for tok, tid in conflicting
-                )
+                conflicting_repr = ", ".join(f"{tok!r}→{tid}" for tok, tid in conflicting)
                 warnings.warn(
                     f"Model {entry['name']!r}: special tokens overlap with byte or "
                     f"merge IDs ({conflicting_repr}). "
