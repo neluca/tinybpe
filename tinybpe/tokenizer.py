@@ -154,7 +154,8 @@ class Tokenizer:
         self._vocab_cache: dict[int, bytes] | None = None
         if bytes_maps is not None:
             self._vocab_cache = {
-                k: self._inv_map(v) for k, v in self._enc.vocab.items()  # type: ignore[union-attr]
+                k: self._inv_map(v)
+                for k, v in self._enc.vocab.items()  # type: ignore[union-attr]
             }
 
     # ------------------------------------------------------------------
