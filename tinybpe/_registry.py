@@ -72,16 +72,42 @@ def _load_registry() -> tuple[dict[str, ModelInfo], dict[str, str | None]]:
         pat_ref: str = entry.get("pattern", "none")
         pat_str = pattern_map.get(pat_ref)
 
-        # Special tokens are only valid for byte-remap models (tiktoken)
-        # where token IDs are preserved.  For ID-remapped models, the
-        # remapped IDs differ from the originals.
         raw_special: dict[str, int] | None = entry.get("special_tokens")
         special_tokens: dict[str, int] | None
-        if entry.get("has_byte_remap", False) and raw_special:
+        has_remap = entry.get("has_byte_remap", False)
+
+        if has_remap and raw_special:
+            # Byte-remap models (tiktoken): special token IDs are the
+            # original model IDs and are always safe to apply — they
+            # sit outside the 0-255 byte range and the merge range.
             special_tokens = raw_special
         elif raw_special:
-            # ID-remapped: store for reference but don't apply
-            special_tokens = None
+            # Non-remap models: special token IDs must not overlap with
+            # byte values (0-255) or merge-derived IDs (256 .. vocab_size-1).
+            # If any special token ID falls inside the vocab range,
+            # decoding would be ambiguous — the C tokenizer cannot tell
+            # whether that ID means a vocab token or a special token.
+            max_vocab_id = entry["vocab_size"] - 1
+            conflicting = [
+                (tok, tid) for tok, tid in raw_special.items() if tid <= max_vocab_id
+            ]
+            if conflicting:
+                import warnings
+
+                conflicting_repr = ", ".join(
+                    f"{tok!r}→{tid}" for tok, tid in conflicting
+                )
+                warnings.warn(
+                    f"Model {entry['name']!r}: special tokens overlap with byte or "
+                    f"merge IDs ({conflicting_repr}). "
+                    f"Special tokens will not be applied for this model. "
+                    f"To fix, re-convert the model so special token IDs start "
+                    f"at or above {max_vocab_id + 1}.",
+                    stacklevel=2,
+                )
+                special_tokens = None
+            else:
+                special_tokens = raw_special
         else:
             special_tokens = None
 
