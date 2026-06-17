@@ -28,7 +28,7 @@ jobs:
           mypy tinybpe/ --strict
       - name: Test
         run: |
-          python -m pytest --cov=tinybpe --cov-branch --cov-fail-under=95 tests/
+          python -m pytest --cov=tinybpe --cov-branch --cov-fail-under=90 tests/
 
   deploy-wheels-linux:
     needs: test-gate

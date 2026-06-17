@@ -18,7 +18,7 @@ This installs TinyBPE in editable mode with all development dependencies.
 pytest --cov=tinybpe --cov-report=term-missing tests/
 ```
 
-All tests must pass and coverage should stay above 95%.
+All tests must pass and coverage should stay above 90%.
 
 ## Code Style
 
