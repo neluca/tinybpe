@@ -6,16 +6,22 @@
 
 - **`count_tokens()`**: new convenience method on `Tokenizer` for counting tokens without the ergonomic overhead of `len(encode(...))`
 - **`get_model_info()`**: promoted to public API — returns vocab size, family, description, regex pattern, and special token metadata for any built-in model
+- **`.editorconfig`**: cross-editor settings for consistent indentation, line endings, and charset
+- **Dependabot**: automatic dependency updates for pip and GitHub Actions
 
 ### Fixed
 
 - **Version string**: `__version__` corrected from `1.0.0` to `1.1.0` (was missed in the v1.1.0 release)
 - **Special tokens for qwen35**: `from_pretrained("qwen35")` now correctly applies special tokens (`<|endoftext|>`, `<|im_start|>`, `<|im_end|>`). Models whose special token IDs overlap with byte or merge IDs (deepseek-v4, llama4, minicpm5) now emit a clear warning explaining why special tokens cannot be applied
 - **Streaming decode performance**: byte-remap models (cl100k_base, o200k_base, p50k_base, r50k_base) now use a cached O(1) vocab lookup instead of a full batch decode per token, making streaming decode ~100× faster for GPT-family models
+- **Release workflow**: removed `continue-on-error: true` on PyPI publish steps (failures are no longer silently swallowed); added a `test-gate` job that must pass before any publish step can run
 
 ### Changed
 
 - **`encode_ordinary` docs**: improved docstring to clearly explain the difference from `encode()` and the behaviour with special tokens
+- **`docs/api.md`**: updated with missing methods (`from_pretrained`, `count_tokens`, `list_models`, `get_model_info`)
+- **CI**: added `--cov-fail-under=95` enforcement; CI and Codecov badges added to README
+- **SECURITY.md**: updated supported version from 1.0.x to 1.1.x
 
 ## [1.1.0] — 2026-06-13
 

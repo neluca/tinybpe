@@ -22,6 +22,8 @@ ext_modules = [
             "src/bpe_trainer.h",
             "src/bpe_tokenizer.h",
         ],
+        # NB: on 64-bit Windows, sys.platform is "win32" (historical).
+        # MSVC uses /W* flags instead of -W*, so pass nothing here.
         extra_compile_args={
             "win32": [],
         }.get(sys.platform, ["-Wall", "-Wextra", "-std=c99"]),

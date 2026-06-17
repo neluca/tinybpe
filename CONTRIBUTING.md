@@ -39,6 +39,7 @@ mypy tinybpe/ --strict
 - Quote style: double quotes
 - Strict mypy checking on the `tinybpe/` package
 - Python 3.9+ compatibility required
+- An [`.editorconfig`](.editorconfig) is provided for consistent editor settings (indentation, line endings, charset).
 
 ## Project Structure
 

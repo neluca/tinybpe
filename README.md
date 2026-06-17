@@ -3,6 +3,8 @@
 [![PyPI version](https://img.shields.io/pypi/v/tinybpe)](https://pypi.org/project/tinybpe/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://pypi.org/project/tinybpe/)
+[![CI](https://github.com/neluca/tinybpe/actions/workflows/python-package.yml/badge.svg)](https://github.com/neluca/tinybpe/actions/workflows/python-package.yml)
+[![codecov](https://codecov.io/gh/neluca/tinybpe/branch/main/graph/badge.svg)](https://codecov.io/gh/neluca/tinybpe)
 [![Ruff](https://img.shields.io/badge/code%20style-ruff-261230)](https://github.com/astral-sh/ruff)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 

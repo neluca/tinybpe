@@ -32,10 +32,11 @@ Tokenizer(
 | Method | Description |
 |---|---|
 | `encode(text) → list[int]` | Encode text, respecting special tokens |
-| `encode_ordinary(text) → list[int]` | Encode text, ignoring special tokens |
+| `encode_ordinary(text) → list[int]` | Encode text, ignoring special token pattern matching |
+| `count_tokens(text) → int` | Return the number of tokens `text` would produce (convenience, same as `len(encode(text))`) |
 | `decode(ids) → str` | Decode token IDs back to text |
-| `stream_decode(callback) → Callable[[int], None]` | Create streaming decoder |
-| `stream_decode_reset()` | Clear streaming decode cache |
+| `stream_decode(callback) → Callable[[int], None]` | Create a streaming decoder. The returned callable accepts one token ID at a time; each complete text fragment is passed to `callback` |
+| `stream_decode_reset()` | Clear streaming decode cache (for reuse) |
 | `save(path)` | Save model to `.tbm` file |
 | `save_vocab(path)` | Save vocabulary to `.vocab` file |
 
@@ -44,6 +45,7 @@ Tokenizer(
 | Method | Description |
 |---|---|
 | `from_file(path, *, pat_str=None, special_tokens=None) → Tokenizer` | Load from `.tbm` file |
+| `from_pretrained(name) → Tokenizer` | Load a built-in model by name (e.g. `"cl100k_base"`). No network required — models ship with the package |
 
 ### Properties
 
@@ -95,6 +97,33 @@ Trainer(
 |---|---|---|
 | `merges` | `list[tuple[int, int]]` | Learned merge pairs |
 | `n_merges` | `int` | Number of merges learned |
+
+---
+
+## Model Discovery
+
+```python
+from tinybpe import list_models, get_model_info
+```
+
+| Function | Description |
+|---|---|
+| `list_models() → list[str]` | Return sorted list of all built-in model names |
+| `get_model_info(name) → dict` | Return metadata dict for a built-in model with keys: `name`, `path`, `vocab_size`, `description`, `family`, `pat_str`, `special_tokens`, `has_byte_remap` |
+
+### Example
+
+```python
+>>> import tinybpe
+>>> tinybpe.list_models()
+['cl100k_base', 'deepseek-v4', 'llama4', 'minicpm5', 'o200k_base', 'p50k_base', 'qwen35', 'r50k_base']
+
+>>> info = tinybpe.get_model_info("cl100k_base")
+>>> info["vocab_size"]
+100277
+>>> info["family"]
+'GPT-4'
+```
 
 ---
 
